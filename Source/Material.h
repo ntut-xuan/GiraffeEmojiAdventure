@@ -5,6 +5,7 @@
 #define ROAD 1
 #define CHEST 2
 #define LADDER 3
+#define DOOR 4
 
 /* ======================= Entity ======================= */
 

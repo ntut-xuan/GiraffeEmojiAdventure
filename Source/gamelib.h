@@ -206,8 +206,8 @@ namespace game_framework {
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 	protected:
-		CRect    location;			// location of the bitmap
 		bool     isBitmapLoaded;	// whether a bitmap has been loaded
+		CRect    location;			// location of the bitmap
 		unsigned SurfaceID;			// the surface id of this bitmap
 	};
 

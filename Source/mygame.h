@@ -82,6 +82,8 @@ namespace game_framework {
 		~CGameStateRun();
 		void OnBeginState();							// 設定每次重玩所需的變數
 		void OnInit();  								// 遊戲的初值及圖形設定
+		void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+		void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		void OnLButtonDown(UINT nFlags, CPoint point);  // 處理滑鼠的動作
 		void OnLButtonUp(UINT nFlags, CPoint point);	// 處理滑鼠的動作
 		void OnMouseMove(UINT nFlags, CPoint point);	// 處理滑鼠的動作 
@@ -92,9 +94,12 @@ namespace game_framework {
 		void OnShow();									// 顯示這個狀態的遊戲畫面
 	private:
 		const int		STAGES;	// 關卡的總數
+		int character_x, character_y;
 		int current_stage;
 		Stage stage;
-		Character Character;
+		Character character;
+		CMovingBitmap menuBitmap;
+		CMovingBitmap characterBitmap;
 		vector<vector<CMovingBitmap>> material_map;
 		vector<vector<CMovingBitmap>> entity_map;
 	};

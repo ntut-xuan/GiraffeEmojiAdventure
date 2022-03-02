@@ -4,6 +4,8 @@ namespace game_framework {
 	public:
 		Character();
 		Character(int health, int attack, int defence, int speed);
+		int getX();
+		int getY();
 		int getHealth();
 		int getAttack();
 		int getDefence();

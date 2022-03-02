@@ -19,6 +19,19 @@ namespace game_framework {
 		speed = _speed;
 	}
 
+	void Character::setXY(int _x, int _y) {
+		x = _x;
+		y = _y;
+	}
+
+	int Character::getX() {
+		return x;
+	}
+
+	int Character::getY() {
+		return y;
+	}
+
 	int Character::getHealth() {
 		return health;
 	}
