@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameCharacter.h"
+#include "Material.h"
 #include <cmath>
 using namespace std;
 
@@ -10,6 +11,9 @@ namespace game_framework {
 		attack = 10;
 		defence = 10;
 		speed = 2;
+		goldKeyNumber = 0;
+		silverKeyNumber = 0;
+		keyNumber = 1;
 	}
 
 	Character::Character(int _health, int _attack, int _defence, int _speed) {
@@ -46,6 +50,30 @@ namespace game_framework {
 
 	int Character::getSpeed() {
 		return speed;
+	}
+
+	int Character::getGoldKeyNumber() {
+		return goldKeyNumber;
+	}
+
+	int Character::getSilverKeyNumber() {
+		return silverKeyNumber;
+	}
+
+	int Character::getKeyNumber() {
+		return keyNumber;
+	}
+
+	void Character::changeKeyNumber(int keyCode, int amount) {
+		if (keyCode == KEY) {
+			keyNumber += amount;
+		}
+		if (keyCode == SILVER_KEY) {
+			silverKeyNumber += amount;
+		}
+		if (keyCode == GOLD_KEY) {
+			goldKeyNumber += amount;
+		}
 	}
 
 	void Character::causeDamage(int damage) {

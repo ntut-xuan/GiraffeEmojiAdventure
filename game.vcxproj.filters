@@ -192,10 +192,19 @@
     <Image Include="RES\ladder.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="RES\normal_door.bmp">
+    <Image Include="RES\grape.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="RES\grape.bmp">
+    <Image Include="RES\goldkey.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="RES\sliverkey.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="RES\key.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="RES\event.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

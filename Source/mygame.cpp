@@ -65,6 +65,13 @@ namespace game_framework {
 	// 這個class為遊戲的遊戲開頭畫面物件
 	/////////////////////////////////////////////////////////////////////////////
 
+	bool eventEntity(int entity_code) {
+		bool flag = false;
+		flag |= entity_code == DOOR || entity_code == SILVER_DOOR || entity_code == GOLD_DOOR;
+		flag |= entity_code == KEY || entity_code == SILVER_KEY || entity_code == GOLD_KEY;
+		return flag;
+	}
+
 	CGameStateInit::CGameStateInit(CGame *g)
 	: CGameState(g)
 	{
@@ -228,30 +235,58 @@ namespace game_framework {
 				if (material_code[i][j] == 0) {
 					material_map[i][j].LoadBitmap("RES/wall.bmp");
 					material_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					hidden_map[i][j].LoadBitmap("RES/wall.bmp");
+					hidden_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
 				else if (material_code[i][j] == 1) {
 					material_map[i][j].LoadBitmap("RES/road.bmp");
 					material_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					hidden_map[i][j].LoadBitmap("RES/road.bmp");
+					hidden_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
 			}
 		}
 
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
-				if (entity_code[i][j] == 2) {
+				if (entity_code[i][j] == BOX) {
 					entity_map[i][j].LoadBitmap("RES/chest.bmp", RGB(255, 255, 255));
 					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
-				else if (entity_code[i][j] == 3) {
+				else if (entity_code[i][j] == LADDER) {
 					entity_map[i][j].LoadBitmap("RES/ladder.bmp", RGB(255, 255, 255));
 					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
-				else if (entity_code[i][j] == 4) {
-					entity_map[i][j].LoadBitmap("RES/normal_door.bmp", RGB(255, 255, 255));
+				else if (entity_code[i][j] == DOOR) {
+					entity_map[i][j].LoadBitmap("RES/door.bmp", RGB(255, 255, 255));
 					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
-				else if (entity_code[i][j] == 5) {
+				else if (entity_code[i][j] == SILVER_DOOR) {
+					entity_map[i][j].LoadBitmap("RES/silverdoor.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == GOLD_DOOR) {
+					entity_map[i][j].LoadBitmap("RES/golddoor.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == GRAPE) {
 					entity_map[i][j].LoadBitmap("RES/grape.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == GOLD_KEY) {
+					entity_map[i][j].LoadBitmap("RES/goldkey.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == SILVER_KEY) {
+					entity_map[i][j].LoadBitmap("RES/sliverkey.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == KEY) {
+					entity_map[i][j].LoadBitmap("RES/key.bmp", RGB(255, 255, 255));
+					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+				}
+				else if (entity_code[i][j] == SUSHI) {
+					entity_map[i][j].LoadBitmap("RES/sushi.bmp", RGB(255, 255, 255));
 					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 				}
 			}
@@ -259,6 +294,89 @@ namespace game_framework {
 
 		characterBitmap.LoadBitmap("RES/character.bmp", RGB(255, 255, 255));
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77 , start_y + character.getX() * 77);
+
+		health.LoadBitmap();
+		health.SetInteger(character.getHealth());
+		health.SetTopLeft(312, 169);
+
+		attack.LoadBitmap();
+		attack.SetInteger(character.getAttack());
+		attack.SetTopLeft(312, 268);
+
+		defence.LoadBitmap();
+		defence.SetInteger(character.getDefence());
+		defence.SetTopLeft(312, 373);
+
+		keyNumber.LoadBitmapA();
+		keyNumber.SetInteger(character.getKeyNumber());
+		keyNumber.SetTopLeft(193, 707);
+
+		silverKeyNumber.LoadBitmapA();
+		silverKeyNumber.SetInteger(character.getSilverKeyNumber());
+		silverKeyNumber.SetTopLeft(304, 707);
+
+		goldKeyNumber.LoadBitmapA();
+		goldKeyNumber.SetInteger(character.getGoldKeyNumber());
+		goldKeyNumber.SetTopLeft(417, 707);
+			
+	}
+
+	bool CGameStateRun::isDoor(int doorCode) {
+		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR;
+	}
+
+	bool CGameStateRun::isKey(int keyCode) {
+		return keyCode == KEY || keyCode == SILVER_KEY || keyCode == GOLD_KEY;
+	}
+
+	bool CGameStateRun::OpenDoor(int x, int y, int doorCode) {
+		if (doorCode == DOOR) {
+			if (character.getKeyNumber() > 0) {
+				hidden_code[x][y] = 1;
+				character.changeKeyNumber(KEY, -1);
+				keyNumber.Add(character.getKeyNumber() - keyNumber.GetInteger());
+				return true;
+			}
+		}
+		if (doorCode == SILVER_DOOR) {
+			if (character.getSilverKeyNumber() > 0) {
+				hidden_code[x][y] = 1;
+				character.changeKeyNumber(SILVER_KEY, -1);
+				silverKeyNumber.Add(character.getSilverKeyNumber() - silverKeyNumber.GetInteger());
+				return true;
+			}
+		}
+		if (doorCode == GOLD_DOOR) {
+			if (character.getGoldKeyNumber() > 0) {
+				hidden_code[x][y] = 1;
+				character.changeKeyNumber(GOLD_KEY, -1);
+				goldKeyNumber.Add(character.getGoldKeyNumber() - goldKeyNumber.GetInteger());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool CGameStateRun::GetKey(int x, int y, int keyCode) {
+		if (keyCode == KEY) {
+			hidden_code[x][y] = 1;
+			character.changeKeyNumber(KEY, 1);
+			keyNumber.Add(1);
+			return true;
+		}
+		if (keyCode == SILVER_KEY) {
+			hidden_code[x][y] = 1;
+			character.changeKeyNumber(SILVER_KEY, 1);
+			silverKeyNumber.Add(1);
+			return true;
+		}
+		if (keyCode == GOLD_KEY) {
+			hidden_code[x][y] = 1;
+			character.changeKeyNumber(GOLD_KEY, 1);
+			goldKeyNumber.Add(1);
+			return true;
+		}
+		return false;
 	}
 
 	void CGameStateRun::OnMove()							// 移動遊戲元素
@@ -279,28 +397,72 @@ namespace game_framework {
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
 
 		if (nChar == KEY_UP) {
-			if (material_code[character.getX() - 1][character.getY()] == 0 || entity_code[character.getX() - 1][character.getY()] == 4) {
+			int x = character.getX() - 1;
+			int y = character.getY();
+			if (material_code[x][y] == 0) {
 				return;
 			}
-			character.setXY(character.getX() - 1, character.getY());
+			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
+				return;
+			}
+			if (isKey(entity_code[x][y])) {
+				GetKey(x, y, entity_code[x][y]);
+			}
+			if(eventEntity(entity_code[x][y])) {
+				hidden_code[x][y] = 1;
+			}
+			character.setXY(x, y);
 		}
 		else if (nChar == KEY_LEFT) {
-			if (material_code[character.getX()][character.getY() - 1] == 0 || entity_code[character.getX()][character.getY() - 1] == 4) {
+			int x = character.getX();
+			int y = character.getY() - 1;
+			if (material_code[x][y] == 0) {
 				return;
 			}
-			character.setXY(character.getX(), character.getY() -1);
+			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
+				return;
+			}
+			if (isKey(entity_code[x][y])) {
+				GetKey(x, y, entity_code[x][y]);
+			}
+			if (eventEntity(entity_code[x][y])) {
+				hidden_code[x][y] = 1;
+			}
+			character.setXY(x, y);
 		}
 		else if (nChar == KEY_RIGHT) {
-			if (material_code[character.getX()][character.getY() + 1] == 0 || entity_code[character.getX()][character.getY() + 1] == 4) {
+			int x = character.getX();
+			int y = character.getY() + 1;
+			if (material_code[x][y] == 0) {
 				return;
 			}
-			character.setXY(character.getX(), character.getY() + 1);
+			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
+				return;
+			}
+			if (isKey(entity_code[x][y])) {
+				GetKey(x, y, entity_code[x][y]);
+			}
+			if (eventEntity(entity_code[x][y])) {
+				hidden_code[x][y] = 1;
+			}
+			character.setXY(x, y);
 		}
 		else if (nChar == KEY_DOWN) {
-			if (material_code[character.getX() + 1][character.getY()] == 0 || entity_code[character.getX() + 1][character.getY()] == 4) {
+			int x = character.getX() + 1;
+			int y = character.getY();
+			if (material_code[x][y] == 0) {
 				return;
 			}
-			character.setXY(character.getX() + 1, character.getY());
+			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
+				return;
+			}
+			if (isKey(entity_code[x][y])) {
+				GetKey(x, y, entity_code[x][y]);
+			}
+			if(eventEntity(entity_code[x][y])){
+				hidden_code[x][y] = 1;
+			}
+			character.setXY(x, y);
 		}
 	
 	}
@@ -345,6 +507,7 @@ namespace game_framework {
 	void CGameStateRun::OnShow() {
 		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
+
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
 				material_map[i][j].ShowBitmap();
@@ -354,12 +517,22 @@ namespace game_framework {
 			for (int j = 0; j < 11; j++) {
 				if (entity_code[i][j] == 0) continue;
 				if (entity_code[i][j] == 1) continue;
-				entity_map[i][j].ShowBitmap();
+				if (hidden_code[i][j] == 1) {
+					material_map[i][j].ShowBitmap();
+				}
+				else {
+					entity_map[i][j].ShowBitmap();
+				}
 			}
 		}
 		
 		characterBitmap.ShowBitmap();
 		menuBitmap.ShowBitmap();
-
+		health.ShowBitmap();
+		attack.ShowBitmap();
+		defence.ShowBitmap();
+		keyNumber.ShowBitmap();
+		silverKeyNumber.ShowBitmap();
+		goldKeyNumber.ShowBitmap();
 	}
 }

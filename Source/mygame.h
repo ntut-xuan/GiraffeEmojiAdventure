@@ -92,6 +92,10 @@ namespace game_framework {
 	protected:
 		void OnMove();									// 移動遊戲元素
 		void OnShow();									// 顯示這個狀態的遊戲畫面
+		bool isDoor(int doorCode);
+		bool isKey(int keyCode);
+		bool OpenDoor(int x, int y, int doorCode);
+		bool GetKey(int x, int y, int keyCode);
 	private:
 		const int		STAGES;	// 關卡的總數
 		int character_x, character_y;
@@ -100,6 +104,15 @@ namespace game_framework {
 		Character character;
 		CMovingBitmap menuBitmap;
 		CMovingBitmap characterBitmap;
+		CMovingBitmap hidden;
+		CInteger health = CInteger(4);
+		CInteger attack = CInteger(2);
+		CInteger defence = CInteger(2);
+		CInteger keyNumber = CInteger(2);
+		CInteger silverKeyNumber = CInteger(2);
+		CInteger goldKeyNumber = CInteger(2);
+		vector<vector<int>> hidden_code = vector<vector<int>>(11, vector<int>(11, 0));
+		vector<vector<CMovingBitmap>> hidden_map = vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11));
 		vector<vector<CMovingBitmap>> material_map;
 		vector<vector<CMovingBitmap>> entity_map;
 	};

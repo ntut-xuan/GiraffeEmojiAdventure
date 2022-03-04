@@ -351,11 +351,14 @@
     <Image Include="res\bitmap3.bmp" />
     <Image Include="RES\character.bmp" />
     <Image Include="RES\chest.bmp" />
+    <Image Include="RES\event.bmp" />
     <Image Include="RES\giraffe.bmp" />
+    <Image Include="RES\goldkey.bmp" />
     <Image Include="RES\grape.bmp" />
+    <Image Include="RES\key.bmp" />
     <Image Include="RES\ladder.bmp" />
-    <Image Include="RES\normal_door.bmp" />
     <Image Include="RES\road.bmp" />
+    <Image Include="RES\sliverkey.bmp" />
     <Image Include="RES\wall.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

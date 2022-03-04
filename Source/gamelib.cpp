@@ -240,8 +240,6 @@ namespace game_framework {
 	// 2. 自己寫到運用CMovingBitmap的程式時，可以參考下列程式的寫法
 	/////////////////////////////////////////////////////////////////////////////
 
-	CMovingBitmap CInteger::digit[11];
-
 	CInteger::CInteger(int digits)
 		: NUMDIGITS(digits)
 	{
