@@ -17,5 +17,6 @@
 #define SILVER_KEY 9
 #define KEY 10
 #define SUSHI 11
+#define GREEN 12
 
 /* ======================= End ======================= */

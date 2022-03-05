@@ -211,85 +211,90 @@ namespace game_framework {
 	void CGameStateRun::OnBeginState()
 	{
 
-		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
-		material_map = vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11));
-		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
-		entity_map = vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11));
-
 		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(255, 255, 255));
 		menuBitmap.SetTopLeft(78, 30);
 
 		int start_x = 539;
 		int start_y = 30;
 
-		for (int i = 0; i < 11; i++) {
-			for (int j = 0; j < 11; j++) {
-				if (entity_code[i][j] == 1) {
-					character.setXY(i, j);
-				}
-			}
-		}
+		for (int s = 0; s < STAGES; s++) {
+			vector<vector<int>> material_code = stage.getStageMaterial(s);
+			vector<vector<int>> entity_code = stage.getStageEntity(s);
 
-		for (int i = 0; i < 11; i++) {
-			for (int j = 0; j < 11; j++) {
-				if (material_code[i][j] == 0) {
-					material_map[i][j].LoadBitmap("RES/wall.bmp");
-					material_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					hidden_map[i][j].LoadBitmap("RES/wall.bmp");
-					hidden_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (material_code[i][j] == 1) {
-					material_map[i][j].LoadBitmap("RES/road.bmp");
-					material_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					hidden_map[i][j].LoadBitmap("RES/road.bmp");
-					hidden_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+			for (int i = 0; i < 11; i++) {
+				for (int j = 0; j < 11; j++) {
+					if (entity_code[i][j] == 1) {
+						character.setXY(i, j);
+					}
 				}
 			}
-		}
 
-		for (int i = 0; i < 11; i++) {
-			for (int j = 0; j < 11; j++) {
-				if (entity_code[i][j] == BOX) {
-					entity_map[i][j].LoadBitmap("RES/chest.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == LADDER) {
-					entity_map[i][j].LoadBitmap("RES/ladder.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == DOOR) {
-					entity_map[i][j].LoadBitmap("RES/door.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == SILVER_DOOR) {
-					entity_map[i][j].LoadBitmap("RES/silverdoor.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == GOLD_DOOR) {
-					entity_map[i][j].LoadBitmap("RES/golddoor.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == GRAPE) {
-					entity_map[i][j].LoadBitmap("RES/grape.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == GOLD_KEY) {
-					entity_map[i][j].LoadBitmap("RES/goldkey.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == SILVER_KEY) {
-					entity_map[i][j].LoadBitmap("RES/sliverkey.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == KEY) {
-					entity_map[i][j].LoadBitmap("RES/key.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-				}
-				else if (entity_code[i][j] == SUSHI) {
-					entity_map[i][j].LoadBitmap("RES/sushi.bmp", RGB(255, 255, 255));
-					entity_map[i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+			for (int i = 0; i < 11; i++) {
+				for (int j = 0; j < 11; j++) {
+					if (material_code[i][j] == 0) {
+						material_map[s][i][j].LoadBitmap("RES/wall.bmp");
+						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						hidden_map[s][i][j].LoadBitmap("RES/wall.bmp");
+						hidden_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (material_code[i][j] == 1) {
+						material_map[s][i][j].LoadBitmap("RES/road.bmp");
+						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						hidden_map[s][i][j].LoadBitmap("RES/road.bmp");
+						hidden_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
 				}
 			}
+
+			for (int i = 0; i < 11; i++) {
+				for (int j = 0; j < 11; j++) {
+					if (entity_code[i][j] == BOX) {
+						entity_map[s][i][j].LoadBitmap("RES/chest.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == LADDER) {
+						entity_map[s][i][j].LoadBitmap("RES/ladder.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == DOOR) {
+						entity_map[s][i][j].LoadBitmap("RES/door.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == SILVER_DOOR) {
+						entity_map[s][i][j].LoadBitmap("RES/silverdoor.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == GOLD_DOOR) {
+						entity_map[s][i][j].LoadBitmap("RES/golddoor.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == GRAPE) {
+						entity_map[s][i][j].LoadBitmap("RES/grape.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == GOLD_KEY) {
+						entity_map[s][i][j].LoadBitmap("RES/goldkey.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == SILVER_KEY) {
+						entity_map[s][i][j].LoadBitmap("RES/sliverkey.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == KEY) {
+						entity_map[s][i][j].LoadBitmap("RES/key.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == SUSHI) {
+						entity_map[s][i][j].LoadBitmap("RES/sushi.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (entity_code[i][j] == GREEN) {
+						entity_map[s][i][j].LoadBitmap("RES/green.bmp", RGB(255, 255, 255));
+						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+				}
+			}
+
 		}
 
 		characterBitmap.LoadBitmap("RES/character.bmp", RGB(255, 255, 255));
@@ -405,6 +410,9 @@ namespace game_framework {
 			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
 				return;
 			}
+			if (entity_code[x][y] == LADDER) {
+				current_stage++;
+			}
 			if (isKey(entity_code[x][y])) {
 				GetKey(x, y, entity_code[x][y]);
 			}
@@ -421,6 +429,9 @@ namespace game_framework {
 			}
 			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
 				return;
+			}
+			if (entity_code[x][y] == LADDER) {
+				current_stage++;
 			}
 			if (isKey(entity_code[x][y])) {
 				GetKey(x, y, entity_code[x][y]);
@@ -439,6 +450,9 @@ namespace game_framework {
 			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
 				return;
 			}
+			if (entity_code[x][y] == LADDER) {
+				current_stage++;
+			}
 			if (isKey(entity_code[x][y])) {
 				GetKey(x, y, entity_code[x][y]);
 			}
@@ -455,6 +469,9 @@ namespace game_framework {
 			}
 			if (hidden_code[x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
 				return;
+			}
+			if (entity_code[x][y] == LADDER) {
+				current_stage++;
 			}
 			if (isKey(entity_code[x][y])) {
 				GetKey(x, y, entity_code[x][y]);
@@ -510,7 +527,7 @@ namespace game_framework {
 
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
-				material_map[i][j].ShowBitmap();
+				material_map[current_stage][i][j].ShowBitmap();
 			}
 		}
 		for (int i = 0; i < 11; i++) {
@@ -518,10 +535,10 @@ namespace game_framework {
 				if (entity_code[i][j] == 0) continue;
 				if (entity_code[i][j] == 1) continue;
 				if (hidden_code[i][j] == 1) {
-					material_map[i][j].ShowBitmap();
+					material_map[current_stage][i][j].ShowBitmap();
 				}
 				else {
-					entity_map[i][j].ShowBitmap();
+					entity_map[current_stage][i][j].ShowBitmap();
 				}
 			}
 		}

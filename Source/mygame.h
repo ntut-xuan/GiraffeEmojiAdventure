@@ -112,9 +112,9 @@ namespace game_framework {
 		CInteger silverKeyNumber = CInteger(2);
 		CInteger goldKeyNumber = CInteger(2);
 		vector<vector<int>> hidden_code = vector<vector<int>>(11, vector<int>(11, 0));
-		vector<vector<CMovingBitmap>> hidden_map = vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11));
-		vector<vector<CMovingBitmap>> material_map;
-		vector<vector<CMovingBitmap>> entity_map;
+		vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
+		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));;
+		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////
