@@ -8,7 +8,7 @@
 
 #define GIRAFFE 1
 #define BOX 2
-#define LADDER 3
+#define	UP_STAIR 3
 #define DOOR 4
 #define SILVER_DOOR 5
 #define GOLD_DOOR 6
@@ -18,5 +18,6 @@
 #define KEY 10
 #define SUSHI 11
 #define GREEN 12
+#define DOWN_STAIR 13
 
 /* ======================= End ======================= */

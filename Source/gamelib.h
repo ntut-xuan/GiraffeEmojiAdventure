@@ -69,7 +69,7 @@
 #define SIZE_X				 1440		// 設定遊戲畫面的解析度為640x480
 #define SIZE_Y				 900		// 註：若不使用標準的解析度，則不能切換到全螢幕
 #define OPEN_AS_FULLSCREEN	 false		// 是否以全螢幕方式開啟遊戲
-#define SHOW_LOAD_PROGRESS   true		// 是否顯示loading(OnInit)的進度
+#define SHOW_LOAD_PROGRESS   false		// 是否顯示loading(OnInit)的進度
 #define DEFAULT_BG_COLOR	 RGB(255,255,255)	// 遊戲畫面預設的背景顏色(黑色)
 #define GAME_CYCLE_TIME		 33		    // 每33ms跑一次Move及Show(每秒30次)
 #define SHOW_GAME_CYCLE_TIME false		// 是否在debug mode顯示cycle time
@@ -197,18 +197,25 @@ namespace game_framework {
 		CMovingBitmap();
 		int   Height();						// 取得圖形的高度
 		int   Left();						// 取得圖形的左上角的 x 座標
+		void  SetAnimation(int delay);
 		void  LoadBitmap(int, COLORREF = CLR_INVALID);		// 載入圖，指定圖的編號(resource)及透明色
-		void  LoadBitmap(char *, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
+		void  LoadBitmap(char*, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
+		void  LoadBitmap(vector<char*>, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
+		void  UnloadBitmap();
 		void  SetTopLeft(int, int);			// 將圖的左上角座標移至 (x,y)
 		void  ShowBitmap();					// 將圖貼到螢幕
 		void  ShowBitmap(double factor);	// 將圖貼到螢幕 factor < 1時縮小，>1時放大。注意：需要VGA卡硬體的支援，否則會很慢
-		void  ShowBitmap(CMovingBitmap &);	// 將圖貼到到另一張圖上 (僅供特殊用途)
+		void  SelectShowBitmap(int select);
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 	protected:
+		int selector = 0;
+		int delayCount = 10;
+		int tempDelayCount = 10;
+		bool isAnimation = false;
+		vector<unsigned> SurfaceID;
 		bool     isBitmapLoaded;	// whether a bitmap has been loaded
 		CRect    location;			// location of the bitmap
-		unsigned SurfaceID;			// the surface id of this bitmap
 	};
 
 	/////////////////////////////////////////////////////////////////////////////

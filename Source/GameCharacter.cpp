@@ -77,7 +77,7 @@ namespace game_framework {
 	}
 
 	void Character::causeDamage(int damage) {
-		health = (int) fmin(0, health - damage);
+		health = (int)fmax(0, health - damage);
 	}
 
 }

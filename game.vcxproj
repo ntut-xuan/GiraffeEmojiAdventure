@@ -285,6 +285,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="Source\Monster.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
     <ClCompile Include="Source\StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -327,6 +328,7 @@
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="Source\Material.h" />
+    <ClInclude Include="Source\Monster.h" />
     <ClInclude Include="Source\Resource.h">
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>

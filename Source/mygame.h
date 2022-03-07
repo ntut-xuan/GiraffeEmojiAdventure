@@ -39,6 +39,7 @@
 */
 
 #include "GameCharacter.h"
+#include "Monster.h"
 #include "Stage.h"
 
 namespace game_framework {
@@ -94,16 +95,23 @@ namespace game_framework {
 		void OnShow();									// 顯示這個狀態的遊戲畫面
 		bool isDoor(int doorCode);
 		bool isKey(int keyCode);
+		bool isEnemy(int enemyCode);
 		bool OpenDoor(int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
 	private:
 		const int		STAGES;	// 關卡的總數
 		int character_x, character_y;
+		int temp_monster_x, temp_monster_y;
 		int current_stage;
+		bool menuing = false;
+		bool winning = false;
+		bool turn = true; // 玩家先手
 		Stage stage;
 		Character character;
 		CMovingBitmap menuBitmap;
 		CMovingBitmap characterBitmap;
+		CMovingBitmap attackMenu;
+		CMovingBitmap winningMenu;
 		CMovingBitmap hidden;
 		CInteger health = CInteger(4);
 		CInteger attack = CInteger(2);
@@ -111,10 +119,11 @@ namespace game_framework {
 		CInteger keyNumber = CInteger(2);
 		CInteger silverKeyNumber = CInteger(2);
 		CInteger goldKeyNumber = CInteger(2);
+		Monster monster;
 		vector<vector<int>> hidden_code = vector<vector<int>>(11, vector<int>(11, 0));
 		vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
-		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));;
-		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));;
+		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
+		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 	};
 
 	/////////////////////////////////////////////////////////////////////////////
