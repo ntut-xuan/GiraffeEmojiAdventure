@@ -110,6 +110,7 @@ using namespace std;
 				"\n(Press Cancel otherwise.)",								\
 				 str , __FILE__,__LINE__);									\
 			id = AfxMessageBox(s, MB_RETRYCANCEL);							\
+																			\
 			if (id == IDCANCEL)												\
 				exit(1);													\
 			AfxDebugBreak();												\
@@ -197,11 +198,11 @@ namespace game_framework {
 		CMovingBitmap();
 		int   Height();						// 取得圖形的高度
 		int   Left();						// 取得圖形的左上角的 x 座標
-		void  SetAnimation(int delay);
+		void  SetAnimation(int delay, bool once);
 		void  LoadBitmap(int, COLORREF = CLR_INVALID);		// 載入圖，指定圖的編號(resource)及透明色
 		void  LoadBitmap(char*, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
 		void  LoadBitmap(vector<char*>, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
-		void  UnloadBitmap();
+		void  UnshowBitmap();
 		void  SetTopLeft(int, int);			// 將圖的左上角座標移至 (x,y)
 		void  ShowBitmap();					// 將圖貼到螢幕
 		void  ShowBitmap(double factor);	// 將圖貼到螢幕 factor < 1時縮小，>1時放大。注意：需要VGA卡硬體的支援，否則會很慢
@@ -213,6 +214,7 @@ namespace game_framework {
 		int delayCount = 10;
 		int tempDelayCount = 10;
 		bool isAnimation = false;
+		bool infiniteShowAnimation = false;
 		vector<unsigned> SurfaceID;
 		bool     isBitmapLoaded;	// whether a bitmap has been loaded
 		CRect    location;			// location of the bitmap
@@ -263,9 +265,10 @@ namespace game_framework {
 		void LoadBitmap();			// 載入0..9及負號之圖形
 		void SetInteger(int);		// 設定整數值
 		void SetTopLeft(int, int);	// 將動畫的左上角座標移至 (x,y)
+		void ShowBitmap(bool);			// 將動畫貼到螢幕
 		void ShowBitmap();			// 將動畫貼到螢幕
 	private:
-		const int NUMDIGITS;			// 共顯示NUMDIGITS個位數
+		int NUMDIGITS;			// 共顯示NUMDIGITS個位數
 		CMovingBitmap digit[11]; // 儲存0..9及負號之圖形(bitmap)
 		int x, y;						// 顯示的座標
 		int n;							// 整數值

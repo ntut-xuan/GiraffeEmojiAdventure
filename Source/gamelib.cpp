@@ -123,7 +123,11 @@
 #include <string.h>
 #include "audio.h"
 #include "gamelib.h"
+#include "Shlwapi.h"
 #include "mygame.h"
+#include <filesystem>
+#include <experimental/filesystem> // Header file for pre-standard implementation
+using namespace std::experimental::filesystem::v1;
 
 namespace game_framework {
 
@@ -279,11 +283,21 @@ namespace game_framework {
 		x = nx; y = ny;
 	}
 
+	void CInteger::ShowBitmap(bool leadingZero) {
+		if (leadingZero == false) {
+			NUMDIGITS = to_string(n).length();
+		}
+		ShowBitmap();
+	}
+
 	void CInteger::ShowBitmap()
 	{
 		GAME_ASSERT(isBmpLoaded, "CInteger: 請先執行LoadBitmap，然後才能ShowBitmap");
 		int nx;		// 待顯示位數的 x 座標
 		int MSB;	// 最左邊(含符號)的位數的數值
+
+		
+
 		if (n >= 0) {
 			MSB = n;
 			nx = x + digit[0].Width()*(NUMDIGITS - 1);
@@ -332,6 +346,7 @@ namespace game_framework {
 	{
 		const int nx = 0;
 		const int ny = 0;
+
 		GAME_ASSERT(!isBitmapLoaded, "A bitmap has been loaded. You can not load another bitmap !!!");
 		CBitmap bitmap;
 		BOOL rval = bitmap.LoadBitmap(IDB_BITMAP);
@@ -349,11 +364,13 @@ namespace game_framework {
 	{
 		const int nx = 0;
 		const int ny = 0;
+
 		GAME_ASSERT(!isBitmapLoaded, "A bitmap has been loaded. You can not load another bitmap !!!");
+
 		HBITMAP hbitmap = (HBITMAP)LoadImage(NULL, filename, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if (hbitmap == NULL) {
 			char error_msg[300];
-			sprintf(error_msg, "Loading bitmap from file \"%s\" failed !!!", filename);
+			sprintf(error_msg, "Loading bitmap	from file \"%s\" failed !!!", filename);
 			GAME_ASSERT(false, error_msg);
 		}
 		CBitmap *bmp = CBitmap::FromHandle(hbitmap); // memory will be deleted automatically
@@ -368,10 +385,12 @@ namespace game_framework {
 
 	void CMovingBitmap::LoadBitmap(vector<char*> filename, COLORREF color)
 	{
+
 		for (int i = 0; i < (int) filename.size(); i++) {
 			const int nx = 0;
 			const int ny = 0;
-			HBITMAP hbitmap = (HBITMAP)LoadImage(NULL, filename[i], IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+			HBITMAP hbitmap = (HBITMAP) LoadImage(NULL, filename[i], IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 			if (hbitmap == NULL) {
 				char error_msg[300];
 				sprintf(error_msg, "Loading bitmap from file \"%s\" failed !!!", filename[i]);
@@ -388,7 +407,7 @@ namespace game_framework {
 		}
 	}
 
-	void CMovingBitmap::UnloadBitmap()
+	void CMovingBitmap::UnshowBitmap()
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before SetTopLeft() is called !!!");
 		isAnimation = false;
@@ -406,8 +425,9 @@ namespace game_framework {
 		location.bottom -= dy;
 	}
 
-	void CMovingBitmap::SetAnimation(int delay) {
+	void CMovingBitmap::SetAnimation(int delay, bool once) {
 		isAnimation = true;
+		infiniteShowAnimation = !once;
 		delayCount = delay;
 		tempDelayCount = delay;
 	}
@@ -420,6 +440,9 @@ namespace game_framework {
 			selector += 1;
 			tempDelayCount = delayCount;
 			selector %= SurfaceID.size();
+			if (infiniteShowAnimation == false) {
+				isAnimation = false;
+			}
 		}
 	}
 
@@ -431,10 +454,14 @@ namespace game_framework {
 			selector += 1;
 			tempDelayCount = delayCount;
 			selector %= SurfaceID.size();
+			if (infiniteShowAnimation == false) {
+				isAnimation = false;
+			}
 		}
 	}
 
 	void CMovingBitmap::SelectShowBitmap(int _select) {
+		GAME_ASSERT(_select < (int) SurfaceID.size(), "選擇圖片時索引出界");
 		selector = _select;
 	}
 
@@ -889,6 +916,7 @@ namespace game_framework {
 			RestoreSurface();
 		if (lpDDS[SurfaceID]->IsLost())
 			RestoreSurface();
+
 		ddrval = lpDDSBack->Blt(TargetRect, lpDDS[SurfaceID], NULL, blt_flag, NULL);
 		CheckDDFail("Blt Bitmap to Back Failed");
 	}
@@ -901,6 +929,7 @@ namespace game_framework {
 		TargetRect.top = y;
 		TargetRect.right = x + (int)((BitmapRect[SurfaceID].right - BitmapRect[SurfaceID].left)*factor);
 		TargetRect.bottom = y + (int)((BitmapRect[SurfaceID].bottom - BitmapRect[SurfaceID].top)*factor);
+
 
 		if (factor == 0) {
 			return;

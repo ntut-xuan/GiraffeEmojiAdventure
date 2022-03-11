@@ -61,6 +61,7 @@
 #include "audio.h"
 #include "gamelib.h"
 #include "mygame.h"
+#include "MainFrm.h"
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
@@ -91,7 +92,7 @@ namespace game_framework {
 		//
 		logo.LoadBitmap(IDB_BACKGROUND);
 
-		giraffe_photo.LoadBitmap("RES/giraffe.bmp", RGB(255, 255, 255));
+		giraffe_photo.LoadBitmap("./RES/giraffe.bmp", RGB(255, 255, 255));
 		giraffe_photo.SetTopLeft(600, 300);
 
 		Sleep(300);				// 放慢，以便看清楚進度，實際遊戲請刪除此Sleep
@@ -289,7 +290,7 @@ namespace game_framework {
 					}
 					else if (entity_code[i][j] == GREEN) {
 						entity_map[s][i][j].LoadBitmap({ "RES/green.bmp", "RES/green2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5);
+						entity_map[s][i][j].SetAnimation(5, false);
 						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
 					else if (entity_code[i][j] == DOWN_STAIR) {
@@ -300,6 +301,9 @@ namespace game_framework {
 			}
 
 		}
+
+		characterAttackMenuBitMap.LoadBitmap({ "RES/character.bmp" }, RGB(255, 255, 255));
+		characterAttackMenuBitMap.SetTopLeft(1266, 380);
 
 		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77 , start_y + character.getX() * 77);
@@ -415,7 +419,6 @@ namespace game_framework {
 					character.causeDamage(monster.getAttack());
 				}
 				turn = !turn;
-				Sleep(300);
 			}
 
 			if (monster.getHealth() == 0) {
@@ -429,6 +432,7 @@ namespace game_framework {
 
 	void CGameStateRun::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
+
 		const char KEY_LEFT = 0x25; // keyboard左箭頭
 		const char KEY_UP = 0x26; // keyboard上箭頭
 		const char KEY_RIGHT = 0x27; // keyboard右箭頭
@@ -450,25 +454,28 @@ namespace game_framework {
 			turn = true;
 		}
 
-		if (nChar == KEY_UP) {
-			x = character.getX() - 1;
-			y = character.getY();
+		if (!menuing) {
+			if (nChar == KEY_UP) {
+				x = character.getX() - 1;
+				y = character.getY();
+			}
+			else if (nChar == KEY_LEFT) {
+				characterBitmap.SelectShowBitmap(0);
+				x = character.getX();
+				y = character.getY() - 1;
+			}
+			else if (nChar == KEY_RIGHT) {
+				characterBitmap.SelectShowBitmap(1);
+				x = character.getX();
+				y = character.getY() + 1;
+
+			}
+			else if (nChar == KEY_DOWN) {
+				x = character.getX() + 1;
+				y = character.getY();
+			}
 		}
-		else if (nChar == KEY_LEFT) {
-			characterBitmap.SelectShowBitmap(0);
-			x = character.getX();
-			y = character.getY() - 1;
-		}
-		else if (nChar == KEY_RIGHT) {
-			characterBitmap.SelectShowBitmap(1);
-			x = character.getX();
-			y = character.getY() + 1;
-			
-		}
-		else if (nChar == KEY_DOWN) {
-			x = character.getX() + 1;
-			y = character.getY();
-		}
+
 		if (material_code[x][y] == 0) {
 			return;
 		}
@@ -481,12 +488,15 @@ namespace game_framework {
 		if (entity_code[x][y] == DOWN_STAIR) {
 			current_stage--;
 		}
-		if (isKey(entity_code[x][y])) {
+		if (hidden_code[x][y] == 0 && isKey(entity_code[x][y])) {
 			GetKey(x, y, entity_code[x][y]);
 		}
 		if (hidden_code[x][y] == 0 && isEnemy(entity_code[x][y])) {
 			menuing = true;
 			monster = Monster("綠色史萊姆", 100, 10, 10, 0);
+			enemyAttackMenuBitmap.LoadBitmap({ "RES/green.bmp", "RES/green2.bmp" }, RGB(0, 0, 0));
+			enemyAttackMenuBitmap.SetTopLeft(550, 370);
+			enemyAttackMenuBitmap.SetAnimation(5, false);
 			temp_monster_x = x;
 			temp_monster_y = y;
 			return;
@@ -522,6 +532,11 @@ namespace game_framework {
 
 	}
 
+	void CGameStateRun::OnMouseMove(UINT nFlags, CPoint point) {
+		mouse_x = point.x;
+		mouse_y = point.y;
+	}
+
 	void CGameStateRun::OnLButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
 	{
 
@@ -530,11 +545,6 @@ namespace game_framework {
 	void CGameStateRun::OnLButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作
 	{
 
-	}
-
-	void CGameStateRun::OnMouseMove(UINT nFlags, CPoint point)	// 處理滑鼠的動作
-	{
-		// 沒事。如果需要處理滑鼠移動的話，寫code在這裡
 	}
 
 	void CGameStateRun::OnRButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
@@ -562,7 +572,7 @@ namespace game_framework {
 				if (entity_code[i][j] == 0) continue;
 				if (entity_code[i][j] == 1) continue;
 				if (hidden_code[i][j] == 1) {
-					entity_map[current_stage][i][j].UnloadBitmap();
+					entity_map[current_stage][i][j].UnshowBitmap();
 				}
 				else {
 					entity_map[current_stage][i][j].ShowBitmap();
@@ -572,16 +582,18 @@ namespace game_framework {
 
 		characterBitmap.ShowBitmap();
 		menuBitmap.ShowBitmap();
-		health.ShowBitmap();
-		attack.ShowBitmap();
-		defence.ShowBitmap();
-		keyNumber.ShowBitmap();
-		silverKeyNumber.ShowBitmap();
-		goldKeyNumber.ShowBitmap();
+		health.ShowBitmap(false);
+		attack.ShowBitmap(false);
+		defence.ShowBitmap(false);
+		keyNumber.ShowBitmap(true);
+		silverKeyNumber.ShowBitmap(true);
+		goldKeyNumber.ShowBitmap(true);
 
-		if (menuing) {
+		if (menuing && --tempDelayCycle) {
 
 			attackMenu.ShowBitmap();
+			characterAttackMenuBitMap.ShowBitmap();
+			enemyAttackMenuBitmap.ShowBitmap();
 
 			CDC *pDC = CDDraw::GetBackCDC();
 			CFont f, *fp;
@@ -597,24 +609,29 @@ namespace game_framework {
 
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->SetTextColor(RGB(255, 255, 255));
+			pDC->TextOut(590, 313, monster.getName().c_str());
 			pDC->TextOut(816, 390, to_string(monster.getHealth()).c_str());
 			pDC->TextOut(816, 456, to_string(monster.getDefence()).c_str());
 			pDC->TextOut(816, 526, to_string(monster.getDefence()).c_str());
 
+
 			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();
 
+			tempDelayCycle = MENU_DELAY_CYCLE;
+
 		}
 		else {
-			menuBitmap.UnloadBitmap();
+			menuBitmap.UnshowBitmap();
 		}
 
 		if (winning) {
 			winningMenu.ShowBitmap();
 		}
 		else {
-			winningMenu.UnloadBitmap();
+			winningMenu.UnshowBitmap();
 		}
+
 
 	}
 }

@@ -100,9 +100,12 @@ namespace game_framework {
 		bool GetKey(int x, int y, int keyCode);
 	private:
 		const int		STAGES;	// 關卡的總數
+		const int MENU_DELAY_CYCLE = 10;
+		int mouse_x, mouse_y;
 		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
+		int tempDelayCycle;
 		bool menuing = false;
 		bool winning = false;
 		bool turn = true; // 玩家先手
@@ -110,7 +113,12 @@ namespace game_framework {
 		Character character;
 		CMovingBitmap menuBitmap;
 		CMovingBitmap characterBitmap;
+
+		/* Attack Menu Object */
 		CMovingBitmap attackMenu;
+		CMovingBitmap characterAttackMenuBitMap;
+		CMovingBitmap enemyAttackMenuBitmap;
+
 		CMovingBitmap winningMenu;
 		CMovingBitmap hidden;
 		CInteger health = CInteger(4);

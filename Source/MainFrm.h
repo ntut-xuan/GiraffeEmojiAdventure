@@ -43,7 +43,6 @@ private:
 // Operations
 public:
 	void SetFullScreen(bool);
-
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
