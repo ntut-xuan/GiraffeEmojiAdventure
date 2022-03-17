@@ -40,6 +40,7 @@
 
 #include "GameCharacter.h"
 #include "Monster.h"
+#include "NPC.h"
 #include "Stage.h"
 
 namespace game_framework {
@@ -96,6 +97,7 @@ namespace game_framework {
 		bool isDoor(int doorCode);
 		bool isKey(int keyCode);
 		bool isEnemy(int enemyCode);
+		bool isNPC(int entityCode);
 		bool OpenDoor(int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
 	private:
@@ -105,9 +107,10 @@ namespace game_framework {
 		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
-		int tempDelayCycle;
-		bool menuing = false;
-		bool winning = false;
+		int tempDelayCycle = MENU_DELAY_CYCLE;
+		bool dialogMenuing = false;
+		bool attackMenuing = false;
+		bool enterStatus = false;
 		bool turn = true; // к▒оaе¤дт
 		Stage stage;
 		Character character;
@@ -119,8 +122,16 @@ namespace game_framework {
 		CMovingBitmap characterAttackMenuBitMap;
 		CMovingBitmap enemyAttackMenuBitmap;
 
+		/* Winning Menu Object */
 		CMovingBitmap winningMenu;
 		CMovingBitmap hidden;
+
+		/* Dialog Menu Object */
+		CMovingBitmap dialogMenu;
+		CMovingBitmap dialogMenuCharacter;
+
+		/* Shoping Menu Object */
+	
 		CInteger health = CInteger(4);
 		CInteger attack = CInteger(2);
 		CInteger defence = CInteger(2);
@@ -128,7 +139,10 @@ namespace game_framework {
 		CInteger silverKeyNumber = CInteger(2);
 		CInteger goldKeyNumber = CInteger(2);
 		Monster monster;
-		vector<vector<int>> hidden_code = vector<vector<int>>(11, vector<int>(11, 0));
+		NPC npc;
+		vector<CMovingBitmap> monster_map = vector<CMovingBitmap>(200);
+		vector<CMovingBitmap> npc_map = vector<CMovingBitmap>(200);
+		vector<vector<vector<int>>> hidden_code = vector<vector<vector<int>>>(11, vector<vector<int>>(11, vector<int>(11)));
 		vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));

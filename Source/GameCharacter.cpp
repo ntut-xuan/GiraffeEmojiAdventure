@@ -11,8 +11,8 @@ namespace game_framework {
 		attack = 10;
 		defence = 10;
 		speed = 2;
-		goldKeyNumber = 0;
-		silverKeyNumber = 0;
+		goldKeyNumber = 1;
+		silverKeyNumber = 1;
 		keyNumber = 1;
 	}
 
@@ -77,7 +77,7 @@ namespace game_framework {
 	}
 
 	void Character::causeDamage(int damage) {
-		health = (int)fmax(0, health - damage);
+		health = max(0, health - damage);
 	}
 
 }

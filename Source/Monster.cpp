@@ -10,12 +10,17 @@ namespace game_framework {
 
 	}
 
-	Monster::Monster(string _name, int _health, int _attack, int _defence, int _speed) {
+	Monster::Monster(int _ID, string _name, int _health, int _attack, int _defence, int _speed) {
+		ID = _ID;
 		name = _name;
 		health = _health;
 		attack = _attack;
 		defence = _defence;
 		speed = _speed;
+	}
+
+	int Monster::getID() {
+		return ID;
 	}
 
 	string Monster::getName() {

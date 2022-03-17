@@ -6,15 +6,16 @@ namespace game_framework {
 	class Monster {
 	public:
 		Monster();
-		Monster(string name, int health, int attack, int defence, int speed);
+		Monster(int ID, string name, int health, int attack, int defence, int speed);
 		string getName();
 		int getHealth();
 		int getAttack();
 		int getDefence();
+		int getID();
 		void causeDamage(int damage);
 	protected:
 		string name;
-		int health, attack, defence, speed; // 人物屬性
+		int ID, health, attack, defence, speed; // 人物屬性
 	private:
 		bool isDodged();
 	};
