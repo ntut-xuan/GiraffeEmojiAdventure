@@ -102,14 +102,16 @@ namespace game_framework {
 		bool GetKey(int x, int y, int keyCode);
 	private:
 		const int		STAGES;	// 關卡的總數
-		const int MENU_DELAY_CYCLE = 10;
+		const int MENU_DELAY_CYCLE = 20;
 		int mouse_x, mouse_y;
 		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
-		int tempDelayCycle = MENU_DELAY_CYCLE;
+		int tempDelayCycle = 0;
+		int tempCauseDamageValue = 0;
 		bool dialogMenuing = false;
 		bool attackMenuing = false;
+		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // 玩家先手
 		Stage stage;
@@ -131,7 +133,11 @@ namespace game_framework {
 		CMovingBitmap dialogMenuCharacter;
 
 		/* Shoping Menu Object */
-	
+		
+		/* Attack Animation Vector (enemy and character) */
+		vector<CMovingBitmap> enemyAttackAnimation = vector<CMovingBitmap>(3);
+		vector<CMovingBitmap> characterAttackAnimation = vector<CMovingBitmap>(3);
+
 		CInteger health = CInteger(4);
 		CInteger attack = CInteger(2);
 		CInteger defence = CInteger(2);

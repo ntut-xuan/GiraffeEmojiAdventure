@@ -386,6 +386,15 @@ namespace game_framework {
 
 		}
 
+		/* Attack animation Load */
+		enemyAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
+		enemyAttackAnimation[0].SetTopLeft(671, 377);
+		enemyAttackAnimation[0].SetAnimation(2, true);
+		
+		characterAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
+		characterAttackAnimation[0].SetTopLeft(1387, 387);
+		characterAttackAnimation[0].SetAnimation(2, true);
+
 		/* Bitmap Menu Load */
 
 		dialogMenu.LoadBitmap("RES/DialogMenu.bmp", RGB(0, 0, 0));
@@ -505,29 +514,35 @@ namespace game_framework {
 		int start_y = 77;
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77, start_y + character.getX() * 77);
 
-		if (attackMenuing && --tempDelayCycle == 0) {
-
+		if (attackMenuing && --tempDelayCycle <= 0) {
 			if (character.getHealth() && monster.getHealth()) {
 				if (turn) {
-					monster.causeDamage(max(0, character.getAttack() - monster.getDefence()));
+					tempCauseDamageValue = max(0, character.getAttack() - monster.getDefence());
+					monster.causeDamage(tempCauseDamageValue);
+					enemyAttackAnimation[0].SetAnimation(1, true);
 				}
 				else {
-					character.causeDamage(max(0, monster.getAttack() - character.getDefence()));
+					tempCauseDamageValue = max(0, monster.getAttack() - character.getDefence());
+					character.causeDamage(tempCauseDamageValue);
 					health.Add(character.getHealth() - health.GetInteger());
+					characterAttackAnimation[0].SetAnimation(1, true);
 				}
 				turn = !turn;
+				showAttackValue = true;
+			}
+
+			if (enterStatus == true) {
+				showAttackValue = false;
 			}
 
 			if (monster.getHealth() == 0) {
 				enterStatus = true;
 				turn = false;
 			}
-				
+
 			tempDelayCycle = MENU_DELAY_CYCLE;
 
 		}
-
-		TRACE(to_string(tempDelayCycle).c_str());
 
 	}
 
@@ -726,6 +741,13 @@ namespace game_framework {
 			characterAttackMenuBitMap.ShowBitmap();
 			monster_map[monster.getID()].ShowBitmap();
 
+			if (!turn) {
+				enemyAttackAnimation[0].ShowBitmap();
+			}
+			else {
+				characterAttackAnimation[0].ShowBitmap();
+			}
+
 			CDC *pDC = CDDraw::GetBackCDC();
 			CFont f, *fp;
 
@@ -744,6 +766,27 @@ namespace game_framework {
 			pDC->TextOut(977, 437, to_string(monster.getHealth()).c_str());
 			pDC->TextOut(977, 503, to_string(monster.getAttack()).c_str());
 			pDC->TextOut(977, 573, to_string(monster.getDefence()).c_str());
+
+			if (showAttackValue == true) {
+				if (!turn) {
+					f.Detach();
+					f.CreatePointFont(400, "Noto Sans TC");
+					fp = pDC->SelectObject(&f);
+
+					pDC->SetBkMode(TRANSPARENT);
+					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
+					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), to_string(tempCauseDamageValue).c_str());
+				}
+				else {
+					f.Detach();
+					f.CreatePointFont(400, "Noto Sans TC");
+					fp = pDC->SelectObject(&f);
+
+					pDC->SetBkMode(TRANSPARENT);
+					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
+					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), to_string(tempCauseDamageValue).c_str());
+				}
+			}
 
 			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();

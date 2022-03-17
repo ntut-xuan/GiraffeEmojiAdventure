@@ -426,6 +426,7 @@ namespace game_framework {
 	}
 
 	void CMovingBitmap::SetAnimation(int delay, bool once) {
+		selector = 0;
 		isAnimation = true;
 		infiniteShowAnimation = !once;
 		delayCount = delay;
@@ -439,10 +440,11 @@ namespace game_framework {
 		if (isAnimation == true && --tempDelayCount <= 0) {
 			selector += 1;
 			tempDelayCount = delayCount;
-			selector %= SurfaceID.size();
-			if (infiniteShowAnimation == false) {
+			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
 				isAnimation = false;
+				selector = SurfaceID.size() - 1;
 			}
+			selector = selector % SurfaceID.size();
 		}
 	}
 
@@ -453,10 +455,11 @@ namespace game_framework {
 		if (isAnimation == true && --tempDelayCount <= 0) {
 			selector += 1;
 			tempDelayCount = delayCount;
-			selector %= SurfaceID.size();
-			if (infiniteShowAnimation == false) {
+			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
 				isAnimation = false;
+				selector = SurfaceID.size() - 1;
 			}
+			selector = selector % SurfaceID.size();
 		}
 	}
 
