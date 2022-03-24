@@ -172,19 +172,6 @@ namespace game_framework {
 
 	void CGameStateOver::OnInit()
 	{
-		//
-		// 當圖很多時，OnInit載入所有的圖要花很多時間。為避免玩遊戲的人
-		//     等的不耐煩，遊戲會出現「Loading ...」，顯示Loading的進度。
-		//
-		ShowInitProgress(66);	// 接個前一個狀態的進度，此處進度視為66%
-		//
-		// 開始載入資料
-		//
-		Sleep(300);				// 放慢，以便看清楚進度，實際遊戲請刪除此Sleep
-		//
-		// 最終進度為100%
-		//
-		ShowInitProgress(100);
 	}
 
 	void CGameStateOver::OnShow()
@@ -208,7 +195,8 @@ namespace game_framework {
 
 	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(10)
 	{	
-
+		current_stage = 0;
+		hidden_map.clear();
 	}
 
 	CGameStateRun::~CGameStateRun()
@@ -387,6 +375,7 @@ namespace game_framework {
 		}
 
 		/* Attack animation Load */
+
 		enemyAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
 		enemyAttackAnimation[0].SetTopLeft(671, 377);
 		enemyAttackAnimation[0].SetAnimation(2, true);
@@ -399,6 +388,12 @@ namespace game_framework {
 
 		dialogMenu.LoadBitmap("RES/DialogMenu.bmp", RGB(0, 0, 0));
 		dialogMenu.SetTopLeft(815, 107);
+
+		optionMenu.LoadBitmap("RES/OptionMenu1.bmp", RGB(0, 0, 0));
+		optionMenu.SetTopLeft(815, 414);
+
+		optionArrow.LoadBitmap("RES/optionArrow.bmp", RGB(0, 0, 0));
+		optionArrow.SetTopLeft(875, 464);
 
 		/* Character Attack Menu Load */
 
@@ -510,6 +505,11 @@ namespace game_framework {
 
 	void CGameStateRun::OnMove()							// 移動遊戲元素
 	{	
+
+		if (character.getHealth() == 0) {
+			GotoGameState(GAME_STATE_OVER);
+		}
+
 		int start_x = 700;
 		int start_y = 77;
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77, start_y + character.getX() * 77);
@@ -554,6 +554,26 @@ namespace game_framework {
 		const char KEY_RIGHT = 0x27; // keyboard右箭頭
 		const char KEY_DOWN = 0x28; // keyboard下箭頭
 		const char KEY_ENTER = 0x0D;
+
+		TRACE("%04X\n", nChar);
+
+		if (inShopping) {
+			if (nChar == KEY_DOWN) {
+				tempSelect += 1;
+				tempSelect %= (int) npc.getOption().size();
+			} else if (nChar == KEY_UP) {
+				tempSelect -= 1;
+				tempSelect += (int) npc.getOption().size();
+				tempSelect %= (int) npc.getOption().size();
+			}
+			else if (nChar == KEY_ENTER) {
+				inShopping = false;
+				enterStatus = false;
+				dialogMenuing = false;
+			}
+			optionArrow.SetTopLeft(875, 464 + menuOptionGap * tempSelect);
+			return;
+		}
 
 		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
@@ -642,8 +662,11 @@ namespace game_framework {
 			else if (entity_code[x][y] == SHOP2) {
 				dialogMenuing = true;
 				enterStatus = true;
+				inShopping = true;
 				npc = NPC(SHOP2, "貪婪之神");
+				npc.setVariable(0, 20);
 				npc.loadData(x, y);
+				menuOptionGap = OPTION_GAP - 10 * npc.getOption().size();
 			}
 			return;
 		}
@@ -806,6 +829,12 @@ namespace game_framework {
 		if (dialogMenuing) {
 
 			dialogMenu.ShowBitmap();
+
+			if (inShopping) {
+				optionMenu.ShowBitmap();
+				optionArrow.ShowBitmap();
+			}
+
 			npc_map[npc.getID()].ShowBitmap();
 
 			CDC *pDC = CDDraw::GetBackCDC();
@@ -826,12 +855,25 @@ namespace game_framework {
 			pDC->SetTextColor(RGB(255, 255, 255));
 
 			vector<string> dialog = npc.getDialog();
+			vector<string> option = npc.getOption();
 
 			for (int i = 0; i < (int) dialog.size(); i++) {
 				pDC->TextOut(1010, 210 + i * 40, dialog[i].c_str());
 			}
 
 			pDC->TextOutA(1293, 360, "-Enter-");
+
+			if (inShopping) {
+
+				f.Detach();
+				f.CreatePointFont(260, "STZhongsong");
+				fp = pDC->SelectObject(&f);
+
+				for (int i = 0; i < (int)option.size(); i++) {
+					pDC->TextOut(1000, 480 + i * menuOptionGap, option[i].c_str());
+				}
+			
+			}
 
 			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();

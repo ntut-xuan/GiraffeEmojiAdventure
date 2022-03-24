@@ -110,6 +110,7 @@ namespace game_framework {
 		int tempDelayCycle = 0;
 		int tempCauseDamageValue = 0;
 		bool dialogMenuing = false;
+		bool inShopping = false;
 		bool attackMenuing = false;
 		bool showAttackValue = true;
 		bool enterStatus = false;
@@ -133,7 +134,12 @@ namespace game_framework {
 		CMovingBitmap dialogMenuCharacter;
 
 		/* Shoping Menu Object */
-		
+		int tempSelect = 0;
+		const int OPTION_GAP = 150;
+		int menuOptionGap = 120;
+		CMovingBitmap optionMenu;
+		CMovingBitmap optionArrow;
+
 		/* Attack Animation Vector (enemy and character) */
 		vector<CMovingBitmap> enemyAttackAnimation = vector<CMovingBitmap>(3);
 		vector<CMovingBitmap> characterAttackAnimation = vector<CMovingBitmap>(3);

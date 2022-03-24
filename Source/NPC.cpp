@@ -30,19 +30,33 @@ namespace game_framework {
 		getline(in, s);
 		for (int i = 0; i < dialogCount; i++) {
 			getline(in, s);
+			for (int j = 0; j < (int) variable.size(); j++) {
+				int index = s.find("{" + to_string(j) + "}");
+				TRACE("%d\n", index);
+				if (index == -1) continue;
+				s.replace(s.find("{" + to_string(j) + "}"), 3, to_string(variable[j]));
+			}
 			dialog.push_back(s);
 		}
 		int selectCount;
 		in >> selectCount;
 		getline(in, s);
 		for (int i = 0; i < selectCount; i++) {
-			in >> s;
+			getline(in, s);
 			option.push_back(s);
 		}
 	}
 
 	vector<string> NPC::getDialog() {
 		return dialog;
+	}
+
+	vector<string> NPC::getOption() {
+		return option;
+	}
+
+	void NPC::setVariable(int index, int value) {
+		variable[index] = value;
 	}
 
 	string NPC::getName() {

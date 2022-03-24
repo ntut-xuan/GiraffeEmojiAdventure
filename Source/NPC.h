@@ -12,11 +12,13 @@ namespace game_framework {
 		string getName();
 		int getID();
 		void loadData(int entity_x, int entity_y);
+		void setVariable(int index, int value);
 		vector<string> getDialog();
-		vector<string> getSelect();
+		vector<string> getOption();
 	protected:
 		int ID;
 		string name;
+		vector<int> variable = vector<int>(100);
 		vector<string> dialog;
 		vector<string> option;
 		int focusOption = 0;
