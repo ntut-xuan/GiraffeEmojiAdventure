@@ -1,0 +1,62 @@
+13
+1 upstair 3
+1 yellow_door 4
+1 blue_door 5
+1 red_door 6
+1 red_key 8
+1 blue_key 9
+1 yellow_key 10
+1 downstair 13
+1 ruby 22
+1 sapphire 23
+1 red_potion 24
+1 blue_potion 25
+1 emerald 30
+
+36
+2 green_slime 12
+2 red_slime 14
+2 bat 15
+2 zombie 16
+2 skeleton_c 17
+2 bigbat 26
+2 bigslime 27
+2 dark_knight 28
+2 gate_keeper_a 32
+2 gate_keeper_b 33
+2 gate_keeper_c 34
+2 great_magic_master 35
+2 iron_knight_a 36
+2 iron_knight_b 37
+2 knight 38
+2 magacian_a 39
+2 magacian_b 40
+2 magic_sergeant_a 41
+2 magic_sergeant_b 42
+2 magic_sergeant_c 43
+2 magic_sergeant_d 44
+2 priest_a 45
+2 priest_b 46
+2 priest_c 47
+2 skeleton_a 48
+2 skeleton_b 49
+2 slime_lord 50
+2 slime_men 51
+2 soul_skeleton 52
+2 soul_skeleton_knight 53
+2 stone_monster_a 54
+2 stone_monster_b 55
+2 sword_men 56
+2 vampire 58
+2 vampire_bat 59
+2 zombie_knight 60
+
+4
+2 shopkeeper 18
+2 shop_1_2 20
+2 elder 29
+2 thief 57
+
+2
+1 shop_1_1 19
+1 shop_1_3 21

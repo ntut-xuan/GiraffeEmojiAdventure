@@ -96,13 +96,11 @@ namespace game_framework {
 		void OnShow();									// 顯示這個狀態的遊戲畫面
 		bool isDoor(int doorCode);
 		bool isKey(int keyCode);
-		bool isEnemy(int enemyCode);
-		bool isNPC(int entityCode);
 		bool OpenDoor(int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
 	private:
 		const int		STAGES;	// 關卡的總數
-		const int MENU_DELAY_CYCLE = 20;
+		const int MENU_DELAY_CYCLE = 10;
 		int mouse_x, mouse_y;
 		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
@@ -115,6 +113,8 @@ namespace game_framework {
 		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // 玩家先手
+		std::string floor_message;
+
 		Stage stage;
 		Character character;
 		CMovingBitmap menuBitmap;
@@ -144,14 +144,14 @@ namespace game_framework {
 		vector<CMovingBitmap> enemyAttackAnimation = vector<CMovingBitmap>(3);
 		vector<CMovingBitmap> characterAttackAnimation = vector<CMovingBitmap>(3);
 
-		CInteger health = CInteger(4);
-		CInteger attack = CInteger(2);
-		CInteger defence = CInteger(2);
-		CInteger keyNumber = CInteger(2);
-		CInteger silverKeyNumber = CInteger(2);
-		CInteger goldKeyNumber = CInteger(2);
 		Monster monster;
 		NPC npc;
+		map<int, Monster> monster_value;
+		map<int, string> normal_bitmap_map;
+		map<int, string> functional_entity_bitmap_map;
+		map<int, string> monster_bitmap_map;
+		map<int, string> npc_bitmap_map;
+		map<int, string> block_bitmap_map;
 		vector<CMovingBitmap> monster_map = vector<CMovingBitmap>(200);
 		vector<CMovingBitmap> npc_map = vector<CMovingBitmap>(200);
 		vector<vector<vector<int>>> hidden_code = vector<vector<vector<int>>>(11, vector<vector<int>>(11, vector<int>(11)));

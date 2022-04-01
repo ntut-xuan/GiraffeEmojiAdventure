@@ -21,8 +21,8 @@ namespace game_framework {
 		name = _name;
 	}
 
-	void NPC::loadData(int entity_x, int entity_y) {
-		string fileName = "DialogData/Dialog" + to_string(entity_x) + "_" + to_string(entity_y) + ".txt";
+	void NPC::loadData(int stage_id, int entity_x, int entity_y) {
+		string fileName = "DialogData/Dialog_" + to_string(stage_id) + "_" + to_string(entity_x) + "_" + to_string(entity_y) + ".txt";
 		ifstream in(fileName);
 		string s;
 		int dialogCount;
@@ -32,7 +32,6 @@ namespace game_framework {
 			getline(in, s);
 			for (int j = 0; j < (int) variable.size(); j++) {
 				int index = s.find("{" + to_string(j) + "}");
-				TRACE("%d\n", index);
 				if (index == -1) continue;
 				s.replace(s.find("{" + to_string(j) + "}"), 3, to_string(variable[j]));
 			}

@@ -11,7 +11,7 @@ namespace game_framework {
 		NPC(int ID, string name, vector<string> dialog);
 		string getName();
 		int getID();
-		void loadData(int entity_x, int entity_y);
+		void loadData(int stage_id, int entity_x, int entity_y);
 		void setVariable(int index, int value);
 		vector<string> getDialog();
 		vector<string> getOption();

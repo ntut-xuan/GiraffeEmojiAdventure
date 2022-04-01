@@ -1,0 +1,67 @@
+5
+upstair 3
+yellow_door 4
+blue_door 5
+red_door 6
+downstair 13
+
+11
+red_key 8
+blue_key 9
+yellow_key 10
+ruby 22
+sapphire 23
+red_potion 24
+blue_potion 25
+emerald 30
+fire_drink 61
+anti_poison 62
+jump_wing 63
+
+36
+green_slime 12
+red_slime 14
+bat 15
+zombie 16
+skeleton_c 17
+big_bat 26
+big_slime 27
+dark_knight 28
+gate_keeper_a 32
+gate_keeper_b 33
+gate_keeper_c 34
+great_magic_master 35
+iron_knight_a 36
+iron_knight_b 37
+knight 38
+magacian_a 39
+magacian_b 40
+magic_sergeant_a 41
+magic_sergeant_b 42
+magic_sergeant_c 43
+magic_sergeant_d 44
+priest_a 45
+priest_b 46
+priest_c 47
+skeleton_a 48
+skeleton_b 49
+slime_lord 50
+slime_men 51
+soul_skeleton 52
+soul_skeleton_knight 53
+stone_monster_a 54
+stone_monster_b 55
+swordsman 56
+vampire 58
+vampire_bat 59
+zombie_knight 60
+
+4
+shopkeeper 18
+shop_1_2 20
+elder 29
+thief 57
+
+2
+shop_1_1 19
+shop_1_3 21

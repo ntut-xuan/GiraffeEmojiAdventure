@@ -51,6 +51,7 @@
  *      1. Demo MP3 support: use lake.mp3 to replace lake.wav.
 */
 
+// #define UU_DEBUG
 #include "stdafx.h"
 #include "Resource.h"
 #include <mmsystem.h>
@@ -58,6 +59,7 @@
 #include <ddraw.h>
 #include <time.h>
 #include <string>
+#include <fstream>
 #include "audio.h"
 #include "gamelib.h"
 #include "mygame.h"
@@ -207,13 +209,68 @@ namespace game_framework {
 	void CGameStateRun::OnBeginState()
 	{
 
-		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(255, 255, 255));
-		menuBitmap.SetTopLeft(239, 77);
+#ifdef UU_DEBUG 
+		character.setAttack(998244353); character.setDefence(998244353); character.setHealth(998244353); character.setSpeed(998244353);
+#endif 
 
+		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(0, 0, 0));
+		menuBitmap.SetTopLeft(239, 0);
+
+			
 		int start_x = 700;
 		int start_y = 77;
 
-		for (int s = 0; s < STAGES; s++) {
+		ifstream in("Config/config.txt");
+		ifstream monster_data_in("Config/monster_config.txt");
+
+		int n;
+
+		for (int r = 0; r < 5; r++) {
+			in >> n;
+			for (int i = 0; i < n; i++) {
+				string file_name;
+				int ID;
+				in >> file_name >> ID;
+				TRACE("%d\n", ID);
+				if (r == 0) normal_bitmap_map[ID] = file_name;
+				else if (r == 1) {
+					functional_entity_bitmap_map[ID] = file_name;
+				}
+				else if (r == 2) {
+					string filename = "RES/" + file_name + ".bmp";
+					string filename2 = "RES/" + file_name + "2.bmp";
+					char* char_filename = (char*)filename.c_str();
+					char* char_filename2 = (char*)filename2.c_str();
+					monster_map[ID].LoadBitmap({ char_filename, char_filename2 });
+					monster_map[ID].SetAnimation(5, false);
+					monster_map[ID].SetTopLeft(711, 417);
+					monster_bitmap_map[ID] = file_name;
+				}else if (r == 3) {
+					string filename = "RES/" + file_name + ".bmp";
+					string filename2 = "RES/" + file_name + "2.bmp";
+					char* char_filename = (char*)filename.c_str();
+					char* char_filename2 = (char*)filename2.c_str();
+					npc_map[ID].LoadBitmap({ char_filename, char_filename2 });
+					npc_map[ID].SetAnimation(5, false);
+					npc_map[ID].SetTopLeft(870, 161);
+					npc_bitmap_map[ID] = file_name;
+				}
+				else if (r == 4) {
+					block_bitmap_map[ID] = file_name;
+				}
+			}
+		}
+
+		monster_data_in >> n;
+		for (int i = 0; i < n; i++) {
+			string name;
+			int ID, health, attack, defence, speed, attack_count, exp, gold;
+			monster_data_in >> ID >> name >> health >> attack >> defence >> speed >> attack_count >> exp >> gold;
+			Monster monster(ID, name, health, attack, defence, speed);
+			monster_value[ID] = monster;
+		}
+
+		for (int s = 0; s <= 5; s++) {
 			vector<vector<int>> material_code = stage.getStageMaterial(s);
 			vector<vector<int>> entity_code = stage.getStageEntity(s);
 
@@ -237,141 +294,53 @@ namespace game_framework {
 
 			for (int i = 0; i < 11; i++) {
 				for (int j = 0; j < 11; j++) {
-					if (entity_code[i][j] == BOX) {
-						entity_map[s][i][j].LoadBitmap("RES/chest.bmp", RGB(255, 255, 255));
+					int ID = entity_code[i][j];
+					if (ID == 0 || ID == 1) {
+						continue;
+					}
+					if (normal_bitmap_map[ID].length() != 0) {
+						string filename = "RES/" + normal_bitmap_map[ID] + ".bmp";
+						char* char_filename = (char*)filename.c_str();
+						entity_map[s][i][j].LoadBitmap(char_filename);
 						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
-					else if (entity_code[i][j] == UP_STAIR) {
-						entity_map[s][i][j].LoadBitmap("RES/upstair.bmp", RGB(255, 255, 255));
+					else if (functional_entity_bitmap_map[ID].length() != 0) {
+						string filename = "RES/" + functional_entity_bitmap_map[ID] + ".bmp";
+						char* char_filename = (char*)filename.c_str();
+						entity_map[s][i][j].LoadBitmap(char_filename);
 						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
-					else if (entity_code[i][j] == DOOR) {
-						entity_map[s][i][j].LoadBitmap("RES/door.bmp", RGB(255, 255, 255));
+					else if (block_bitmap_map[ID].length() != 0) {
+						string filename = "RES/" + block_bitmap_map[ID] + ".bmp";
+						char* char_filename = (char*)filename.c_str();
+						entity_map[s][i][j].LoadBitmap(char_filename);
 						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
-					else if (entity_code[i][j] == SILVER_DOOR) {
-						entity_map[s][i][j].LoadBitmap("RES/silverdoor.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == GOLD_DOOR) {
-						entity_map[s][i][j].LoadBitmap("RES/golddoor.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == GRAPE) {
-						entity_map[s][i][j].LoadBitmap("RES/grape.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == GOLD_KEY) {
-						entity_map[s][i][j].LoadBitmap("RES/goldkey.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SILVER_KEY) {
-						entity_map[s][i][j].LoadBitmap("RES/sliverkey.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == KEY) {
-						entity_map[s][i][j].LoadBitmap("RES/key.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SUSHI) {
-						entity_map[s][i][j].LoadBitmap("RES/sushi.bmp", RGB(255, 255, 255));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == GREEN_SLIME) {
-
-						monster_map[GREEN_SLIME].LoadBitmap({ "RES/green.bmp", "RES/green2.bmp" }, RGB(0, 0, 0));
-						monster_map[GREEN_SLIME].SetAnimation(5, false);
-						monster_map[GREEN_SLIME].SetTopLeft(711, 417);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/green.bmp", "RES/green2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == DOWN_STAIR) {
-						entity_map[s][i][j].LoadBitmap("RES/downstair.bmp", RGB(0, 0, 0));
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == RED_SLIME) {
-
-						monster_map[RED_SLIME].LoadBitmap({ "RES/red.bmp", "RES/red2.bmp" }, RGB(0, 0, 0));
-						monster_map[RED_SLIME].SetAnimation(5, false);
-						monster_map[RED_SLIME].SetTopLeft(711, 417);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/red.bmp", "RES/red2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == BAT) {
-
-						monster_map[BAT].LoadBitmap({ "RES/bat.bmp", "RES/bat2.bmp" }, RGB(0, 0, 0));
-						monster_map[BAT].SetAnimation(5, false);
-						monster_map[BAT].SetTopLeft(711, 417);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/bat.bmp", "RES/bat2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == ZOMBIE) {
-
-						monster_map[ZOMBIE].LoadBitmap({ "RES/zombie.bmp", "RES/zombie2.bmp" }, RGB(0, 0, 0));
-						monster_map[ZOMBIE].SetAnimation(5, false);
-						monster_map[ZOMBIE].SetTopLeft(711, 417);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/zombie.bmp", "RES/zombie2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SKELETON) {
-
-						monster_map[SKELETON].LoadBitmap({ "RES/skeleton.bmp", "RES/skeleton2.bmp" }, RGB(0, 0, 0));
-						monster_map[SKELETON].SetAnimation(5, false);
-						monster_map[SKELETON].SetTopLeft(711, 417);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/skeleton.bmp", "RES/skeleton2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SHOPKEEPER) {
-
-						npc_map[SHOPKEEPER].LoadBitmap({ "RES/shopkeeper.bmp", "RES/shopkeeper2.bmp" }, RGB(0, 0, 0));
-						npc_map[SHOPKEEPER].SetAnimation(5, false);
-						npc_map[SHOPKEEPER].SetTopLeft(870, 161);
-
-						entity_map[s][i][j].LoadBitmap({ "RES/shopkeeper.bmp", "RES/shopkeeper2.bmp" }, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SHOP1) {
-
-						npc_map[SHOP1].LoadBitmap("RES/shop1.bmp", RGB(0, 0, 0));
-						npc_map[SHOP1].SetAnimation(5, false);
-						npc_map[SHOP1].SetTopLeft(870, 161);
-
-						entity_map[s][i][j].LoadBitmap("RES/shop1.bmp", RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SHOP2) {
-						npc_map[SHOP2].LoadBitmap({ "RES/shop2.bmp", "RES/shop22.bmp" }, RGB(0, 0, 0));
-						npc_map[SHOP2].SetAnimation(5, false);
-						npc_map[SHOP2].SetTopLeft(870, 161);
-
-						entity_map[s][i][j].LoadBitmap({"RES/shop2.bmp", "RES/shop22.bmp"}, RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
-					}
-					else if (entity_code[i][j] == SHOP3) {
-						npc_map[SHOP3].LoadBitmap("RES/shop3.bmp", RGB(0, 0, 0));
-						npc_map[SHOP3].SetAnimation(5, false);
-						npc_map[SHOP3].SetTopLeft(870, 161);
-
-						entity_map[s][i][j].LoadBitmap("RES/shop3.bmp", RGB(0, 0, 0));
-						entity_map[s][i][j].SetAnimation(5, false);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					else {
+						if (monster_bitmap_map[ID].length() != 0) {
+							string filename = "RES/" + monster_bitmap_map[ID] + ".bmp";
+							string filename2 = "RES/" + monster_bitmap_map[ID] + "2.bmp";
+							char* char_filename = (char*) filename.c_str();
+							char* char_filename2 = (char*) filename2.c_str();
+							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
+							entity_map[s][i][j].SetAnimation(5, false);
+							entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						}
+						else if (npc_bitmap_map[ID].length() != 0) {
+							string filename = "RES/" + npc_bitmap_map[ID] + ".bmp";
+							string filename2 = "RES/" + npc_bitmap_map[ID] + "2.bmp";
+							char* char_filename = (char*) filename.c_str();
+							char* char_filename2 = (char*) filename2.c_str();
+							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
+							entity_map[s][i][j].SetAnimation(5, false);
+							entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						}
+						else {
+							GAME_ASSERT(false, "ID NOT EXIST!");
+						}
 					}
 				}
 			}
-
 		}
 
 		/* Attack animation Load */
@@ -403,37 +372,11 @@ namespace game_framework {
 		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77 , start_y + character.getX() * 77);
 
-		/* Panel Value Load */
-
-		health.LoadBitmap();
-		health.SetInteger(character.getHealth());
-		health.SetTopLeft(473, 216);
-
-		attack.LoadBitmap();
-		attack.SetInteger(character.getAttack());
-		attack.SetTopLeft(473, 315);
-
-		defence.LoadBitmap();
-		defence.SetInteger(character.getDefence());
-		defence.SetTopLeft(473, 420);
-
 		attackMenu.LoadBitmap({ "RES/AttackPlatform.bmp" }, RGB(0, 0, 0));
 		attackMenu.SetTopLeft(656, 297);
 
 		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" }, RGB(0, 0, 0));
 		winningMenu.SetTopLeft(656, 682);
-
-		keyNumber.LoadBitmapA();
-		keyNumber.SetInteger(character.getKeyNumber());
-		keyNumber.SetTopLeft(354, 754);
-
-		silverKeyNumber.LoadBitmapA();
-		silverKeyNumber.SetInteger(character.getSilverKeyNumber());
-		silverKeyNumber.SetTopLeft(465, 754);
-
-		goldKeyNumber.LoadBitmapA();
-		goldKeyNumber.SetInteger(character.getGoldKeyNumber());
-		goldKeyNumber.SetTopLeft(578, 754);
 			
 	}
 
@@ -441,16 +384,8 @@ namespace game_framework {
 		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR;
 	}
 
-	bool CGameStateRun::isEnemy(int enemyCode) {
-		return enemyCode == GREEN_SLIME || enemyCode == RED_SLIME || enemyCode == BAT || enemyCode == ZOMBIE || enemyCode == SKELETON;
-	}
-
 	bool CGameStateRun::isKey(int keyCode) {
 		return keyCode == KEY || keyCode == SILVER_KEY || keyCode == GOLD_KEY;
-	}
-
-	bool CGameStateRun::isNPC(int entityCode) {
-		return entityCode == SHOPKEEPER || entityCode == SHOP1 || entityCode == SHOP2 || entityCode == SHOP3;
 	}
 
 	bool CGameStateRun::OpenDoor(int x, int y, int doorCode) {
@@ -458,7 +393,6 @@ namespace game_framework {
 			if (character.getKeyNumber() > 0) {
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(KEY, -1);
-				keyNumber.Add(character.getKeyNumber() - keyNumber.GetInteger());
 				return true;
 			}
 		}
@@ -466,7 +400,6 @@ namespace game_framework {
 			if (character.getSilverKeyNumber() > 0) {
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(SILVER_KEY, -1);
-				silverKeyNumber.Add(character.getSilverKeyNumber() - silverKeyNumber.GetInteger());
 				return true;
 			}
 		}
@@ -474,7 +407,6 @@ namespace game_framework {
 			if (character.getGoldKeyNumber() > 0) {
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(GOLD_KEY, -1);
-				goldKeyNumber.Add(character.getGoldKeyNumber() - goldKeyNumber.GetInteger());
 				return true;
 			}
 		}
@@ -485,19 +417,16 @@ namespace game_framework {
 		if (keyCode == KEY) {
 			hidden_code[current_stage][x][y] = 1;
 			character.changeKeyNumber(KEY, 1);
-			keyNumber.Add(1);
 			return true;
 		}
 		if (keyCode == SILVER_KEY) {
 			hidden_code[current_stage][x][y] = 1;
 			character.changeKeyNumber(SILVER_KEY, 1);
-			silverKeyNumber.Add(1);
 			return true;
 		}
 		if (keyCode == GOLD_KEY) {
 			hidden_code[current_stage][x][y] = 1;
 			character.changeKeyNumber(GOLD_KEY, 1);
-			goldKeyNumber.Add(1);
 			return true;
 		}
 		return false;
@@ -508,6 +437,15 @@ namespace game_framework {
 
 		if (character.getHealth() == 0) {
 			GotoGameState(GAME_STATE_OVER);
+		}
+
+		floor_message = "主塔　";
+
+		if (current_stage == 0) {
+			floor_message += "入口";
+		}
+		else {
+			floor_message += to_string(current_stage) + "F";
 		}
 
 		int start_x = 700;
@@ -524,7 +462,6 @@ namespace game_framework {
 				else {
 					tempCauseDamageValue = max(0, monster.getAttack() - character.getDefence());
 					character.causeDamage(tempCauseDamageValue);
-					health.Add(character.getHealth() - health.GetInteger());
 					characterAttackAnimation[0].SetAnimation(1, true);
 				}
 				turn = !turn;
@@ -631,33 +568,38 @@ namespace game_framework {
 		if (hidden_code[current_stage][x][y] == 0 && isKey(entity_code[x][y])) {
 			GetKey(x, y, entity_code[x][y]);
 		}
-		if (hidden_code[current_stage][x][y] == 0 && isEnemy(entity_code[x][y])) {
+		if (hidden_code[current_stage][x][y] == 0 && monster_bitmap_map[entity_code[x][y]].length() != 0) {
 			attackMenuing = true;
-			if (entity_code[x][y] == GREEN_SLIME) {
-				monster = Monster(GREEN_SLIME, "綠色史萊姆", 40, 18, 1, 0);
-			}
-			else if (entity_code[x][y] == RED_SLIME) {
-				monster = Monster(RED_SLIME, "紅色史萊姆", 50, 20, 4, 0);
-			}
-			else if (entity_code[x][y] == BAT) {
-				monster = Monster(BAT, "蝙蝠", 52, 32, 2, 4);
-			}
-			else if (entity_code[x][y] == SKELETON) {
-				monster = Monster(SKELETON, "骷髏", 95, 70, 0, 3);
-			}
-			else if (entity_code[x][y] == ZOMBIE) {
-				monster = Monster(ZOMBIE, "殭屍", 190, 90, 33, 2);
-			}
+			int ID = entity_code[x][y];
+			monster = monster_value[ID];
 			temp_monster_x = x;
 			temp_monster_y = y;
 			return;
 		}
-		if (hidden_code[current_stage][x][y] == 0 && isNPC(entity_code[x][y])) {
+		if (hidden_code[current_stage][x][y] == 0 && functional_entity_bitmap_map[entity_code[x][y]].length() != 0) {
+			if (entity_code[x][y] == RUBY) {
+				character.setAttack(character.getAttack() + 2);
+			}
+			if (entity_code[x][y] == SAPPHIRE) {
+				character.setDefence(character.getDefence() + 2);
+			}
+			if (entity_code[x][y] == EMERALD) {
+				character.setSpeed(character.getSpeed() + 2);
+			}
+			if (entity_code[x][y] == RED_POTION) {
+				character.setHealth(character.getHealth() + 150);
+			}
+			if (entity_code[x][y] == BLUE_POTION) {
+				character.setHealth(character.getHealth() + 400);
+			}
+			hidden_code[current_stage][x][y] = 1;
+		}
+		if (hidden_code[current_stage][x][y] == 0 && npc_bitmap_map[entity_code[x][y]].length() != 0) {
 			if (entity_code[x][y] == SHOPKEEPER) {
 				dialogMenuing = true;
 				enterStatus = true;
 				npc = NPC(SHOPKEEPER, "商人");
-				npc.loadData(x, y);
+				npc.loadData(current_stage, x, y);
 			}
 			else if (entity_code[x][y] == SHOP2) {
 				dialogMenuing = true;
@@ -665,7 +607,7 @@ namespace game_framework {
 				inShopping = true;
 				npc = NPC(SHOP2, "貪婪之神");
 				npc.setVariable(0, 20);
-				npc.loadData(x, y);
+				npc.loadData(current_stage, x, y);
 				menuOptionGap = OPTION_GAP - 10 * npc.getOption().size();
 			}
 			return;
@@ -678,16 +620,12 @@ namespace game_framework {
 
 	void CGameStateRun::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
-		const char KEY_LEFT = 0x25; // keyboard左箭頭
-		const char KEY_UP = 0x26; // keyboard上箭頭
-		const char KEY_RIGHT = 0x27; // keyboard右箭頭
-		const char KEY_DOWN = 0x28; // keyboard下箭頭
 	}
 
 	void CGameStateRun::OnInit()  								// 遊戲的初值及圖形設定
 	{
 
-		current_stage = 1;
+		current_stage = 0;
 
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
 
@@ -698,31 +636,6 @@ namespace game_framework {
 				}
 			}
 		}
-
-	}
-
-	void CGameStateRun::OnMouseMove(UINT nFlags, CPoint point) {
-		mouse_x = point.x;
-		mouse_y = point.y;
-	}
-
-	void CGameStateRun::OnLButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
-	{
-
-	}
-
-	void CGameStateRun::OnLButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作
-	{
-
-	}
-
-	void CGameStateRun::OnRButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
-	{
-
-	}
-
-	void CGameStateRun::OnRButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作
-	{
 
 	}
 
@@ -751,12 +664,6 @@ namespace game_framework {
 
 		characterBitmap.ShowBitmap();
 		menuBitmap.ShowBitmap();
-		health.ShowBitmap(false);
-		attack.ShowBitmap(false);
-		defence.ShowBitmap(false);
-		keyNumber.ShowBitmap(true);
-		silverKeyNumber.ShowBitmap(true);
-		goldKeyNumber.ShowBitmap(true);
 
 		if (attackMenuing) {
 
@@ -882,5 +789,62 @@ namespace game_framework {
 		else {
 			dialogMenu.UnshowBitmap();
 		}
+
+		CDC *pDC = CDDraw::GetBackCDC();
+		CFont f, *fp;
+		
+		f.CreatePointFont(240, "Noto Sans TC");
+		fp = pDC->SelectObject(&f);
+
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(255, 255, 255));
+		pDC->TextOut(256 + 240, 140, character.getStatus().c_str());
+		pDC->TextOut(256 + 250, 204, to_string(character.getLevel()).c_str());
+		pDC->TextOut(256 + 250, 256, to_string(character.getHealth()).c_str());
+		pDC->TextOut(256 + 250, 308, to_string(character.getAttack()).c_str());
+		pDC->TextOut(256 + 250, 360, to_string(character.getDefence()).c_str());
+		pDC->TextOut(256 + 250, 412, to_string(character.getSpeed()).c_str());
+		pDC->TextOut(256 + 250, 460, to_string(character.getExp()).c_str());
+		pDC->TextOut(256 + 790, 14, floor_message.c_str());
+
+		f.Detach();
+		f.CreatePointFont(300, "Noto Sans TC");
+		fp = pDC->SelectObject(&f);
+
+		pDC->TextOut(256 + 290, 615, to_string(character.getKeyNumber()).c_str());
+		pDC->TextOut(256 + 290, 688, to_string(character.getSilverKeyNumber()).c_str());
+		pDC->TextOut(256 + 290, 762, to_string(character.getGoldKeyNumber()).c_str());
+		pDC->TextOut(256 + 290, 844, to_string(character.getCoin()).c_str());
+
+		
+		pDC->SelectObject(fp);
+		CDDraw::ReleaseBackCDC();
+	}
+
+
+
+	void CGameStateRun::OnMouseMove(UINT nFlags, CPoint point) {
+		mouse_x = point.x;
+		mouse_y = point.y;
+	}
+
+	void CGameStateRun::OnLButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
+	{
+
+	}
+
+	void CGameStateRun::OnLButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作
+	{
+
+	}
+
+	void CGameStateRun::OnRButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
+	{
+
+	}
+
+	void CGameStateRun::OnRButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作
+	{
+
 	}
 }
