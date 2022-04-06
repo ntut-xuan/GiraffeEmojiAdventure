@@ -39,6 +39,10 @@ namespace game_framework {
 		return defence;
 	}
 
+	int Monster::getSpeed() {
+		return speed;
+	}
+
 	void Monster::causeDamage(int damage) {
 		health = (int)fmax(0, health - damage);
 	}

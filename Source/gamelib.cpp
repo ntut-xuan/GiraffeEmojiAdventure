@@ -386,11 +386,11 @@ namespace game_framework {
 	void CMovingBitmap::LoadBitmap(vector<char*> filename, COLORREF color)
 	{
 
-		for (int i = 0; i < (int) filename.size(); i++) {
+		for (int i = 0; i < (int)filename.size(); i++) {
 			const int nx = 0;
 			const int ny = 0;
 
-			HBITMAP hbitmap = (HBITMAP) LoadImage(NULL, filename[i], IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			HBITMAP hbitmap = (HBITMAP)LoadImage(NULL, filename[i], IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 			if (hbitmap == NULL) {
 				char error_msg[300];
 				sprintf(error_msg, "Loading bitmap from file \"%s\" failed !!!", filename[i]);
@@ -403,6 +403,30 @@ namespace game_framework {
 			location.right = nx + bitmapSize.bmWidth;
 			location.bottom = ny + bitmapSize.bmHeight;
 			SurfaceID.push_back(CDDraw::RegisterBitmap(filename[i], color));
+			isBitmapLoaded = true;
+		}
+	}
+
+	void CMovingBitmap::LoadBitmapByString(vector<string> filename, COLORREF color)
+	{
+
+		for (int i = 0; i < (int) filename.size(); i++) {
+			const int nx = 0;
+			const int ny = 0;
+
+			HBITMAP hbitmap = (HBITMAP) LoadImage(NULL, (char*)filename[i].c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			if (hbitmap == NULL) {
+				char error_msg[300];
+				sprintf(error_msg, "Loading bitmap from file \"%s\" failed !!!", (char*)filename[i].c_str());
+				GAME_ASSERT(false, error_msg);
+			}
+			CBitmap *bmp = CBitmap::FromHandle(hbitmap); // memory will be deleted automatically
+			BITMAP bitmapSize;
+			bmp->GetBitmap(&bitmapSize);
+			location.left = nx; location.top = ny;
+			location.right = nx + bitmapSize.bmWidth;
+			location.bottom = ny + bitmapSize.bmHeight;
+			SurfaceID.push_back(CDDraw::RegisterBitmap((char*)filename[i].c_str(), color));
 			isBitmapLoaded = true;
 		}
 	}
@@ -442,6 +466,7 @@ namespace game_framework {
 			tempDelayCount = delayCount;
 			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
 				isAnimation = false;
+				isAnimationDone = true;
 				selector = SurfaceID.size() - 1;
 			}
 			selector = selector % SurfaceID.size();
@@ -457,6 +482,7 @@ namespace game_framework {
 			tempDelayCount = delayCount;
 			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
 				isAnimation = false;
+				isAnimationDone = true;
 				selector = SurfaceID.size() - 1;
 			}
 			selector = selector % SurfaceID.size();
@@ -478,6 +504,15 @@ namespace game_framework {
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before Width() is called !!!");
 		return location.right - location.left;
+	}
+
+	void CMovingBitmap::ToggleAnimation(int delay) {
+		SetAnimation(delay, true);
+		isAnimationDone = false;
+	}
+
+	bool CMovingBitmap::IsAnimationDone() {
+		return isAnimationDone;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

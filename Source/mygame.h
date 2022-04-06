@@ -105,14 +105,16 @@ namespace game_framework {
 		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
+		int current_shop_price = 20;
 		int tempDelayCycle = 0;
-		int tempCauseDamageValue = 0;
+		std::string causeDamageValueString;
 		bool dialogMenuing = false;
 		bool inShopping = false;
 		bool attackMenuing = false;
 		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // к▒оaе¤дт
+		bool teleport_allow = false;
 		std::string floor_message;
 
 		Stage stage;
@@ -146,6 +148,7 @@ namespace game_framework {
 
 		Monster monster;
 		NPC npc;
+		map<int, int> bitmap_frame;
 		map<int, Monster> monster_value;
 		map<int, string> normal_bitmap_map;
 		map<int, string> functional_entity_bitmap_map;
@@ -154,8 +157,8 @@ namespace game_framework {
 		map<int, string> block_bitmap_map;
 		vector<CMovingBitmap> monster_map = vector<CMovingBitmap>(200);
 		vector<CMovingBitmap> npc_map = vector<CMovingBitmap>(200);
-		vector<vector<vector<int>>> hidden_code = vector<vector<vector<int>>>(11, vector<vector<int>>(11, vector<int>(11)));
-		vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
+		vector<vector<vector<int>>> hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
+		//vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 	};

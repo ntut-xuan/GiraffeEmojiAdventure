@@ -51,7 +51,6 @@
  *      1. Demo MP3 support: use lake.mp3 to replace lake.wav.
 */
 
-// #define UU_DEBUG
 #include "stdafx.h"
 #include "Resource.h"
 #include <mmsystem.h>
@@ -64,6 +63,8 @@
 #include "gamelib.h"
 #include "mygame.h"
 #include "MainFrm.h"
+
+#define UU_DEBUG 0
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
@@ -195,10 +196,8 @@ namespace game_framework {
 	// 這個class為遊戲的遊戲執行物件，主要的遊戲程式都在這裡
 	/////////////////////////////////////////////////////////////////////////////
 
-	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(10)
+	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(50)
 	{	
-		current_stage = 0;
-		hidden_map.clear();
 	}
 
 	CGameStateRun::~CGameStateRun()
@@ -208,13 +207,19 @@ namespace game_framework {
 
 	void CGameStateRun::OnBeginState()
 	{
+		current_stage = 26;
 
 #ifdef UU_DEBUG 
-		character.setAttack(998244353); character.setDefence(998244353); character.setHealth(998244353); character.setSpeed(998244353);
+		character.setAttack(998244353);  
+		character.setDefence(998244353);  
+		character.setHealth(998244353);  
+		character.setSpeed(998244353);  
+		character.setCoin(998244353); 
+		teleport_allow = true;
 #endif 
 
 		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(0, 0, 0));
-		menuBitmap.SetTopLeft(239, 0);
+		menuBitmap.SetTopLeft(237, 0);
 
 			
 		int start_x = 700;
@@ -232,8 +237,12 @@ namespace game_framework {
 				int ID;
 				in >> file_name >> ID;
 				TRACE("%d\n", ID);
-				if (r == 0) normal_bitmap_map[ID] = file_name;
-				else if (r == 1) {
+				if (r == 0) {
+					int frame_count;
+					in >> frame_count;
+					normal_bitmap_map[ID] = file_name;
+					bitmap_frame[ID] = frame_count;
+				}else if (r == 1) {
 					functional_entity_bitmap_map[ID] = file_name;
 				}
 				else if (r == 2) {
@@ -270,7 +279,7 @@ namespace game_framework {
 			monster_value[ID] = monster;
 		}
 
-		for (int s = 0; s <= 5; s++) {
+		for (int s = 26; s <= 46; s++) {
 			vector<vector<int>> material_code = stage.getStageMaterial(s);
 			vector<vector<int>> entity_code = stage.getStageEntity(s);
 
@@ -289,6 +298,16 @@ namespace game_framework {
 						material_map[s][i][j].SetAnimation(5, false);
 						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
+					else if (material_code[i][j] == WALL_SHINE) {
+						material_map[s][i][j].LoadBitmap({ "RES/wall_shine.bmp", "RES/wall_shine2.bmp" });
+						material_map[s][i][j].SetAnimation(5, false);
+						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
+					else if (material_code[i][j] == WALL_SPECIAL) {
+						material_map[s][i][j].LoadBitmap({ "RES/wall_special.bmp" });
+						material_map[s][i][j].SetAnimation(5, false);
+						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+					}
 				}
 			}
 
@@ -299,9 +318,13 @@ namespace game_framework {
 						continue;
 					}
 					if (normal_bitmap_map[ID].length() != 0) {
-						string filename = "RES/" + normal_bitmap_map[ID] + ".bmp";
-						char* char_filename = (char*)filename.c_str();
-						entity_map[s][i][j].LoadBitmap(char_filename);
+						vector<string> frames = {};
+						for (int i = 0; i < bitmap_frame[ID]; i++) {
+							string filename = "RES/" + normal_bitmap_map[ID] + (i == 0 ? "" : to_string(i+1)) +".bmp";
+							frames.push_back(filename);
+						}
+						TRACE("%d\n", frames.size());
+						entity_map[s][i][j].LoadBitmapByString(frames);
 						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
 					}
 					else if (functional_entity_bitmap_map[ID].length() != 0) {
@@ -350,7 +373,7 @@ namespace game_framework {
 		enemyAttackAnimation[0].SetAnimation(2, true);
 		
 		characterAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
-		characterAttackAnimation[0].SetTopLeft(1387, 387);
+		characterAttackAnimation[0].SetTopLeft(1427, 387);
 		characterAttackAnimation[0].SetAnimation(2, true);
 
 		/* Bitmap Menu Load */
@@ -367,7 +390,7 @@ namespace game_framework {
 		/* Character Attack Menu Load */
 
 		characterAttackMenuBitMap.LoadBitmap({ "RES/character.bmp" }, RGB(255, 255, 255));
-		characterAttackMenuBitMap.SetTopLeft(1427, 427);
+		characterAttackMenuBitMap.SetTopLeft(1467, 427);
 
 		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77 , start_y + character.getX() * 77);
@@ -391,6 +414,7 @@ namespace game_framework {
 	bool CGameStateRun::OpenDoor(int x, int y, int doorCode) {
 		if (doorCode == DOOR) {
 			if (character.getKeyNumber() > 0) {
+				entity_map[current_stage][x][y].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(KEY, -1);
 				return true;
@@ -398,6 +422,7 @@ namespace game_framework {
 		}
 		if (doorCode == SILVER_DOOR) {
 			if (character.getSilverKeyNumber() > 0) {
+				entity_map[current_stage][x][y].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(SILVER_KEY, -1);
 				return true;
@@ -405,6 +430,7 @@ namespace game_framework {
 		}
 		if (doorCode == GOLD_DOOR) {
 			if (character.getGoldKeyNumber() > 0) {
+				entity_map[current_stage][x][y].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(GOLD_KEY, -1);
 				return true;
@@ -436,36 +462,55 @@ namespace game_framework {
 	{	
 
 		if (character.getHealth() == 0) {
-			GotoGameState(GAME_STATE_OVER);
+			//GotoGameState(GAME_STATE_OVER);
 		}
 
 		floor_message = "主塔　";
 
-		if (current_stage == 0) {
+		if (current_stage == 26) {
 			floor_message += "入口";
 		}
 		else {
-			floor_message += to_string(current_stage) + "F";
+			floor_message += to_string(current_stage-26) + "F";
 		}
 
 		int start_x = 700;
 		int start_y = 77;
+
 		characterBitmap.SetTopLeft(start_x + character.getY() * 77, start_y + character.getX() * 77);
 
 		if (attackMenuing && --tempDelayCycle <= 0) {
 			if (character.getHealth() && monster.getHealth()) {
 				if (turn) {
-					tempCauseDamageValue = max(0, character.getAttack() - monster.getDefence());
-					monster.causeDamage(tempCauseDamageValue);
+					int probabilityCauseDamage = rand() % 100;
+					int causeDamageValue;
+					if (probabilityCauseDamage < monster.getSpeed()) {
+						causeDamageValue = 0;
+						causeDamageValueString = "Miss!";
+					}
+					else {
+						causeDamageValue = max(0, character.getAttack() - monster.getDefence());
+						causeDamageValueString = to_string(causeDamageValue);
+					}
+					monster.causeDamage(causeDamageValue);
 					enemyAttackAnimation[0].SetAnimation(1, true);
 				}
 				else {
-					tempCauseDamageValue = max(0, monster.getAttack() - character.getDefence());
-					character.causeDamage(tempCauseDamageValue);
+					int probabilityCauseDamage = rand() % 100;
+					int causeDamageValue;
+					if (probabilityCauseDamage < character.getSpeed()) {
+						causeDamageValue = 0;
+						causeDamageValueString = "Miss!";
+					}
+					else {
+						causeDamageValue = max(0, monster.getAttack() - character.getDefence());
+						causeDamageValueString = to_string(causeDamageValue);
+					}
+					character.causeDamage(causeDamageValue);
 					characterAttackAnimation[0].SetAnimation(1, true);
 				}
-				turn = !turn;
 				showAttackValue = true;
+				turn = !turn;
 			}
 
 			if (enterStatus == true) {
@@ -492,25 +537,7 @@ namespace game_framework {
 		const char KEY_DOWN = 0x28; // keyboard下箭頭
 		const char KEY_ENTER = 0x0D;
 
-		TRACE("%04X\n", nChar);
-
-		if (inShopping) {
-			if (nChar == KEY_DOWN) {
-				tempSelect += 1;
-				tempSelect %= (int) npc.getOption().size();
-			} else if (nChar == KEY_UP) {
-				tempSelect -= 1;
-				tempSelect += (int) npc.getOption().size();
-				tempSelect %= (int) npc.getOption().size();
-			}
-			else if (nChar == KEY_ENTER) {
-				inShopping = false;
-				enterStatus = false;
-				dialogMenuing = false;
-			}
-			optionArrow.SetTopLeft(875, 464 + menuOptionGap * tempSelect);
-			return;
-		}
+		TRACE("%X %X %X\n", nChar, nRepCnt, nFlags);
 
 		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
@@ -518,7 +545,60 @@ namespace game_framework {
 		int x = character.getX();
 		int y = character.getY();
 
-		if (enterStatus && KEY_ENTER) {
+		if (teleport_allow) {
+			if (GetKeyState(VK_CONTROL) < 0) {
+				if (nChar == KEY_UP) {
+					current_stage += 1;
+					return;
+				}
+				else {
+					current_stage -= 1;
+					return;
+				}
+			}
+		}
+
+		if (inShopping) {
+			if (nChar == KEY_DOWN) {
+				tempSelect += 1;
+				tempSelect %= (int)npc.getOption().size();
+			}
+			else if (nChar == KEY_UP) {
+				tempSelect -= 1;
+				tempSelect += (int)npc.getOption().size();
+				tempSelect %= (int)npc.getOption().size();
+			}
+			else if (nChar == KEY_ENTER) {
+				if (character.getCoin() >= NPC::increaseCost1) {
+					if (tempSelect == 0) {
+						character.setHealth(character.getHealth() + 500);
+						character.setCoin(character.getCoin() - current_shop_price);
+						NPC::increaseCost1 += 1;
+					}
+					else if (tempSelect == 1) {
+						character.setAttack(character.getAttack() + 3);
+						character.setCoin(character.getCoin() - current_shop_price);
+						NPC::increaseCost1 += 1;
+					}
+					else if (tempSelect == 2) {
+						character.setDefence(character.getDefence() + 3);
+						character.setCoin(character.getCoin() - current_shop_price);
+						NPC::increaseCost1 += 1;
+					}
+					else if (tempSelect == 3) {
+						inShopping = false;
+						enterStatus = false;
+						dialogMenuing = false;
+					}
+				}
+				else {
+					return;
+				}
+			}
+			optionArrow.SetTopLeft(875, 464 + menuOptionGap * tempSelect);
+			return;
+		}
+		if (enterStatus && nChar == KEY_ENTER) {
 			if (attackMenuing) {
 				hidden_code[current_stage][temp_monster_x][temp_monster_y] = 1;
 				temp_monster_x = 0;
@@ -531,7 +611,6 @@ namespace game_framework {
 			dialogMenuing = false;
 			return;
 		}
-
 		if (!attackMenuing) {
 			if (nChar == KEY_UP) {
 				x = max(0, character.getX() - 1);
@@ -552,7 +631,6 @@ namespace game_framework {
 				y = character.getY();
 			}
 		}
-
 		if (material_code[x][y] == 0) {
 			return;
 		}
@@ -574,6 +652,7 @@ namespace game_framework {
 			monster = monster_value[ID];
 			temp_monster_x = x;
 			temp_monster_y = y;
+			turn = 1;
 			return;
 		}
 		if (hidden_code[current_stage][x][y] == 0 && functional_entity_bitmap_map[entity_code[x][y]].length() != 0) {
@@ -606,7 +685,6 @@ namespace game_framework {
 				enterStatus = true;
 				inShopping = true;
 				npc = NPC(SHOP2, "貪婪之神");
-				npc.setVariable(0, 20);
 				npc.loadData(current_stage, x, y);
 				menuOptionGap = OPTION_GAP - 10 * npc.getOption().size();
 			}
@@ -625,7 +703,7 @@ namespace game_framework {
 	void CGameStateRun::OnInit()  								// 遊戲的初值及圖形設定
 	{
 
-		current_stage = 0;
+		current_stage = 26;
 
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
 
@@ -636,6 +714,9 @@ namespace game_framework {
 				}
 			}
 		}
+
+		NPC::increaseCost1 = 20;
+		NPC::increaseCost2 = 50;
 
 	}
 
@@ -653,15 +734,19 @@ namespace game_framework {
 			for (int j = 0; j < 11; j++) {
 				if (entity_code[i][j] == 0) continue;
 				if (entity_code[i][j] == 1) continue;
-				if (hidden_code[current_stage][i][j] == 1) {
-					entity_map[current_stage][i][j].UnshowBitmap();
+				if (entity_map[current_stage][i][j].IsAnimationDone()) {
+					if (hidden_code[current_stage][i][j] == 1) {
+						entity_map[current_stage][i][j].UnshowBitmap();
+					} else {
+						entity_map[current_stage][i][j].ShowBitmap();
+					}
 				}
 				else {
 					entity_map[current_stage][i][j].ShowBitmap();
 				}
 			}
 		}
-
+		
 		characterBitmap.ShowBitmap();
 		menuBitmap.ShowBitmap();
 
@@ -686,16 +771,18 @@ namespace game_framework {
 
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->SetTextColor(RGB(255, 255, 255));
-			pDC->TextOut(1167, 437, to_string(character.getHealth()).c_str());
-			pDC->TextOut(1167, 503, to_string(character.getAttack()).c_str());
-			pDC->TextOut(1167, 573, to_string(character.getDefence()).c_str());
+			pDC->TextOut(1167, 398, to_string(character.getHealth()).c_str());
+			pDC->TextOut(1167, 471, to_string(character.getAttack()).c_str());
+			pDC->TextOut(1167, 541, to_string(character.getDefence()).c_str());
+			pDC->TextOut(1167, 611, to_string(character.getSpeed()).c_str());
 
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->SetTextColor(RGB(255, 255, 255));
-			pDC->TextOut(751, 360, monster.getName().c_str());
-			pDC->TextOut(977, 437, to_string(monster.getHealth()).c_str());
-			pDC->TextOut(977, 503, to_string(monster.getAttack()).c_str());
-			pDC->TextOut(977, 573, to_string(monster.getDefence()).c_str());
+			pDC->TextOut(701, 330, monster.getName().c_str());
+			pDC->TextOut(977, 398, to_string(monster.getHealth()).c_str());
+			pDC->TextOut(977, 471, to_string(monster.getAttack()).c_str());
+			pDC->TextOut(977, 541, to_string(monster.getDefence()).c_str());
+			pDC->TextOut(977, 611, to_string(monster.getSpeed()).c_str());
 
 			if (showAttackValue == true) {
 				if (!turn) {
@@ -705,7 +792,7 @@ namespace game_framework {
 
 					pDC->SetBkMode(TRANSPARENT);
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), to_string(tempCauseDamageValue).c_str());
+					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
 				}
 				else {
 					f.Detach();
@@ -714,7 +801,7 @@ namespace game_framework {
 
 					pDC->SetBkMode(TRANSPARENT);
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), to_string(tempCauseDamageValue).c_str());
+					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
 				}
 			}
 
@@ -784,7 +871,6 @@ namespace game_framework {
 
 			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();
-
 		}
 		else {
 			dialogMenu.UnshowBitmap();

@@ -1,11 +1,13 @@
-5
-upstair 3
-yellow_door 4
-blue_door 5
-red_door 6
-downstair 13
+7
+upstair 3 1
+yellow_door 4 5
+blue_door 5 5
+red_door 6 5
+iron_fence 67 1
+downstair 13 1
+gem_door 72 1
 
-11
+18
 red_key 8
 blue_key 9
 yellow_key 10
@@ -17,6 +19,13 @@ emerald 30
 fire_drink 61
 anti_poison 62
 jump_wing 63
+gem_digger 68
+coin_200 69
+magic_key 70
+shield_c 71
+light_shiled 74
+sword_b 75
+gem_hoe 76
 
 36
 green_slime 12
@@ -56,12 +65,16 @@ vampire 58
 vampire_bat 59
 zombie_knight 60
 
-4
+6
 shopkeeper 18
 shop_1_2 20
+shop_2_2 65
 elder 29
 thief 57
+princess 78
 
-2
+4
 shop_1_1 19
 shop_1_3 21
+shop_2_1 64
+shop_2_3 66

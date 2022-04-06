@@ -4,6 +4,7 @@
 #define WALL 0
 #define ROAD 1
 #define LAVA 2
+#define WALL_SHINE 73
 
 /* ======================= Entity ======================= */
 
@@ -67,5 +68,22 @@
 #define VAMPIRE 58
 #define VAMPIRE_BAT 59
 #define ZOMBIE_KNIGHT 60
+#define FIRE_DRINK 61
+#define ANTI_POTION 62
+#define JUMP_WING 63
+#define SHOP_2_1 64
+#define SHOP_2_2 65
+#define SHOP_2_3 66
+#define IRON_FENCE 67
+#define GEM_DIGGER 68
+#define COIN_200 69
+#define MAGIC_KEY 70
+#define SHIELD_C 71
+#define GEM_DOOR 72
+#define LIGHT_SHIELD 74
+#define SWORD_B 75
+#define GEM_HOE 76
+#define WALL_SPECIAL 77
+#define PRINCESS 78
 
 /* ======================= End ======================= */

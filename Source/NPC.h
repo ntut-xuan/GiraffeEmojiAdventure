@@ -12,9 +12,12 @@ namespace game_framework {
 		string getName();
 		int getID();
 		void loadData(int stage_id, int entity_x, int entity_y);
+		int getVariable(int index);
 		void setVariable(int index, int value);
 		vector<string> getDialog();
 		vector<string> getOption();
+		static int increaseCost1;
+		static int increaseCost2;
 	protected:
 		int ID;
 		string name;

@@ -11,6 +11,7 @@ namespace game_framework {
 		int getHealth();
 		int getAttack();
 		int getDefence();
+		int getSpeed();
 		int getID();
 		void causeDamage(int damage);
 	protected:

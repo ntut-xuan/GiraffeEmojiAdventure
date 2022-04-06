@@ -6,6 +6,9 @@
 
 namespace game_framework {
 
+	int NPC::increaseCost1 = 20;
+	int NPC::increaseCost2 = 50;
+
 	NPC::NPC() {
 
 	}
@@ -21,7 +24,13 @@ namespace game_framework {
 		name = _name;
 	}
 
+	int NPC::getVariable(int index) {
+		return variable[index];
+	}
+
 	void NPC::loadData(int stage_id, int entity_x, int entity_y) {
+		dialog.clear();
+		option.clear();
 		string fileName = "DialogData/Dialog_" + to_string(stage_id) + "_" + to_string(entity_x) + "_" + to_string(entity_y) + ".txt";
 		ifstream in(fileName);
 		string s;
@@ -30,11 +39,6 @@ namespace game_framework {
 		getline(in, s);
 		for (int i = 0; i < dialogCount; i++) {
 			getline(in, s);
-			for (int j = 0; j < (int) variable.size(); j++) {
-				int index = s.find("{" + to_string(j) + "}");
-				if (index == -1) continue;
-				s.replace(s.find("{" + to_string(j) + "}"), 3, to_string(variable[j]));
-			}
 			dialog.push_back(s);
 		}
 		int selectCount;
@@ -47,7 +51,16 @@ namespace game_framework {
 	}
 
 	vector<string> NPC::getDialog() {
-		return dialog;
+		vector<string> replacementDialog = dialog;
+		for (int i = 0; i < (int) dialog.size(); i++) {
+			if (replacementDialog[i].find("{IC1}") != -1) {
+				replacementDialog[i] = replacementDialog[i].replace(replacementDialog[i].find("{IC1}"), 5, to_string(NPC::increaseCost1));
+			}
+			if (replacementDialog[i].find("{IC2}") != -1) {
+				replacementDialog[i] = replacementDialog[i].replace(replacementDialog[i].find("{IC2}"), 5, to_string(NPC::increaseCost2));
+			}
+		}
+		return replacementDialog;
 	}
 
 	vector<string> NPC::getOption() {
