@@ -99,6 +99,7 @@ namespace game_framework {
 		bool OpenDoor(int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
 	private:
+
 		const int		STAGES;	// 關卡的總數
 		const int MENU_DELAY_CYCLE = 10;
 		int mouse_x, mouse_y;
@@ -161,6 +162,8 @@ namespace game_framework {
 		//vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
 		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
+
+		void ShowText();
 	};
 
 	/////////////////////////////////////////////////////////////////////////////

@@ -1141,6 +1141,9 @@ namespace game_framework {
 		lpClipperBack->Release();
 
 		BltBackColor(RGB(0, 0, 0));
+
+		SetWindowPos(AfxGetMainWnd()->m_hWnd, HWND_TOP, 0, 0, size_x, size_y, SWP_NOZORDER);
+
 		return true;
 	}
 
@@ -1224,7 +1227,7 @@ namespace game_framework {
 		ZeroMemory(&ddsd, sizeof(ddsd));
 		ddsd.dwSize = sizeof(ddsd);
 		ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-		ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+		ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;	
 		BitmapRect[i].bottom = ddsd.dwHeight = bitmapSize.bmHeight;
 		BitmapRect[i].right = ddsd.dwWidth = bitmapSize.bmWidth;
 		ddrval = lpDD->CreateSurface(&ddsd, &lpDDS[i], NULL);

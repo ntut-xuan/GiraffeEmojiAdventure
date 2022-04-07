@@ -1,56 +1,3 @@
-/*
- * mygame.cpp: 本檔案儲遊戲本身的class的implementation
- * Copyright (C) 2002-2008 Woei-Kae Chen <wkc@csie.ntut.edu.tw>
- *
- * This file is part of game, a free game development framework for windows.
- *
- * game is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * game is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * History:
- *   2002-03-04 V3.1
- *          Add codes to demostrate the use of CMovingBitmap::ShowBitmap(CMovingBitmap &).
- *	 2004-03-02 V4.0
- *      1. Add CGameStateInit, CGameStateRun, and CGameStateOver to
- *         demonstrate the use of states.
- *      2. Demo the use of CInteger in CGameStateRun.
- *   2005-09-13
- *      Rewrite the codes for CBall and CEraser.
- *   2005-09-20 V4.2Beta1.
- *   2005-09-29 V4.2Beta2.
- *      1. Add codes to display IDC_GAMECURSOR in GameStateRun.
- *   2006-02-08 V4.2
- *      1. Revise sample screens to display in English only.
- *      2. Add code in CGameStateInit to demo the use of PostQuitMessage().
- *      3. Rename OnInitialUpdate() -> OnInit().
- *      4. Fix the bug that OnBeginState() of GameStateInit is not called.
- *      5. Replace AUDIO_CANYON as AUDIO_NTUT.
- *      6. Add help bitmap to CGameStateRun.
- *   2006-09-09 V4.3
- *      1. Rename Move() and Show() as OnMove and OnShow() to emphasize that they are
- *         event driven.
- *   2006-12-30
- *      1. Bug fix: fix a memory leak problem by replacing PostQuitMessage(0) as
- *         PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE,0,0).
- *   2008-02-15 V4.4
- *      1. Add namespace game_framework.
- *      2. Replace the demonstration of animation as a new bouncing ball.
- *      3. Use ShowInitProgress(percent) to display loading progress. 
- *   2010-03-23 V4.6
- *      1. Demo MP3 support: use lake.mp3 to replace lake.wav.
-*/
-
 #include "stdafx.h"
 #include "Resource.h"
 #include <mmsystem.h>
@@ -71,6 +18,17 @@ namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
 	// 這個class為遊戲的遊戲開頭畫面物件
 	/////////////////////////////////////////////////////////////////////////////
+
+	void ChangeFontLog(CDC* pDC, CFont* &fp, int size, string fontName, int weight = 500) {
+		LOGFONT lf;
+		CFont f;
+		memset(&lf, 0, sizeof(lf));
+		lf.lfHeight = size;
+		lf.lfWeight = weight;
+		strcpy(lf.lfFaceName, fontName.c_str());
+		f.CreateFontIndirect(&lf);
+		fp = pDC->SelectObject(&f);
+	}
 
 	bool eventEntity(int entity_code) {
 		bool flag = false;
@@ -211,7 +169,7 @@ namespace game_framework {
 		current_stage = 26;
 
 #ifdef UU_DEBUG 
-		character.setAttack(10);  
+		character.setAttack(998244353);
 		character.setDefence(998244353);  
 		character.setHealth(998244353);  
 		character.setSpeed(998244353);  
@@ -275,7 +233,7 @@ namespace game_framework {
 			string name;
 			int ID, health, attack, defence, speed, attack_count, exp, gold;
 			monster_data_in >> ID >> name >> health >> attack >> defence >> speed >> attack_count >> exp >> gold;
-			Monster monster(ID, name, health, attack, defence, speed);
+			Monster monster(ID, name, health, attack, defence, speed, attack_count, gold, exp);
 			monster_value[ID] = monster;
 		}
 
@@ -397,7 +355,7 @@ namespace game_framework {
 		attackMenu.LoadBitmap({ "RES/attack_menu.bmp" }, RGB(0, 0, 0));
 		attackMenu.SetTopLeft(656, 297);
 
-		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" }, RGB(0, 0, 0));
+		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" });
 		winningMenu.SetTopLeft(656, 682);
 			
 	}
@@ -516,7 +474,9 @@ namespace game_framework {
 				showAttackValue = false;
 			}
 
-			if (monster.getHealth() == 0) {
+			if (showAttackValue && monster.getHealth() == 0) {
+				character.setExp(character.getExp() + monster.getExp());
+				character.setCoin(character.getCoin() + monster.getGold());
 				enterStatus = true;
 				turn = false;
 			}
@@ -584,25 +544,23 @@ namespace game_framework {
 					if (tempSelect == 0) {
 						character.setHealth(character.getHealth() + 500);
 						character.setCoin(character.getCoin() - current_shop_price);
-						NPC::increaseCost1 += 1;
 					}
 					else if (tempSelect == 1) {
 						character.setAttack(character.getAttack() + 3);
 						character.setCoin(character.getCoin() - current_shop_price);
-						NPC::increaseCost1 += 1;
 					}
 					else if (tempSelect == 2) {
 						character.setDefence(character.getDefence() + 3);
 						character.setCoin(character.getCoin() - current_shop_price);
-						NPC::increaseCost1 += 1;
 					}
-					else if (tempSelect == 3) {
+					NPC::increaseCost1 += 1;
+				}
+				else {
+					if (tempSelect == 3) {
 						inShopping = false;
 						enterStatus = false;
 						dialogMenuing = false;
 					}
-				}
-				else {
 					return;
 				}
 			}
@@ -762,60 +720,15 @@ namespace game_framework {
 		menuBitmap.ShowBitmap();
 
 		if (attackMenuing) {
-
 			attackMenu.ShowBitmap();
 			characterAttackMenuBitMap.ShowBitmap();
 			monster_map[monster.getID()].ShowBitmap();
-
 			if (!turn) {
 				enemyAttackAnimation[0].ShowBitmap();
 			}
 			else {
 				characterAttackAnimation[0].ShowBitmap();
 			}
-
-			CDC *pDC = CDDraw::GetBackCDC();
-			CFont f, *fp;
-
-			f.CreatePointFont(300, "Noto Sans TC");
-			fp = pDC->SelectObject(&f);
-
-			pDC->SetBkMode(TRANSPARENT);
-			pDC->SetTextColor(RGB(255, 255, 255));
-			pDC->TextOut(1167, 398, to_string(character.getHealth()).c_str());
-			pDC->TextOut(1167, 471, to_string(character.getAttack()).c_str());
-			pDC->TextOut(1167, 541, to_string(character.getDefence()).c_str());
-			pDC->TextOut(1167, 611, to_string(character.getSpeed()).c_str());
-
-			pDC->SetBkMode(TRANSPARENT);
-			pDC->SetTextColor(RGB(255, 255, 255));
-			pDC->TextOut(701, 330, monster.getName().c_str());
-			pDC->TextOut(977, 398, to_string(monster.getHealth()).c_str());
-			pDC->TextOut(977, 471, to_string(monster.getAttack()).c_str());
-			pDC->TextOut(977, 541, to_string(monster.getDefence()).c_str());
-			pDC->TextOut(977, 611, to_string(monster.getSpeed()).c_str());
-
-			if (showAttackValue == true) {
-				if (!turn) {
-					f.Detach();
-					f.CreatePointFont(400, "Noto Sans TC");
-
-					pDC->SetBkMode(TRANSPARENT);
-					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
-				}
-				else {
-					f.Detach();
-					f.CreatePointFont(400, "Noto Sans TC");
-
-					pDC->SetBkMode(TRANSPARENT);
-					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
-				}
-			}
-
-			CDDraw::ReleaseBackCDC();
-
 		}
 		else {
 			menuBitmap.UnshowBitmap();
@@ -838,58 +751,131 @@ namespace game_framework {
 			}
 
 			npc_map[npc.getID()].ShowBitmap();
-
-			CDC *pDC = CDDraw::GetBackCDC();
-			CFont f, *fp;
-
-			f.CreatePointFont(450, "STZhongsong");
-			fp = pDC->SelectObject(&f);
-
-			pDC->SetBkMode(TRANSPARENT);
-			pDC->SetTextColor(RGB(255, 255, 255));
-			pDC->TextOut(1100, 130, npc.getName().c_str());
-
-			f.Detach();
-			f.CreatePointFont(200, "Noto Sans TC");
-
-			pDC->SetBkMode(TRANSPARENT);
-			pDC->SetTextColor(RGB(255, 255, 255));
-
-			vector<string> dialog = npc.getDialog();
-			vector<string> option = npc.getOption();
-
-			for (int i = 0; i < (int) dialog.size(); i++) {
-				pDC->TextOut(1010, 210 + i * 40, dialog[i].c_str());
-			}
-
-			pDC->TextOutA(1293, 360, "-Enter-");
-
-			if (inShopping) {
-
-				f.Detach();
-				f.CreatePointFont(260, "STZhongsong");
-
-				for (int i = 0; i < (int)option.size(); i++) {
-					pDC->TextOut(1000, 480 + i * menuOptionGap, option[i].c_str());
-				}
-			
-			}
-
-			CDDraw::ReleaseBackCDC();
 		}
 		else {
 			dialogMenu.UnshowBitmap();
 		}
 
+		ShowText();
+
+	}
+
+	void CGameStateRun::ShowText() {
+
 		CDC *pDC = CDDraw::GetBackCDC();
-		CFont f, *fp;
-		
-		f.CreatePointFont(240, "Noto Sans TC");
-		fp = pDC->SelectObject(&f);
+		CFont *fp;
 
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(RGB(255, 255, 255));
+
+		/* Attack Menu Text Setup */
+
+		if (attackMenuing) {
+
+			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
+
+			pDC->TextOut(1167, 405, to_string(character.getHealth()).c_str());
+			pDC->TextOut(1167, 465, to_string(character.getAttack()).c_str());
+			pDC->TextOut(1167, 528, to_string(character.getDefence()).c_str());
+			pDC->TextOut(1167, 586, to_string(character.getSpeed()).c_str());
+
+			ChangeFontLog(pDC, fp, 60, "Noto Sans TC");
+
+			pDC->TextOut(701, 330, monster.getName().c_str());
+
+			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
+
+			pDC->TextOut(977, 405, to_string(monster.getHealth()).c_str());
+			pDC->TextOut(977, 465, to_string(monster.getAttack()).c_str());
+			pDC->TextOut(977, 528, to_string(monster.getDefence()).c_str());
+			pDC->TextOut(977, 586, to_string(monster.getSpeed()).c_str());
+
+			if (showAttackValue == true) {
+
+				ChangeFontLog(pDC, fp, 80, "Noto Sans TC");
+
+				if (!turn) {
+					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
+					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+				}
+				else {
+					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
+					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+				}
+
+				if (!enterStatus) {
+					pDC->SetTextColor(RGB(255, 255, 0));
+					ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
+					pDC->TextOut(1430, 630, string("撤退(Q)").c_str());
+				}
+			}
+
+		}
+
+		if (attackMenuing && enterStatus || dialogMenuing) {
+			/* Make Shine Enter */
+			vector<int> vec;
+			for (int i = 80; i <= 250; i += 10) {
+				vec.push_back(i);
+			}
+			for (int i = 250; i >= 80; i -= 10) {
+				vec.push_back(i);
+			}
+			int count = vec.size();
+			pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
+			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
+			if (!dialogMenuing) {
+				pDC->TextOut(1430, 630, string("- Enter -").c_str());
+			}
+			else {
+				pDC->TextOut(1293, 360, string("- Enter -").c_str());
+			}
+			/* Place gold and exp */
+			if (attackMenuing) {
+				pDC->SetTextColor(RGB(255, 255, 255));
+				ChangeFontLog(pDC, fp, 80, "Noto Sans TC", 800);
+				pDC->TextOut(1156, 688, to_string(monster.getExp()).c_str());
+				pDC->TextOut(1470, 688, to_string(monster.getGold()).c_str());
+			}
+		}
+
+		
+
+		/* Dialog Menu Text Setup */
+
+		if (dialogMenuing) {
+
+			pDC->SetTextColor(RGB(255, 255, 255));
+
+			vector<string> dialog = npc.getDialog();
+			vector<string> option = npc.getOption();
+
+			ChangeFontLog(pDC, fp, 60, "STZhongsong");
+
+			pDC->TextOut(1100, 130, npc.getName().c_str());
+
+			ChangeFontLog(pDC, fp, 30, "STZhongsong");
+
+			for (int i = 0; i < (int)dialog.size(); i++) {
+				pDC->TextOut(1010, 210 + i * 40, dialog[i].c_str());
+			}
+
+			if (inShopping) {
+				ChangeFontLog(pDC, fp, 36, "Noto Sans TC");
+				for (int i = 0; i < (int)option.size(); i++) {
+					pDC->TextOut(1000, 480 + i * menuOptionGap, option[i].c_str());
+				}
+			}
+		}
+
+		/* Show Dashboard */
+
+		ChangeFontLog(pDC, fp, 48, "Noto Sans TC");
+
+		pDC->SetTextColor(RGB(255, 255, 255));
+
 		pDC->TextOut(256 + 240, 140, character.getStatus().c_str());
+
 		pDC->TextOut(256 + 250, 204, to_string(character.getLevel()).c_str());
 		pDC->TextOut(256 + 250, 256, to_string(character.getHealth()).c_str());
 		pDC->TextOut(256 + 250, 308, to_string(character.getAttack()).c_str());
@@ -898,19 +884,18 @@ namespace game_framework {
 		pDC->TextOut(256 + 250, 460, to_string(character.getExp()).c_str());
 		pDC->TextOut(256 + 790, 14, floor_message.c_str());
 
-		f.Detach();
-		f.CreatePointFont(300, "Noto Sans TC");
+		ChangeFontLog(pDC, fp, 60, "Noto Sans TC", 800);
 
 		pDC->TextOut(256 + 290, 615, to_string(character.getKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 688, to_string(character.getSilverKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 762, to_string(character.getGoldKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 844, to_string(character.getCoin()).c_str());
 
-	
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(0, 0, (to_string(mouse_x) + " " + to_string(mouse_y)).c_str());
+
 		CDDraw::ReleaseBackCDC();
 	}
-
-
 
 	void CGameStateRun::OnMouseMove(UINT nFlags, CPoint point) {
 		mouse_x = point.x;

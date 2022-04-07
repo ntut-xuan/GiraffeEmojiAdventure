@@ -10,13 +10,16 @@ namespace game_framework {
 
 	}
 
-	Monster::Monster(int _ID, string _name, int _health, int _attack, int _defence, int _speed) {
+	Monster::Monster(int _ID, string _name, int _health, int _attack, int _defence, int _speed, int _attack_count, int _gold, int _exp) {
 		ID = _ID;
 		name = _name;
 		health = _health;
 		attack = _attack;
 		defence = _defence;
 		speed = _speed;
+		attack_count = _attack_count;
+		gold = _gold;
+		exp = _exp;
 	}
 
 	int Monster::getID() {
@@ -41,6 +44,18 @@ namespace game_framework {
 
 	int Monster::getSpeed() {
 		return speed;
+	}
+
+	int Monster::getExp() {
+		return exp;
+	}
+
+	int Monster::getGold() {
+		return gold;
+	}
+
+	int Monster::getAttackCount() {
+		return attack_count;
 	}
 
 	void Monster::causeDamage(int damage) {
