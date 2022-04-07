@@ -64,6 +64,7 @@
 #include "mygame.h"
 #include "MainFrm.h"
 
+#define element_width 77
 #define UU_DEBUG 0
 
 namespace game_framework {
@@ -210,7 +211,7 @@ namespace game_framework {
 		current_stage = 26;
 
 #ifdef UU_DEBUG 
-		character.setAttack(998244353);  
+		character.setAttack(10);  
 		character.setDefence(998244353);  
 		character.setHealth(998244353);  
 		character.setSpeed(998244353);  
@@ -236,7 +237,6 @@ namespace game_framework {
 				string file_name;
 				int ID;
 				in >> file_name >> ID;
-				TRACE("%d\n", ID);
 				if (r == 0) {
 					int frame_count;
 					in >> frame_count;
@@ -287,26 +287,26 @@ namespace game_framework {
 				for (int j = 0; j < 11; j++) {
 					if (material_code[i][j] == WALL) {
 						material_map[s][i][j].LoadBitmap("RES/wall.bmp");
-						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (material_code[i][j] == ROAD) {
 						material_map[s][i][j].LoadBitmap("RES/road.bmp");
-						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (material_code[i][j] == LAVA) {
 						material_map[s][i][j].LoadBitmap({ "RES/lava.bmp", "RES/lava2.bmp" });
 						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (material_code[i][j] == WALL_SHINE) {
 						material_map[s][i][j].LoadBitmap({ "RES/wall_shine.bmp", "RES/wall_shine2.bmp" });
 						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (material_code[i][j] == WALL_SPECIAL) {
 						material_map[s][i][j].LoadBitmap({ "RES/wall_special.bmp" });
 						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 				}
 			}
@@ -323,21 +323,20 @@ namespace game_framework {
 							string filename = "RES/" + normal_bitmap_map[ID] + (i == 0 ? "" : to_string(i+1)) +".bmp";
 							frames.push_back(filename);
 						}
-						TRACE("%d\n", frames.size());
-						entity_map[s][i][j].LoadBitmapByString(frames);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						entity_map[s][i][j].LoadBitmapByString(frames, RGB(0, 0, 0));
+						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (functional_entity_bitmap_map[ID].length() != 0) {
 						string filename = "RES/" + functional_entity_bitmap_map[ID] + ".bmp";
 						char* char_filename = (char*)filename.c_str();
 						entity_map[s][i][j].LoadBitmap(char_filename);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else if (block_bitmap_map[ID].length() != 0) {
 						string filename = "RES/" + block_bitmap_map[ID] + ".bmp";
 						char* char_filename = (char*)filename.c_str();
 						entity_map[s][i][j].LoadBitmap(char_filename);
-						entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 					}
 					else {
 						if (monster_bitmap_map[ID].length() != 0) {
@@ -347,7 +346,7 @@ namespace game_framework {
 							char* char_filename2 = (char*) filename2.c_str();
 							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
 							entity_map[s][i][j].SetAnimation(5, false);
-							entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 						}
 						else if (npc_bitmap_map[ID].length() != 0) {
 							string filename = "RES/" + npc_bitmap_map[ID] + ".bmp";
@@ -356,7 +355,7 @@ namespace game_framework {
 							char* char_filename2 = (char*) filename2.c_str();
 							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
 							entity_map[s][i][j].SetAnimation(5, false);
-							entity_map[s][i][j].SetTopLeft(start_x + 77 * j, start_y + 77 * i);
+							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
 						}
 						else {
 							GAME_ASSERT(false, "ID NOT EXIST!");
@@ -393,9 +392,9 @@ namespace game_framework {
 		characterAttackMenuBitMap.SetTopLeft(1467, 427);
 
 		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
-		characterBitmap.SetTopLeft(start_x + character.getY() * 77 , start_y + character.getX() * 77);
+		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
-		attackMenu.LoadBitmap({ "RES/AttackPlatform.bmp" }, RGB(0, 0, 0));
+		attackMenu.LoadBitmap({ "RES/attack_menu.bmp" }, RGB(0, 0, 0));
 		attackMenu.SetTopLeft(656, 297);
 
 		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" }, RGB(0, 0, 0));
@@ -477,7 +476,7 @@ namespace game_framework {
 		int start_x = 700;
 		int start_y = 77;
 
-		characterBitmap.SetTopLeft(start_x + character.getY() * 77, start_y + character.getX() * 77);
+		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
 		if (attackMenuing && --tempDelayCycle <= 0) {
 			if (character.getHealth() && monster.getHealth()) {
@@ -489,7 +488,7 @@ namespace game_framework {
 						causeDamageValueString = "Miss!";
 					}
 					else {
-						causeDamageValue = max(0, character.getAttack() - monster.getDefence());
+						causeDamageValue = max(1, character.getAttack() - monster.getDefence());
 						causeDamageValueString = to_string(causeDamageValue);
 					}
 					monster.causeDamage(causeDamageValue);
@@ -536,6 +535,7 @@ namespace game_framework {
 		const char KEY_RIGHT = 0x27; // keyboard¥k½bÀY
 		const char KEY_DOWN = 0x28; // keyboard¤U½bÀY
 		const char KEY_ENTER = 0x0D;
+		const char KEY_Q = 0x51;
 
 		TRACE("%X %X %X\n", nChar, nRepCnt, nFlags);
 
@@ -555,6 +555,17 @@ namespace game_framework {
 					current_stage -= 1;
 					return;
 				}
+			}
+		}
+
+		if (nChar == KEY_Q) {
+			if (!enterStatus && attackMenuing) {
+				attackMenuing = false;
+				showAttackValue = false;
+				temp_monster_x = 0;
+				temp_monster_y = 0;
+				enterStatus = false;
+				turn = true;
 			}
 		}
 
@@ -788,7 +799,6 @@ namespace game_framework {
 				if (!turn) {
 					f.Detach();
 					f.CreatePointFont(400, "Noto Sans TC");
-					fp = pDC->SelectObject(&f);
 
 					pDC->SetBkMode(TRANSPARENT);
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
@@ -797,7 +807,6 @@ namespace game_framework {
 				else {
 					f.Detach();
 					f.CreatePointFont(400, "Noto Sans TC");
-					fp = pDC->SelectObject(&f);
 
 					pDC->SetBkMode(TRANSPARENT);
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
@@ -805,7 +814,6 @@ namespace game_framework {
 				}
 			}
 
-			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();
 
 		}
@@ -843,7 +851,6 @@ namespace game_framework {
 
 			f.Detach();
 			f.CreatePointFont(200, "Noto Sans TC");
-			fp = pDC->SelectObject(&f);
 
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->SetTextColor(RGB(255, 255, 255));
@@ -861,7 +868,6 @@ namespace game_framework {
 
 				f.Detach();
 				f.CreatePointFont(260, "STZhongsong");
-				fp = pDC->SelectObject(&f);
 
 				for (int i = 0; i < (int)option.size(); i++) {
 					pDC->TextOut(1000, 480 + i * menuOptionGap, option[i].c_str());
@@ -869,7 +875,6 @@ namespace game_framework {
 			
 			}
 
-			pDC->SelectObject(fp);
 			CDDraw::ReleaseBackCDC();
 		}
 		else {
@@ -895,15 +900,13 @@ namespace game_framework {
 
 		f.Detach();
 		f.CreatePointFont(300, "Noto Sans TC");
-		fp = pDC->SelectObject(&f);
 
 		pDC->TextOut(256 + 290, 615, to_string(character.getKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 688, to_string(character.getSilverKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 762, to_string(character.getGoldKeyNumber()).c_str());
 		pDC->TextOut(256 + 290, 844, to_string(character.getCoin()).c_str());
 
-		
-		pDC->SelectObject(fp);
+	
 		CDDraw::ReleaseBackCDC();
 	}
 

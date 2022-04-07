@@ -99,10 +99,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
+	
 
 	// TODO: Remove this if you don't want tool tips or a resizeable toolbar
 	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
-		CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
+		CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 
 	// TODO: Delete these three lines if you don't want the toolbar to
 	//  be dockable
@@ -119,6 +120,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//
 	pMenu = GetMenu();
 	//
+	
 	// 如果是Full Screen的話，隱藏ToolBar, StatusBar, Menu
 	//
 	if (isFullScreen) {
