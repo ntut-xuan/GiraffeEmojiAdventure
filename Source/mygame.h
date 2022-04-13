@@ -103,7 +103,6 @@ namespace game_framework {
 		const int		STAGES;	// 關卡的總數
 		const int MENU_DELAY_CYCLE = 10;
 		int mouse_x, mouse_y;
-		int character_x, character_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
 		int current_shop_price = 20;

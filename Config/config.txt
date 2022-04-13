@@ -3,7 +3,7 @@ upstair 3 1
 yellow_door 4 5
 blue_door 5 5
 red_door 6 5
-iron_fence 67 1
+iron_fence 67 5
 downstair 13 1
 gem_door 72 1
 

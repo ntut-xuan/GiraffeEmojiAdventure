@@ -92,11 +92,11 @@ namespace game_framework {
 		time_t rawtime;
 		time(&rawtime);
 
-		f.CreatePointFont(960, "Noto Sans TC");	
+		f.CreatePointFont(560, "Noto Sans TC");	
 		fp=pDC->SelectObject(&f);
 		pDC->SetBkColor(RGB(255,255,255));
 		pDC->SetTextColor(RGB(0,0,0));
-		pDC->TextOut(400, 50, "長頸鹿爬塔");
+		pDC->TextOut(400, 50, "魔塔（但封面還沒做好.jpg）");
 
 		f.Detach();
 		f.CreatePointFont(160, "Noto Sans TC");
@@ -156,7 +156,8 @@ namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
 
 	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(50)
-	{	
+	{
+
 	}
 
 	CGameStateRun::~CGameStateRun()
@@ -164,23 +165,12 @@ namespace game_framework {
 		
 	}
 
-	void CGameStateRun::OnBeginState()
+	void CGameStateRun::OnInit()  								// 遊戲的初值及圖形設定
 	{
-		current_stage = 26;
-
-#ifdef UU_DEBUG 
-		character.setAttack(998244353);
-		character.setDefence(998244353);  
-		character.setHealth(998244353);  
-		character.setSpeed(998244353);  
-		character.setCoin(998244353); 
-		teleport_allow = true;
-#endif 
 
 		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(0, 0, 0));
 		menuBitmap.SetTopLeft(237, 0);
 
-			
 		int start_x = 700;
 		int start_y = 77;
 
@@ -200,7 +190,8 @@ namespace game_framework {
 					in >> frame_count;
 					normal_bitmap_map[ID] = file_name;
 					bitmap_frame[ID] = frame_count;
-				}else if (r == 1) {
+				}
+				else if (r == 1) {
 					functional_entity_bitmap_map[ID] = file_name;
 				}
 				else if (r == 2) {
@@ -212,7 +203,8 @@ namespace game_framework {
 					monster_map[ID].SetAnimation(5, false);
 					monster_map[ID].SetTopLeft(711, 417);
 					monster_bitmap_map[ID] = file_name;
-				}else if (r == 3) {
+				}
+				else if (r == 3) {
 					string filename = "RES/" + file_name + ".bmp";
 					string filename2 = "RES/" + file_name + "2.bmp";
 					char* char_filename = (char*)filename.c_str();
@@ -278,7 +270,7 @@ namespace game_framework {
 					if (normal_bitmap_map[ID].length() != 0) {
 						vector<string> frames = {};
 						for (int i = 0; i < bitmap_frame[ID]; i++) {
-							string filename = "RES/" + normal_bitmap_map[ID] + (i == 0 ? "" : to_string(i+1)) +".bmp";
+							string filename = "RES/" + normal_bitmap_map[ID] + (i == 0 ? "" : to_string(i + 1)) + ".bmp";
 							frames.push_back(filename);
 						}
 						entity_map[s][i][j].LoadBitmapByString(frames, RGB(0, 0, 0));
@@ -300,8 +292,8 @@ namespace game_framework {
 						if (monster_bitmap_map[ID].length() != 0) {
 							string filename = "RES/" + monster_bitmap_map[ID] + ".bmp";
 							string filename2 = "RES/" + monster_bitmap_map[ID] + "2.bmp";
-							char* char_filename = (char*) filename.c_str();
-							char* char_filename2 = (char*) filename2.c_str();
+							char* char_filename = (char*)filename.c_str();
+							char* char_filename2 = (char*)filename2.c_str();
 							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
 							entity_map[s][i][j].SetAnimation(5, false);
 							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
@@ -309,8 +301,8 @@ namespace game_framework {
 						else if (npc_bitmap_map[ID].length() != 0) {
 							string filename = "RES/" + npc_bitmap_map[ID] + ".bmp";
 							string filename2 = "RES/" + npc_bitmap_map[ID] + "2.bmp";
-							char* char_filename = (char*) filename.c_str();
-							char* char_filename2 = (char*) filename2.c_str();
+							char* char_filename = (char*)filename.c_str();
+							char* char_filename2 = (char*)filename2.c_str();
 							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
 							entity_map[s][i][j].SetAnimation(5, false);
 							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
@@ -328,7 +320,7 @@ namespace game_framework {
 		enemyAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
 		enemyAttackAnimation[0].SetTopLeft(671, 377);
 		enemyAttackAnimation[0].SetAnimation(2, true);
-		
+
 		characterAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
 		characterAttackAnimation[0].SetTopLeft(1427, 387);
 		characterAttackAnimation[0].SetAnimation(2, true);
@@ -357,11 +349,50 @@ namespace game_framework {
 
 		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" });
 		winningMenu.SetTopLeft(656, 682);
-			
+
+	}
+
+	void CGameStateRun::OnBeginState()
+	{	
+		character = Character();
+		
+		current_stage = 26;
+		temp_monster_x = NULL;
+		temp_monster_y = NULL;
+		dialogMenuing = false;
+		inShopping = false;
+		attackMenuing = false;
+		showAttackValue = true;
+		enterStatus = false;
+		turn = true;
+		teleport_allow = false;
+		
+#ifdef UU_DEBUG 
+		character.setAttack(35);
+		character.setDefence(0);
+		character.setHealth(1);
+		character.setSpeed(0);
+		character.setCoin(998244353);
+		character.changeKeyNumber(KEY, 23766);
+		character.changeKeyNumber(SILVER_KEY, 23766);
+		character.changeKeyNumber(GOLD_KEY, 23766);
+		teleport_allow = true;
+#endif 
+
+		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
+
+		for (int i = 0; i < 11; i++) {
+			for (int j = 0; j < 11; j++) {
+				if (entity_code[i][j] == 1) {
+					character.setXY(i, j);
+				}
+			}
+		}
+
 	}
 
 	bool CGameStateRun::isDoor(int doorCode) {
-		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR;
+		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR || doorCode == IRON_FENCE;
 	}
 
 	bool CGameStateRun::isKey(int keyCode) {
@@ -393,6 +424,11 @@ namespace game_framework {
 				return true;
 			}
 		}
+		if (doorCode == IRON_FENCE) {
+			entity_map[current_stage][x][y].ToggleAnimation(1);
+			hidden_code[current_stage][x][y] = 1;
+			return true;
+		}
 		return false;
 	}
 
@@ -419,7 +455,7 @@ namespace game_framework {
 	{	
 
 		if (character.getHealth() == 0) {
-			//GotoGameState(GAME_STATE_OVER);
+			GotoGameState(GAME_STATE_OVER);
 		}
 
 		floor_message = "主塔　";
@@ -497,8 +533,6 @@ namespace game_framework {
 		const char KEY_ENTER = 0x0D;
 		const char KEY_Q = 0x51;
 
-		TRACE("%X %X %X\n", nChar, nRepCnt, nFlags);
-
 		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
 
@@ -526,6 +560,7 @@ namespace game_framework {
 				temp_monster_y = 0;
 				enterStatus = false;
 				turn = true;
+				return;
 			}
 		}
 
@@ -540,6 +575,7 @@ namespace game_framework {
 				tempSelect %= (int)npc.getOption().size();
 			}
 			else if (nChar == KEY_ENTER) {
+				TRACE("%d\n", tempSelect);
 				if (character.getCoin() >= NPC::increaseCost1) {
 					if (tempSelect == 0) {
 						character.setHealth(character.getHealth() + 500);
@@ -555,16 +591,14 @@ namespace game_framework {
 					}
 					NPC::increaseCost1 += 1;
 				}
-				else {
-					if (tempSelect == 3) {
-						inShopping = false;
-						enterStatus = false;
-						dialogMenuing = false;
-					}
-					return;
+				if (tempSelect == 3) {
+					inShopping = false;
+					enterStatus = false;
+					dialogMenuing = false;
 				}
+				return;
 			}
-			optionArrow.SetTopLeft(875, 464 + menuOptionGap * tempSelect);
+			optionArrow.SetTopLeft(875  , 464 + menuOptionGap * tempSelect);
 			return;
 		}
 		if (enterStatus && nChar == KEY_ENTER) {
@@ -600,7 +634,7 @@ namespace game_framework {
 				y = character.getY();
 			}
 		}
-		if (material_code[x][y] == 0) {
+		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL) {
 			return;
 		}
 		if (hidden_code[current_stage][x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
@@ -667,26 +701,6 @@ namespace game_framework {
 
 	void CGameStateRun::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
-	}
-
-	void CGameStateRun::OnInit()  								// 遊戲的初值及圖形設定
-	{
-
-		current_stage = 26;
-
-		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
-
-		for (int i = 0; i < 11; i++) {
-			for (int j = 0; j < 11; j++) {
-				if (entity_code[i][j] == 1) {
-					character.setXY(i, j);
-				}
-			}
-		}
-
-		NPC::increaseCost1 = 20;
-		NPC::increaseCost2 = 50;
-
 	}
 
 	void CGameStateRun::OnShow() {

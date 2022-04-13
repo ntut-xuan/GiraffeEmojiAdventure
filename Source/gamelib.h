@@ -210,6 +210,7 @@ namespace game_framework {
 		void  ShowBitmap(double factor);	// 將圖貼到螢幕 factor < 1時縮小，>1時放大。注意：需要VGA卡硬體的支援，否則會很慢
 		void  SelectShowBitmap(int select);
 		void  ToggleAnimation(int delay);
+		void  dispose();
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 		bool  IsAnimationDone();
@@ -221,7 +222,7 @@ namespace game_framework {
 		bool isAnimationDone = true;
 		bool infiniteShowAnimation = false;
 		vector<unsigned> SurfaceID;
-		bool     isBitmapLoaded;	// whether a bitmap has been loaded
+		bool     isBitmapLoaded = false;	// whether a bitmap has been loaded
 		CRect    location;			// location of the bitmap
 	};
 
