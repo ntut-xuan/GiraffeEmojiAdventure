@@ -214,6 +214,7 @@ namespace game_framework {
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 		bool  IsAnimationDone();
+		int   GetMovingBitmapFrame();
 	protected:
 		int selector = 0;
 		int delayCount = 10;

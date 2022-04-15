@@ -85,5 +85,9 @@
 #define GEM_HOE 76
 #define WALL_SPECIAL 77
 #define PRINCESS 78
+#define SWORD_A 79
+#define SWORD_C 80
+#define SWORD_D 81
+#define SHIELD_D 82
 
 /* ======================= End ======================= */

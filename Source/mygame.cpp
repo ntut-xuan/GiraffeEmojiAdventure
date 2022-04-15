@@ -12,7 +12,7 @@
 #include "MainFrm.h"
 
 #define element_width 77
-#define UU_DEBUG 0
+//#define UU_DEBUG 0
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
@@ -350,6 +350,9 @@ namespace game_framework {
 		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" });
 		winningMenu.SetTopLeft(656, 682);
 
+		getDialogMenu.LoadBitmap({ "RES/getDialog.bmp" });
+		getDialogMenu.SetTopLeft(656, 400);
+
 	}
 
 	void CGameStateRun::OnBeginState()
@@ -367,17 +370,32 @@ namespace game_framework {
 		turn = true;
 		teleport_allow = false;
 		
+		hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
+
 #ifdef UU_DEBUG 
-		character.setAttack(35);
-		character.setDefence(0);
-		character.setHealth(1);
-		character.setSpeed(0);
+		character.setAttack(998244353);
+		character.setDefence(998244353);
+		character.setHealth(998244353);
+		character.setSpeed(998244353);
 		character.setCoin(998244353);
 		character.changeKeyNumber(KEY, 23766);
 		character.changeKeyNumber(SILVER_KEY, 23766);
 		character.changeKeyNumber(GOLD_KEY, 23766);
 		teleport_allow = true;
 #endif 
+
+		for (int i = 26; i <= 46; i++) {
+			for (int j = 0; j < 11; j++) {
+				for (int k = 0; k < 11; k++) {
+					if (entity_map[i][j][k].GetMovingBitmapFrame() > 0) {
+						entity_map[i][j][k].SelectShowBitmap(0);
+					}
+					if (material_map[i][j][k].GetMovingBitmapFrame() > 0) {
+						material_map[i][j][k].SelectShowBitmap(0);
+					}
+				}
+			}
+		}
 
 		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
 
@@ -609,9 +627,15 @@ namespace game_framework {
 				enterStatus = false;
 				turn = true;
 			}
+			if (getDialogMenuing) {
+				getDialogMenuing = false;
+			}
 			enterStatus = false;
 			attackMenuing = false;
 			dialogMenuing = false;
+			return;
+		}
+		if (enterStatus) {
 			return;
 		}
 		if (!attackMenuing) {
@@ -646,9 +670,6 @@ namespace game_framework {
 		if (entity_code[x][y] == DOWN_STAIR) {
 			current_stage--;
 		}
-		if (hidden_code[current_stage][x][y] == 0 && isKey(entity_code[x][y])) {
-			GetKey(x, y, entity_code[x][y]);
-		}
 		if (hidden_code[current_stage][x][y] == 0 && monster_bitmap_map[entity_code[x][y]].length() != 0) {
 			attackMenuing = true;
 			int ID = entity_code[x][y];
@@ -661,20 +682,79 @@ namespace game_framework {
 		if (hidden_code[current_stage][x][y] == 0 && functional_entity_bitmap_map[entity_code[x][y]].length() != 0) {
 			if (entity_code[x][y] == RUBY) {
 				character.setAttack(character.getAttack() + 2);
+				temp_item_info = "¬õÄ_¥Û¡A§ðÀ»¤O + 2";
 			}
 			if (entity_code[x][y] == SAPPHIRE) {
 				character.setDefence(character.getDefence() + 2);
+				temp_item_info = "ÂÅÄ_¥Û¡A¨¾¿m¤O + 2";
 			}
 			if (entity_code[x][y] == EMERALD) {
 				character.setSpeed(character.getSpeed() + 2);
+				temp_item_info = "ºñÄ_¥Û¡A±Ó±¶ + 2";
 			}
 			if (entity_code[x][y] == RED_POTION) {
 				character.setHealth(character.getHealth() + 150);
+				temp_item_info = "¬õÃÄ¤ô¡A¦å¶q + 150";
 			}
 			if (entity_code[x][y] == BLUE_POTION) {
 				character.setHealth(character.getHealth() + 400);
+				temp_item_info = "ÂÅÃÄ¤ô¡A¦å¶q + 400";
 			}
+			if (entity_code[x][y] == KEY) {
+				character.changeKeyNumber(KEY, 1);
+				temp_item_info = "¶ÀÆ_°Í";
+			}
+			if (entity_code[x][y] == SILVER_KEY) {
+				character.changeKeyNumber(SILVER_KEY, 1);
+				temp_item_info = "ÂÅÆ_°Í";
+			}
+			if (entity_code[x][y] == GOLD_KEY) {
+				character.changeKeyNumber(GOLD_KEY, 1);
+				temp_item_info = "¬õÆ_°Í";
+			}
+			if (entity_code[x][y] == FIRE_DRINK) {
+				temp_item_info = "¤õ°s¡A¦^´_°I®zª¬ºA";
+			}
+			if (entity_code[x][y] == ANTI_POTION) {
+				temp_item_info = "§Ü¬r¾¯¡A¦^´_¬rª¬ºA";
+			}
+			if (entity_code[x][y] == JUMP_WING) {
+				character.setLevel(character.getLevel() + 1);
+				temp_item_info = "ÅD¶i¤§Ál¡Aµ¥¯Å´£¤É¤@";
+			}
+			if (entity_code[x][y] == SHIELD_D) {
+				character.setDefence(character.getDefence() + 7);
+				temp_item_info = "¥Ö­²¤§¬Þ¡A¨¾¿m¤O + 7";
+			}
+			if (entity_code[x][y] == GEM_DIGGER) {
+				temp_item_info = "Ä_¥Û¾SÀY";
+			}
+			if (entity_code[x][y] == COIN_200) {
+				character.setCoin(character.getCoin() + 200);
+				temp_item_info = "ª÷¹ô 200 ¶ô";
+			}
+			if (entity_code[x][y] == SWORD_C) {
+				character.setAttack(character.getAttack() + 16);
+				temp_item_info = "ªø¼C¡A§ðÀ»¤O + 16";
+			}
+			if (entity_code[x][y] == SHIELD_C) {
+				character.setAttack(character.getDefence() + 22);
+				temp_item_info = "¥ú¤§¬Þ¡A¨¾¿m¤O + 22";
+			}
+			if (entity_code[x][y] == MAGIC_KEY) {
+				character.changeKeyNumber(KEY, 1);
+				character.changeKeyNumber(SILVER_KEY, 1);
+				character.changeKeyNumber(GOLD_KEY, 1);
+				temp_item_info = "Å]ªk¤§°Í¡A©Ò¦³Âê°Í¼Æ + 1";
+			}
+			if (entity_code[x][y] == SWORD_D) {
+				character.setAttack(character.getAttack() + 16);
+				temp_item_info = "ÅK¼C¡A§ðÀ»¤O + 8";
+			}
+			enterStatus = true;
+			getDialogMenuing = true;
 			hidden_code[current_stage][x][y] = 1;
+			return;
 		}
 		if (hidden_code[current_stage][x][y] == 0 && npc_bitmap_map[entity_code[x][y]].length() != 0) {
 			if (entity_code[x][y] == SHOPKEEPER) {
@@ -770,6 +850,10 @@ namespace game_framework {
 			dialogMenu.UnshowBitmap();
 		}
 
+		if (getDialogMenuing) {
+			getDialogMenu.ShowBitmap();
+		}
+
 		ShowText();
 
 	}
@@ -826,7 +910,14 @@ namespace game_framework {
 
 		}
 
-		if (attackMenuing && enterStatus || dialogMenuing) {
+		/* Get Dialog Menu Setup */
+		if (getDialogMenuing) {
+			pDC->SetTextColor(RGB(255, 255, 255));
+			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
+			pDC->TextOut(786, 415, temp_item_info.c_str());
+		}
+
+		if (attackMenuing && enterStatus || dialogMenuing || getDialogMenuing ) {
 			/* Make Shine Enter */
 			vector<int> vec;
 			for (int i = 80; i <= 250; i += 10) {
@@ -838,10 +929,11 @@ namespace game_framework {
 			int count = vec.size();
 			pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-			if (!dialogMenuing) {
+			if (attackMenuing) {
 				pDC->TextOut(1430, 630, string("- Enter -").c_str());
-			}
-			else {
+			}else if (getDialogMenuing) {
+				pDC->TextOut(1430, 415, string("- Enter -").c_str());
+			}else if(dialogMenuing) {
 				pDC->TextOut(1293, 360, string("- Enter -").c_str());
 			}
 			/* Place gold and exp */

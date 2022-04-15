@@ -108,6 +108,7 @@ namespace game_framework {
 		int current_shop_price = 20;
 		int tempDelayCycle = 0;
 		std::string causeDamageValueString;
+		bool getDialogMenuing = false;
 		bool dialogMenuing = false;
 		bool inShopping = false;
 		bool attackMenuing = false;
@@ -116,6 +117,7 @@ namespace game_framework {
 		bool turn = true; // к▒оaе¤дт
 		bool teleport_allow = false;
 		std::string floor_message;
+		std::string temp_item_info;
 
 		Stage stage;
 		Character character;
@@ -141,6 +143,9 @@ namespace game_framework {
 		int menuOptionGap = 120;
 		CMovingBitmap optionMenu;
 		CMovingBitmap optionArrow;
+
+		/* Get Dialog Menu Object */
+		CMovingBitmap getDialogMenu;
 
 		/* Attack Animation Vector (enemy and character) */
 		vector<CMovingBitmap> enemyAttackAnimation = vector<CMovingBitmap>(3);
