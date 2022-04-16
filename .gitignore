@@ -273,3 +273,6 @@ _Pvt_Extensions
 *.app
 
 illustrator
+RES_backup
+RES/svg
+RES/transform

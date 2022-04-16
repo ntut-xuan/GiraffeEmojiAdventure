@@ -19,6 +19,9 @@ namespace game_framework {
 	// 這個class為遊戲的遊戲開頭畫面物件
 	/////////////////////////////////////////////////////////////////////////////
 
+	const int start_x = 472;
+	const int start_y = 77;
+
 	void ChangeFontLog(CDC* pDC, CFont* &fp, int size, string fontName, int weight = 500) {
 		LOGFONT lf;
 		CFont f;
@@ -54,8 +57,8 @@ namespace game_framework {
 		//
 		logo.LoadBitmap(IDB_BACKGROUND);
 
-		giraffe_photo.LoadBitmap("./RES/giraffe.bmp", RGB(255, 255, 255));
-		giraffe_photo.SetTopLeft(600, 300);
+		giraffe_photo.LoadBitmap("./RES/layout.bmp", RGB(255, 255, 255));
+		giraffe_photo.SetTopLeft(0, 0);
 
 		Sleep(300);				// 放慢，以便看清楚進度，實際遊戲請刪除此Sleep
 		//
@@ -65,6 +68,7 @@ namespace game_framework {
 
 	void CGameStateInit::OnBeginState()
 	{
+
 	}
 
 	void CGameStateInit::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -79,7 +83,7 @@ namespace game_framework {
 
 	void CGameStateInit::OnLButtonDown(UINT nFlags, CPoint point)
 	{
-		GotoGameState(GAME_STATE_RUN);		// 切換至GAME_STATE_RUN
+		//GotoGameState(GAME_STATE_RUN);		// 切換至GAME_STATE_RUN
 	}
 
 	void CGameStateInit::OnShow(){
@@ -96,16 +100,16 @@ namespace game_framework {
 		fp=pDC->SelectObject(&f);
 		pDC->SetBkColor(RGB(255,255,255));
 		pDC->SetTextColor(RGB(0,0,0));
-		pDC->TextOut(400, 50, "魔塔（但封面還沒做好.jpg）");
+		//pDC->TextOut(400, 50, "魔塔（但封面還沒做好.jpg）");
 
 		f.Detach();
 		f.CreatePointFont(160, "Noto Sans TC");
 		fp = pDC->SelectObject(&f);
 
-		pDC->TextOut(650, 740, " - 按 Space 開始遊戲 - ");
-		pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
-		pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
-		pDC->TextOut(1000, 850, ctime(&rawtime));
+		//pDC->TextOut(650, 740, " - 按 Space 開始遊戲 - ");
+		//pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
+		//pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
+		//pDC->TextOut(1000, 850, ctime(&rawtime));
 
 		pDC->SelectObject(fp);						// 放掉 font f (千萬不要漏了放掉)
 		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC
@@ -169,10 +173,7 @@ namespace game_framework {
 	{
 
 		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(0, 0, 0));
-		menuBitmap.SetTopLeft(237, 0);
-
-		int start_x = 700;
-		int start_y = 77;
+		menuBitmap.SetTopLeft(0, 0);
 
 		ifstream in("Config/config.txt");
 		ifstream monster_data_in("Config/monster_config.txt");
@@ -201,7 +202,7 @@ namespace game_framework {
 					char* char_filename2 = (char*)filename2.c_str();
 					monster_map[ID].LoadBitmap({ char_filename, char_filename2 });
 					monster_map[ID].SetAnimation(5, false);
-					monster_map[ID].SetTopLeft(711, 417);
+					monster_map[ID].SetTopLeft(711 - 227, 417);
 					monster_bitmap_map[ID] = file_name;
 				}
 				else if (r == 3) {
@@ -211,7 +212,7 @@ namespace game_framework {
 					char* char_filename2 = (char*)filename2.c_str();
 					npc_map[ID].LoadBitmap({ char_filename, char_filename2 });
 					npc_map[ID].SetAnimation(5, false);
-					npc_map[ID].SetTopLeft(870, 161);
+					npc_map[ID].SetTopLeft(870 - 227, 161);
 					npc_bitmap_map[ID] = file_name;
 				}
 				else if (r == 4) {
@@ -318,40 +319,40 @@ namespace game_framework {
 		/* Attack animation Load */
 
 		enemyAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
-		enemyAttackAnimation[0].SetTopLeft(671, 377);
+		enemyAttackAnimation[0].SetTopLeft(671 - 227, 377);
 		enemyAttackAnimation[0].SetAnimation(2, true);
 
 		characterAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
-		characterAttackAnimation[0].SetTopLeft(1427, 387);
+		characterAttackAnimation[0].SetTopLeft(1427 - 227, 387);
 		characterAttackAnimation[0].SetAnimation(2, true);
 
 		/* Bitmap Menu Load */
 
 		dialogMenu.LoadBitmap("RES/DialogMenu.bmp", RGB(0, 0, 0));
-		dialogMenu.SetTopLeft(815, 107);
+		dialogMenu.SetTopLeft(815 - 227, 107);
 
 		optionMenu.LoadBitmap("RES/OptionMenu1.bmp", RGB(0, 0, 0));
-		optionMenu.SetTopLeft(815, 414);
+		optionMenu.SetTopLeft(815 - 227, 414);
 
 		optionArrow.LoadBitmap("RES/optionArrow.bmp", RGB(0, 0, 0));
-		optionArrow.SetTopLeft(875, 464);
+		optionArrow.SetTopLeft(875 - 227, 464);
 
 		/* Character Attack Menu Load */
 
 		characterAttackMenuBitMap.LoadBitmap({ "RES/character.bmp" }, RGB(255, 255, 255));
-		characterAttackMenuBitMap.SetTopLeft(1467, 427);
+		characterAttackMenuBitMap.SetTopLeft(1467 - 227, 427);
 
 		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
 		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
 		attackMenu.LoadBitmap({ "RES/attack_menu.bmp" }, RGB(0, 0, 0));
-		attackMenu.SetTopLeft(656, 297);
+		attackMenu.SetTopLeft(656 - 227, 297);
 
 		winningMenu.LoadBitmap({ "RES/WinPlatform.bmp" });
-		winningMenu.SetTopLeft(656, 682);
+		winningMenu.SetTopLeft(656 - 227, 682);
 
 		getDialogMenu.LoadBitmap({ "RES/getDialog.bmp" });
-		getDialogMenu.SetTopLeft(656, 400);
+		getDialogMenu.SetTopLeft(656 - 227, 400);
 
 	}
 
@@ -484,9 +485,6 @@ namespace game_framework {
 		else {
 			floor_message += to_string(current_stage-26) + "F";
 		}
-
-		int start_x = 700;
-		int start_y = 77;
 
 		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
@@ -872,21 +870,21 @@ namespace game_framework {
 
 			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
 
-			pDC->TextOut(1167, 405, to_string(character.getHealth()).c_str());
-			pDC->TextOut(1167, 465, to_string(character.getAttack()).c_str());
-			pDC->TextOut(1167, 528, to_string(character.getDefence()).c_str());
-			pDC->TextOut(1167, 586, to_string(character.getSpeed()).c_str());
+			pDC->TextOut(1167 - 227, 405, to_string(character.getHealth()).c_str());
+			pDC->TextOut(1167 - 227, 465, to_string(character.getAttack()).c_str());
+			pDC->TextOut(1167 - 227, 528, to_string(character.getDefence()).c_str());
+			pDC->TextOut(1167 - 227, 586, to_string(character.getSpeed()).c_str());
 
 			ChangeFontLog(pDC, fp, 60, "Noto Sans TC");
 
-			pDC->TextOut(701, 330, monster.getName().c_str());
+			pDC->TextOut(701 - 227, 330, monster.getName().c_str());
 
 			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
 
-			pDC->TextOut(977, 405, to_string(monster.getHealth()).c_str());
-			pDC->TextOut(977, 465, to_string(monster.getAttack()).c_str());
-			pDC->TextOut(977, 528, to_string(monster.getDefence()).c_str());
-			pDC->TextOut(977, 586, to_string(monster.getSpeed()).c_str());
+			pDC->TextOut(977 - 227, 405, to_string(monster.getHealth()).c_str());
+			pDC->TextOut(977 - 227, 465, to_string(monster.getAttack()).c_str());
+			pDC->TextOut(977 - 227, 528, to_string(monster.getDefence()).c_str());
+			pDC->TextOut(977 - 227, 586, to_string(monster.getSpeed()).c_str());
 
 			if (showAttackValue == true) {
 
@@ -894,17 +892,17 @@ namespace game_framework {
 
 				if (!turn) {
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(781 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+					pDC->TextOut(781 - 227 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
 				}
 				else {
 					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(1507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+					pDC->TextOut(1507 - 227 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
 				}
 
 				if (!enterStatus) {
 					pDC->SetTextColor(RGB(255, 255, 0));
 					ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-					pDC->TextOut(1430, 630, string("撤退(Q)").c_str());
+					pDC->TextOut(1430 - 227, 630, string("撤退(Q)").c_str());
 				}
 			}
 
@@ -914,7 +912,7 @@ namespace game_framework {
 		if (getDialogMenuing) {
 			pDC->SetTextColor(RGB(255, 255, 255));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-			pDC->TextOut(786, 415, temp_item_info.c_str());
+			pDC->TextOut(786 - 227, 415, temp_item_info.c_str());
 		}
 
 		if (attackMenuing && enterStatus || dialogMenuing || getDialogMenuing ) {
@@ -930,18 +928,18 @@ namespace game_framework {
 			pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
 			if (attackMenuing) {
-				pDC->TextOut(1430, 630, string("- Enter -").c_str());
+				pDC->TextOut(1430 - 227, 630, string("- Enter -").c_str());
 			}else if (getDialogMenuing) {
-				pDC->TextOut(1430, 415, string("- Enter -").c_str());
+				pDC->TextOut(1430 - 227, 415, string("- Enter -").c_str());
 			}else if(dialogMenuing) {
-				pDC->TextOut(1293, 360, string("- Enter -").c_str());
+				pDC->TextOut(1293 - 227, 360, string("- Enter -").c_str());
 			}
 			/* Place gold and exp */
 			if (attackMenuing) {
 				pDC->SetTextColor(RGB(255, 255, 255));
 				ChangeFontLog(pDC, fp, 80, "Noto Sans TC", 800);
-				pDC->TextOut(1156, 688, to_string(monster.getExp()).c_str());
-				pDC->TextOut(1470, 688, to_string(monster.getGold()).c_str());
+				pDC->TextOut(1156 - 227, 688, to_string(monster.getExp()).c_str());
+				pDC->TextOut(1470 - 227, 688, to_string(monster.getGold()).c_str());
 			}
 		}
 
@@ -958,18 +956,18 @@ namespace game_framework {
 
 			ChangeFontLog(pDC, fp, 60, "STZhongsong");
 
-			pDC->TextOut(1100, 130, npc.getName().c_str());
+			pDC->TextOut(1100 - 227, 130, npc.getName().c_str());
 
 			ChangeFontLog(pDC, fp, 30, "STZhongsong");
 
 			for (int i = 0; i < (int)dialog.size(); i++) {
-				pDC->TextOut(1010, 210 + i * 40, dialog[i].c_str());
+				pDC->TextOut(1010 - 227, 210 + i * 40, dialog[i].c_str());
 			}
 
 			if (inShopping) {
 				ChangeFontLog(pDC, fp, 36, "Noto Sans TC");
 				for (int i = 0; i < (int)option.size(); i++) {
-					pDC->TextOut(1000, 480 + i * menuOptionGap, option[i].c_str());
+					pDC->TextOut(1000 - 227, 480 + i * menuOptionGap, option[i].c_str());
 				}
 			}
 		}
@@ -980,22 +978,22 @@ namespace game_framework {
 
 		pDC->SetTextColor(RGB(255, 255, 255));
 
-		pDC->TextOut(256 + 240, 140, character.getStatus().c_str());
+		pDC->TextOut(256 + 240 - 227 - 20, 140, character.getStatus().c_str());
 
-		pDC->TextOut(256 + 250, 204, to_string(character.getLevel()).c_str());
-		pDC->TextOut(256 + 250, 256, to_string(character.getHealth()).c_str());
-		pDC->TextOut(256 + 250, 308, to_string(character.getAttack()).c_str());
-		pDC->TextOut(256 + 250, 360, to_string(character.getDefence()).c_str());
-		pDC->TextOut(256 + 250, 412, to_string(character.getSpeed()).c_str());
-		pDC->TextOut(256 + 250, 460, to_string(character.getExp()).c_str());
-		pDC->TextOut(256 + 790, 14, floor_message.c_str());
+		pDC->TextOut(256 + 250 - 227, 204, to_string(character.getLevel()).c_str());
+		pDC->TextOut(256 + 250 - 227, 256, to_string(character.getHealth()).c_str());
+		pDC->TextOut(256 + 250 - 227, 308, to_string(character.getAttack()).c_str());
+		pDC->TextOut(256 + 250 - 227, 360, to_string(character.getDefence()).c_str());
+		pDC->TextOut(256 + 250 - 227, 412, to_string(character.getSpeed()).c_str());
+		pDC->TextOut(256 + 250 - 227, 460, to_string(character.getExp()).c_str());
+		pDC->TextOut(256 + 790 - 227, 14, floor_message.c_str());
 
 		ChangeFontLog(pDC, fp, 60, "Noto Sans TC", 800);
 
-		pDC->TextOut(256 + 290, 615, to_string(character.getKeyNumber()).c_str());
-		pDC->TextOut(256 + 290, 688, to_string(character.getSilverKeyNumber()).c_str());
-		pDC->TextOut(256 + 290, 762, to_string(character.getGoldKeyNumber()).c_str());
-		pDC->TextOut(256 + 290, 844, to_string(character.getCoin()).c_str());
+		pDC->TextOut(256 + 290 - 227, 615, to_string(character.getKeyNumber()).c_str());
+		pDC->TextOut(256 + 290 - 227, 688, to_string(character.getSilverKeyNumber()).c_str());
+		pDC->TextOut(256 + 290 - 227, 762, to_string(character.getGoldKeyNumber()).c_str());
+		pDC->TextOut(256 + 290 - 227, 844, to_string(character.getCoin()).c_str());
 
 		pDC->SetTextColor(RGB(0, 0, 0));
 		pDC->TextOut(0, 0, (to_string(mouse_x) + " " + to_string(mouse_y)).c_str());
