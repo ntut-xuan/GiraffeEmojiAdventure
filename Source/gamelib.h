@@ -69,9 +69,9 @@
 #define SIZE_X				 1400		// 設定遊戲畫面的解析度為640x480
 #define SIZE_Y				 1050		// 註：若不使用標準的解析度，則不能切換到全螢幕
 #define OPEN_AS_FULLSCREEN	 false		// 是否以全螢幕方式開啟遊戲
-#define SHOW_LOAD_PROGRESS   false		// 是否顯示loading(OnInit)的進度
+#define SHOW_LOAD_PROGRESS   true		// 是否顯示loading(OnInit)的進度
 #define DEFAULT_BG_COLOR	 RGB(255,255,255)	// 遊戲畫面預設的背景顏色(黑色)
-#define GAME_CYCLE_TIME		 30		    // 每33ms跑一次Move及Show(每秒30次)
+#define GAME_CYCLE_TIME		 15		    // 每33ms跑一次Move及Show(每秒30次)
 #define SHOW_GAME_CYCLE_TIME false		// 是否在debug mode顯示cycle time
 #define ENABLE_GAME_PAUSE	 false		// 是否允許以 Ctrl-Q 暫停遊戲
 #define ENABLE_AUDIO		 true		// 啟動音效介面
@@ -202,7 +202,8 @@ namespace game_framework {
 		CMovingBitmap();
 		int   Height();						// 取得圖形的高度
 		int   Left();						// 取得圖形的左上角的 x 座標
-		void  SetAnimation(int delay, bool once);
+		void  SetAnimation(int delay, bool _once);
+		void  SetAnimation(int delay, int count);
 		void  LoadBitmap(int, COLORREF = CLR_INVALID);		// 載入圖，指定圖的編號(resource)及透明色
 		void  LoadBitmap(char*, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
 		void  LoadBitmap(vector<char*>, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
@@ -213,7 +214,7 @@ namespace game_framework {
 		void  ShowBitmap(double factor);	// 將圖貼到螢幕 factor < 1時縮小，>1時放大。注意：需要VGA卡硬體的支援，否則會很慢
 		void  SelectShowBitmap(int select);
 		void  ToggleAnimation(int delay);
-		void  dispose();
+		void  ToggleAnimation();
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 		bool  IsAnimationDone();
@@ -221,10 +222,11 @@ namespace game_framework {
 	protected:
 		int selector = 0;
 		int delayCount = 10;
-		int tempDelayCount = 10;
+		int animationCount = -1;
+		clock_t last_time = clock();
 		bool isAnimation = false;
 		bool isAnimationDone = true;
-		bool infiniteShowAnimation = false;
+		bool once = false;
 		vector<unsigned> SurfaceID;
 		bool     isBitmapLoaded = false;	// whether a bitmap has been loaded
 		CRect    location;			// location of the bitmap
@@ -319,13 +321,14 @@ namespace game_framework {
 		virtual void OnRButtonUp(UINT nFlags, CPoint point) {}	// 處理滑鼠的動作
 	protected:
 		void GotoGameState(int state);							// 跳躍至指定的state
-		void ShowInitProgress(int percent);						// 顯示初始化的進度
+		void ShowInitProgress(int percent, string message);						// 顯示初始化的進度
 		//
 		// virtual functions, 由繼承者提供implementation
 		//
 		virtual void OnMove() {}								// 移動這個狀態的遊戲元素
 		virtual void OnShow() = 0;								// 顯示這個狀態的遊戲畫面
 		CGame *game;
+		CMovingBitmap loadingBitmap;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////

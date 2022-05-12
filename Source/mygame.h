@@ -42,6 +42,12 @@
 #include "Monster.h"
 #include "NPC.h"
 #include "Stage.h"
+#include "GameMenu.h"
+#include "Spymenu.h"
+#include "FlyingMenu.h"
+#include "GameSystem.h"
+#include "DialogMenu.h"
+#include "Event.h"
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
@@ -82,6 +88,8 @@ namespace game_framework {
 	public:
 		CGameStateRun(CGame *g);
 		~CGameStateRun();
+		static const int start_x;
+		static const int start_y;
 		void OnBeginState();							// 設定每次重玩所需的變數
 		void OnInit();  								// 遊戲的初值及圖形設定
 		void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -91,6 +99,11 @@ namespace game_framework {
 		void OnMouseMove(UINT nFlags, CPoint point);	// 處理滑鼠的動作 
 		void OnRButtonDown(UINT nFlags, CPoint point);  // 處理滑鼠的動作
 		void OnRButtonUp(UINT nFlags, CPoint point);	// 處理滑鼠的動作
+
+		static vector<vector<vector<int>>> stage_entity;
+		static vector<vector<vector<int>>> stage_material;
+		static vector<vector<vector<int>>> hidden_code;
+
 	protected:
 		void OnMove();									// 移動遊戲元素
 		void OnShow();									// 顯示這個狀態的遊戲畫面
@@ -98,30 +111,41 @@ namespace game_framework {
 		bool isKey(int keyCode);
 		bool OpenDoor(int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
+		void loadFixedEntityMap(int ID, vector<string> vec, int animation_time, bool animation_option);
+		void loadFixedMaterialMap(int ID, vector<string> vec, int animation_time, bool animation_option);
 	private:
-
 		const int		STAGES;	// 關卡的總數
-		const int MENU_DELAY_CYCLE = 10;
+		const int MENU_DELAY = 500;
 		int mouse_x, mouse_y;
 		int temp_monster_x, temp_monster_y;
 		int current_stage;
 		int current_shop_price = 20;
-		int tempDelayCycle = 0;
+		int current_dialog = 0;
+		long long tempDelayCycle = MENU_DELAY;
+		int monsterAttackCount = 0;
+		int attack_menu_animation_select = -1;
 		std::string causeDamageValueString;
 		bool getDialogMenuing = false;
 		bool dialogMenuing = false;
 		bool inShopping = false;
 		bool attackMenuing = false;
+		bool helpMenuing = false;
+		bool flyingMenuing = false;
+		bool spyMenuing = false;
 		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // 玩家先手
 		bool teleport_allow = false;
+		bool onMoveDone = false;
+		bool onShowDone = true;
+		int last_time;
+		int show_value_time;
 		std::string floor_message;
 		std::string temp_item_info;
 
 		Stage stage;
+		Event event;
 		Character character;
-		CMovingBitmap menuBitmap;
 		CMovingBitmap characterBitmap;
 
 		/* Attack Menu Object */
@@ -133,19 +157,11 @@ namespace game_framework {
 		CMovingBitmap winningMenu;
 		CMovingBitmap hidden;
 
-		/* Dialog Menu Object */
-		CMovingBitmap dialogMenu;
-		CMovingBitmap dialogMenuCharacter;
-
-		/* Shoping Menu Object */
-		int tempSelect = 0;
-		const int OPTION_GAP = 150;
-		int menuOptionGap = 120;
-		CMovingBitmap optionMenu;
-		CMovingBitmap optionArrow;
-
 		/* Get Dialog Menu Object */
 		CMovingBitmap getDialogMenu;
+
+		/* Help Menu */
+		CMovingBitmap helpMenu;
 
 		/* Attack Animation Vector (enemy and character) */
 		vector<CMovingBitmap> enemyAttackAnimation = vector<CMovingBitmap>(3);
@@ -162,10 +178,12 @@ namespace game_framework {
 		map<int, string> block_bitmap_map;
 		vector<CMovingBitmap> monster_map = vector<CMovingBitmap>(200);
 		vector<CMovingBitmap> npc_map = vector<CMovingBitmap>(200);
-		vector<vector<vector<int>>> hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
-		//vector<vector<vector<CMovingBitmap>>> hidden_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
-		vector<vector<vector<CMovingBitmap>>> material_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
-		vector<vector<vector<CMovingBitmap>>> entity_map = vector<vector<vector<CMovingBitmap>>>(STAGES, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(11)));
+		vector<vector<vector<CMovingBitmap>>> fixed_entity_map = vector<vector<vector<CMovingBitmap>>>(11, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(200)));
+		vector<vector<vector<CMovingBitmap>>> fixed_material_map = vector<vector<vector<CMovingBitmap>>>(11, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(200)));
+		GameSystem gameSystem;
+		SpyMenu spyMenu;
+		FlyingMenu flyingMenu;
+		DialogMenu dialogMenu;
 
 		void ShowText();
 	};

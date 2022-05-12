@@ -381,6 +381,8 @@ namespace game_framework {
 		location.bottom = ny + bitmapSize.bmHeight;
 		SurfaceID.push_back(CDDraw::RegisterBitmap(filename, color));
 		isBitmapLoaded = true;
+
+		bmp->DeleteObject();
 	}
 
 	void CMovingBitmap::LoadBitmap(vector<char*> filename, COLORREF color)
@@ -404,6 +406,8 @@ namespace game_framework {
 			location.bottom = ny + bitmapSize.bmHeight;
 			SurfaceID.push_back(CDDraw::RegisterBitmap(filename[i], color));
 			isBitmapLoaded = true;
+
+			bmp->DeleteObject();
 		}
 	}
 
@@ -428,6 +432,8 @@ namespace game_framework {
 			location.bottom = ny + bitmapSize.bmHeight;
 			SurfaceID.push_back(CDDraw::RegisterBitmap((char*)filename[i].c_str(), color));
 			isBitmapLoaded = true;
+
+			bmp->DeleteObject();
 		}
 	}
 
@@ -449,25 +455,33 @@ namespace game_framework {
 		location.bottom -= dy;
 	}
 
-	void CMovingBitmap::SetAnimation(int delay, bool once) {
-		selector = 0;
-		isAnimation = true;
-		infiniteShowAnimation = !once;
+	void CMovingBitmap::SetAnimation(int delay, bool _once) {
+		if(!_once) isAnimation = true;
+		once = _once;
 		delayCount = delay;
-		tempDelayCount = delay;
+	}
+
+	void CMovingBitmap::SetAnimation(int delay, int count) {
+		isAnimation = true;
+		animationCount = count;
+		delayCount = delay / count;
 	}
 
 	void CMovingBitmap::ShowBitmap()
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before ShowBitmap() is called !!!");
 		CDDraw::BltBitmapToBack(SurfaceID[selector], location.left, location.top);
-		if (isAnimation == true && --tempDelayCount <= 0) {
+		if (isAnimation == true && clock() - last_time >= delayCount) {
 			selector += 1;
-			tempDelayCount = delayCount;
-			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
+			last_time = clock();
+			if (selector == SurfaceID.size() && animationCount > 0) {
+				animationCount -= 1;
+			}
+			if (selector == SurfaceID.size() && (once || animationCount == 0)) {
 				isAnimation = false;
 				isAnimationDone = true;
 				selector = SurfaceID.size() - 1;
+				return;
 			}
 			selector = selector % SurfaceID.size();
 		}
@@ -477,13 +491,17 @@ namespace game_framework {
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before ShowBitmap() is called !!!");
 		CDDraw::BltBitmapToBack(SurfaceID[selector], location.left, location.top, factor);
-		if (isAnimation == true && --tempDelayCount <= 0) {
+		if (isAnimation == true && clock() - last_time >= delayCount) {
 			selector += 1;
-			tempDelayCount = delayCount;
-			if (selector == SurfaceID.size() && infiniteShowAnimation == false) {
+			last_time = clock();
+			if (selector == SurfaceID.size() && animationCount > 0) {
+				animationCount -= 1;
+			}
+			if (selector == SurfaceID.size() && (once || animationCount == 0)) {
 				isAnimation = false;
 				isAnimationDone = true;
 				selector = SurfaceID.size() - 1;
+				return;
 			}
 			selector = selector % SurfaceID.size();
 		}
@@ -507,7 +525,8 @@ namespace game_framework {
 	}
 
 	void CMovingBitmap::ToggleAnimation(int delay) {
-		SetAnimation(delay, true);
+		selector = 0;
+		isAnimation = true;
 		isAnimationDone = false;
 	}
 
@@ -533,7 +552,7 @@ namespace game_framework {
 		game->SetGameState(state);
 	}
 
-	void CGameState::ShowInitProgress(int percent)
+	void CGameState::ShowInitProgress(int percent, string message)
 	{
 		if (!SHOW_LOAD_PROGRESS)
 			return;
@@ -551,10 +570,12 @@ namespace game_framework {
 		const int progress_y2 = y2 - pen_width;
 
 		CDDraw::BltBackColor(DEFAULT_BG_COLOR);		// 將 Back Plain 塗上預設的顏色
+
 		CMovingBitmap loading;						// 貼上loading圖示
-		loading.LoadBitmap(IDB_LOADING, RGB(0, 0, 0));
-		loading.SetTopLeft((SIZE_X - loading.Width()) / 2, y1 - 2 * loading.Height());
+		loading.LoadBitmap({"RES/loading.bmp"});
+		loading.SetTopLeft(0, 0);
 		loading.ShowBitmap();
+
 		//
 		// 以下為CDC的用法
 		//
@@ -562,7 +583,7 @@ namespace game_framework {
 		CPen *pp, p(PS_NULL, 0, RGB(0, 0, 0));		// 清除pen
 		pp = pDC->SelectObject(&p);
 
-		CBrush *pb, b(RGB(0, 255, 0));				// 畫綠色 progress框
+		CBrush *pb, b(RGB(155, 155, 155));				// 畫綠色 progress框
 		pb = pDC->SelectObject(&b);
 		pDC->Rectangle(x1, y1, x2, y2);
 
@@ -570,12 +591,28 @@ namespace game_framework {
 		pDC->SelectObject(&b1);
 		pDC->Rectangle(progress_x1, progress_y1, progress_x2_end, progress_y2);
 
-		CBrush b2(RGB(255, 255, 0));					// 畫黃色 progrss進度
+		CBrush b2(RGB(30, 30, 30));					// 畫黃色 progrss進度
 		pDC->SelectObject(&b2);
 		pDC->Rectangle(progress_x1, progress_y1, progress_x2, progress_y2);
 
 		pDC->SelectObject(pp);						// 釋放 pen
 		pDC->SelectObject(pb);						// 釋放 brush
+
+		CFont *fp;
+
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(255, 255, 255));
+		LOGFONT lf;
+		CFont f;
+		memset(&lf, 0, sizeof(lf));
+		lf.lfHeight = 30;
+		lf.lfWeight = 500;
+		strcpy(lf.lfFaceName, "微軟正黑體");
+		f.CreateFontIndirect(&lf);
+		fp = pDC->SelectObject(&f);
+
+		pDC->TextOut(250, 445, message.c_str());
+
 		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC
 		//
 		// 如果是別的地方用到CDC的話，不要抄以下這行，否則螢幕會閃爍
@@ -751,8 +788,9 @@ namespace game_framework {
 
 	void CGame::OnLButtonDown(UINT nFlags, CPoint point)
 	{
-		if (running)
+		if (running) {
 			gameState->OnLButtonDown(nFlags, point);
+		}
 	}
 
 	void CGame::OnRButtonDown(UINT nFlags, CPoint point)

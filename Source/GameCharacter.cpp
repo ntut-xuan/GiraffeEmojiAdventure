@@ -128,4 +128,12 @@ namespace game_framework {
 		health = max(0, health - damage);
 	}
 
+	void Character::setItemCount(int item, int count){
+		itemCount[item] = count;
+	}
+
+	int Character::getItemCount(int item) {
+		return itemCount[item];
+	}
+
 }

@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 #pragma once
 namespace game_framework {
 	class Character {
@@ -27,11 +28,14 @@ namespace game_framework {
 		void setLevel(int level);
 		void setCoin(int coin);
 		void setExp(int exp);
+		void setItemCount(int item, int count);
+		int getItemCount(int item);
 		void changeKeyNumber(int keyCode, int amount);
 	protected:
 		int x, y; // 座標
 		int level, health, attack, defence, speed, coin, exp; // 人物屬性
 		int goldKeyNumber, silverKeyNumber, keyNumber;
 		std::string status;
+		std::map<int, int> itemCount;
 	};
 }

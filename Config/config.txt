@@ -7,7 +7,7 @@ iron_fence 67 5
 downstair 13 1
 gem_door 72 1
 
-22
+27
 red_key 8
 blue_key 9
 yellow_key 10
@@ -27,11 +27,16 @@ light_shiled 74
 sword_b 75
 gem_hoe 76
 sword_a 79
-sword_c 80
-sword_d 81
+sword_d 80
+sword_e 81
 shield_d 82
+hoe 93
+sword_c 96
+cross 97
+amulet_of_ice 98
+holy_cross_shield 99
 
-36
+44
 green_slime 12
 red_slime 14
 bat 15
@@ -68,14 +73,31 @@ swordsman 56
 vampire 58
 vampire_bat 59
 zombie_knight 60
+octopus_8 90
+princess 92
+mercury_man 100
+silver_slime 101
+sword_king 102
+poison_zombie 103
+poison_bat 104
+skeleton_s 105
 
-6
+15
+octopus_1 83
+octopus_2 84
+octopus_3 85
+octopus_4 86
+octopus_5 87
+octopus_6 88
+octopus_7 89
+octopus_9 91
 shopkeeper 18
 shop_1_2 20
 shop_2_2 65
 elder 29
 thief 57
 princess 78
+fairy 31
 
 4
 shop_1_1 19

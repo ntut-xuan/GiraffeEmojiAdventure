@@ -10,17 +10,19 @@
 #include "gamelib.h"
 #include "mygame.h"
 #include "MainFrm.h"
+#include <thread>
+#include <set>
 
 #define element_width 77
-//#define UU_DEBUG 0
+#define UU_DEBUG 0
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
 	// 這個class為遊戲的遊戲開頭畫面物件
 	/////////////////////////////////////////////////////////////////////////////
 
-	const int start_x = 472;
-	const int start_y = 77;
+	const int CGameStateRun::start_x = 472;
+	const int CGameStateRun::start_y = 77;
 
 	void ChangeFontLog(CDC* pDC, CFont* &fp, int size, string fontName, int weight = 500) {
 		LOGFONT lf;
@@ -41,7 +43,7 @@ namespace game_framework {
 	}
 
 	CGameStateInit::CGameStateInit(CGame *g)
-	: CGameState(g)
+		: CGameState(g)
 	{
 	}
 
@@ -51,7 +53,7 @@ namespace game_framework {
 		// 當圖很多時，OnInit載入所有的圖要花很多時間。為避免玩遊戲的人
 		//     等的不耐煩，遊戲會出現「Loading ...」，顯示Loading的進度。
 		//
-		//ShowInitProgress(0);	// 一開始的loading進度為0%
+		ShowInitProgress(0, "Hi!");	// 一開始的loading進度為0%
 		//
 		// 開始載入資料
 		//
@@ -78,7 +80,7 @@ namespace game_framework {
 		if (nChar == KEY_SPACE)
 			GotoGameState(GAME_STATE_RUN);						// 切換至GAME_STATE_RUN
 		else if (nChar == KEY_ESC)								// Demo 關閉遊戲的方法
-			PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE,0,0);	// 關閉遊戲
+			PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);	// 關閉遊戲
 	}
 
 	void CGameStateInit::OnLButtonDown(UINT nFlags, CPoint point)
@@ -86,20 +88,20 @@ namespace game_framework {
 		//GotoGameState(GAME_STATE_RUN);		// 切換至GAME_STATE_RUN
 	}
 
-	void CGameStateInit::OnShow(){
+	void CGameStateInit::OnShow() {
 
 		giraffe_photo.ShowBitmap();
 
-		CDC *pDC = CDDraw::GetBackCDC();
-		CFont f,*fp;
+		/*CDC *pDC = CDDraw::GetBackCDC();
+		CFont f, *fp;
 
 		time_t rawtime;
 		time(&rawtime);
 
-		f.CreatePointFont(560, "Noto Sans TC");	
-		fp=pDC->SelectObject(&f);
-		pDC->SetBkColor(RGB(255,255,255));
-		pDC->SetTextColor(RGB(0,0,0));
+		f.CreatePointFont(560, "Noto Sans TC");
+		fp = pDC->SelectObject(&f);
+		pDC->SetBkColor(RGB(255, 255, 255));
+		pDC->SetTextColor(RGB(0, 0, 0));
 		//pDC->TextOut(400, 50, "魔塔（但封面還沒做好.jpg）");
 
 		f.Detach();
@@ -112,15 +114,15 @@ namespace game_framework {
 		//pDC->TextOut(1000, 850, ctime(&rawtime));
 
 		pDC->SelectObject(fp);						// 放掉 font f (千萬不要漏了放掉)
-		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC
-	}								
+		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC*/
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// 這個class為遊戲的結束狀態(Game Over)
 	/////////////////////////////////////////////////////////////////////////////
 
 	CGameStateOver::CGameStateOver(CGame *g)
-	: CGameState(g)
+		: CGameState(g)
 	{
 	}
 
@@ -143,14 +145,14 @@ namespace game_framework {
 	void CGameStateOver::OnShow()
 	{
 		CDC *pDC = CDDraw::GetBackCDC();			// 取得 Back Plain 的 CDC 
-		CFont f,*fp;
-		f.CreatePointFont(160,"Times New Roman");	// 產生 font f; 160表示16 point的字
-		fp=pDC->SelectObject(&f);					// 選用 font f
-		pDC->SetBkColor(RGB(0,0,0));
-		pDC->SetTextColor(RGB(255,255,0));
+		CFont f, *fp;
+		f.CreatePointFont(160, "Times New Roman");	// 產生 font f; 160表示16 point的字
+		fp = pDC->SelectObject(&f);					// 選用 font f
+		pDC->SetBkColor(RGB(0, 0, 0));
+		pDC->SetTextColor(RGB(255, 255, 0));
 		char str[80];								// Demo 數字對字串的轉換
 		sprintf(str, "Game Over ! (%d)", counter / 30);
-		pDC->TextOut(240,210,str);
+		pDC->TextOut(240, 210, str);
 		pDC->SelectObject(fp);						// 放掉 font f (千萬不要漏了放掉)
 		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC
 	}
@@ -159,6 +161,10 @@ namespace game_framework {
 	// 這個class為遊戲的遊戲執行物件，主要的遊戲程式都在這裡
 	/////////////////////////////////////////////////////////////////////////////
 
+	vector<vector<vector<int>>> CGameStateRun::stage_entity = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
+	vector<vector<vector<int>>> CGameStateRun::stage_material = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
+	vector<vector<vector<int>>> CGameStateRun::hidden_code = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
+
 	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(50)
 	{
 
@@ -166,23 +172,46 @@ namespace game_framework {
 
 	CGameStateRun::~CGameStateRun()
 	{
-		
+
+	}
+
+	void CGameStateRun::loadFixedEntityMap(int ID, vector<string> vec, int animation_time, bool animation_option) {
+		for (int i = 0; i < 11; i++) {
+			for (int j = 0; j < 11; j++) {
+				fixed_entity_map[i][j][ID].LoadBitmapByString(vec);
+				fixed_entity_map[i][j][ID].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
+				if (animation_time) {
+					fixed_entity_map[i][j][ID].SetAnimation(animation_time, animation_option);
+				}
+			}
+		}
+	}
+
+	void CGameStateRun::loadFixedMaterialMap(int ID, vector<string> vec, int animation_time, bool animation_option) {
+		for (int i = 0; i < 11; i++) {
+			for (int j = 0; j < 11; j++) {
+				fixed_material_map[i][j][ID].LoadBitmapByString(vec);
+				fixed_material_map[i][j][ID].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
+				if (animation_time) {
+					fixed_material_map[i][j][ID].SetAnimation(animation_time, animation_option);
+				}
+			}
+		}
 	}
 
 	void CGameStateRun::OnInit()  								// 遊戲的初值及圖形設定
 	{
-
-		menuBitmap.LoadBitmapA("RES/menu.bmp", RGB(0, 0, 0));
-		menuBitmap.SetTopLeft(0, 0);
 
 		ifstream in("Config/config.txt");
 		ifstream monster_data_in("Config/monster_config.txt");
 
 		int n;
 
+		int count = 0;
+
 		for (int r = 0; r < 5; r++) {
 			in >> n;
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++, count++) {
 				string file_name;
 				int ID;
 				in >> file_name >> ID;
@@ -190,18 +219,25 @@ namespace game_framework {
 					int frame_count;
 					in >> frame_count;
 					normal_bitmap_map[ID] = file_name;
-					bitmap_frame[ID] = frame_count;
+					vector<string> frame = { "RES/" + file_name + ".bmp" };
+					for (int i = 0; i < frame_count - 1; i++) {
+						frame.push_back("RES/" + file_name + to_string(2 + i) + ".bmp");
+					}
+					loadFixedEntityMap(ID, { frame }, 0, 0);
 				}
 				else if (r == 1) {
 					functional_entity_bitmap_map[ID] = file_name;
+					loadFixedEntityMap(ID, { "RES/" + file_name + ".bmp" }, 0, 0);
 				}
 				else if (r == 2) {
 					string filename = "RES/" + file_name + ".bmp";
 					string filename2 = "RES/" + file_name + "2.bmp";
 					char* char_filename = (char*)filename.c_str();
 					char* char_filename2 = (char*)filename2.c_str();
+					loadFixedEntityMap(ID, { filename, filename2 }, 200, false);
+					spyMenu.LoadMonsterBitmap(ID, { char_filename, char_filename2 });
 					monster_map[ID].LoadBitmap({ char_filename, char_filename2 });
-					monster_map[ID].SetAnimation(5, false);
+					monster_map[ID].SetAnimation(200, false);
 					monster_map[ID].SetTopLeft(711 - 227, 417);
 					monster_bitmap_map[ID] = file_name;
 				}
@@ -210,132 +246,67 @@ namespace game_framework {
 					string filename2 = "RES/" + file_name + "2.bmp";
 					char* char_filename = (char*)filename.c_str();
 					char* char_filename2 = (char*)filename2.c_str();
+					loadFixedEntityMap(ID, { filename, filename2 }, 200, false);
 					npc_map[ID].LoadBitmap({ char_filename, char_filename2 });
-					npc_map[ID].SetAnimation(5, false);
+					npc_map[ID].SetAnimation(200, false);
 					npc_map[ID].SetTopLeft(870 - 227, 161);
 					npc_bitmap_map[ID] = file_name;
 				}
 				else if (r == 4) {
 					block_bitmap_map[ID] = file_name;
+					loadFixedEntityMap(ID, { "RES/" + file_name + ".bmp" }, 0, 0);
 				}
+				ShowInitProgress((int)(count * 0.5), "Loading Entity " + file_name);
 			}
 		}
+
+		ShowInitProgress(100, "Done!");
+
+		map<string, int> special_event_number;
+		special_event_number["RESPAWN_52"] = RESPAWN_52;
+		special_event_number["RESPAWN_53"] = RESPAWN_53;
+		special_event_number["ONE_SHOT_ATTACK"] = ONE_SHOT_ATTACK;
+		special_event_number["IGNORE_DEFENCE"] = IGNORE_DEFENCE;
+		special_event_number["CAUSE_WEEK"] = CAUSE_WEEK;
+		special_event_number["POSION_ATTACK"] = POSION_ATTACK;
+		special_event_number["HARD_HARD_HARD"] = HARD_HARD_HARD;
+		special_event_number["MULTIPLE_ATTACK"] = MULTIPLE_ATTACK;
+		special_event_number["DODGE_ATTACK"] = DODGE_ATTACK;
 
 		monster_data_in >> n;
 		for (int i = 0; i < n; i++) {
 			string name;
+			string special_event;
 			int ID, health, attack, defence, speed, attack_count, exp, gold;
-			monster_data_in >> ID >> name >> health >> attack >> defence >> speed >> attack_count >> exp >> gold;
-			Monster monster(ID, name, health, attack, defence, speed, attack_count, gold, exp);
+			monster_data_in >> ID >> name >> health >> attack >> defence >> speed >> attack_count >> exp >> gold >> special_event;
+			Monster monster(ID, name, health, attack, defence, speed, attack_count, gold, exp, special_event_number[special_event]);
 			monster_value[ID] = monster;
 		}
 
-		for (int s = 26; s <= 46; s++) {
-			vector<vector<int>> material_code = stage.getStageMaterial(s);
-			vector<vector<int>> entity_code = stage.getStageEntity(s);
+		gameSystem.LoadBitmap({ "RES/menu.bmp" });
 
-			for (int i = 0; i < 11; i++) {
-				for (int j = 0; j < 11; j++) {
-					if (material_code[i][j] == WALL) {
-						material_map[s][i][j].LoadBitmap("RES/wall.bmp");
-						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (material_code[i][j] == ROAD) {
-						material_map[s][i][j].LoadBitmap("RES/road.bmp");
-						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (material_code[i][j] == LAVA) {
-						material_map[s][i][j].LoadBitmap({ "RES/lava.bmp", "RES/lava2.bmp" });
-						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (material_code[i][j] == WALL_SHINE) {
-						material_map[s][i][j].LoadBitmap({ "RES/wall_shine.bmp", "RES/wall_shine2.bmp" });
-						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (material_code[i][j] == WALL_SPECIAL) {
-						material_map[s][i][j].LoadBitmap({ "RES/wall_special.bmp" });
-						material_map[s][i][j].SetAnimation(5, false);
-						material_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-				}
-			}
-
-			for (int i = 0; i < 11; i++) {
-				for (int j = 0; j < 11; j++) {
-					int ID = entity_code[i][j];
-					if (ID == 0 || ID == 1) {
-						continue;
-					}
-					if (normal_bitmap_map[ID].length() != 0) {
-						vector<string> frames = {};
-						for (int i = 0; i < bitmap_frame[ID]; i++) {
-							string filename = "RES/" + normal_bitmap_map[ID] + (i == 0 ? "" : to_string(i + 1)) + ".bmp";
-							frames.push_back(filename);
-						}
-						entity_map[s][i][j].LoadBitmapByString(frames, RGB(0, 0, 0));
-						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (functional_entity_bitmap_map[ID].length() != 0) {
-						string filename = "RES/" + functional_entity_bitmap_map[ID] + ".bmp";
-						char* char_filename = (char*)filename.c_str();
-						entity_map[s][i][j].LoadBitmap(char_filename);
-						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else if (block_bitmap_map[ID].length() != 0) {
-						string filename = "RES/" + block_bitmap_map[ID] + ".bmp";
-						char* char_filename = (char*)filename.c_str();
-						entity_map[s][i][j].LoadBitmap(char_filename);
-						entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-					}
-					else {
-						if (monster_bitmap_map[ID].length() != 0) {
-							string filename = "RES/" + monster_bitmap_map[ID] + ".bmp";
-							string filename2 = "RES/" + monster_bitmap_map[ID] + "2.bmp";
-							char* char_filename = (char*)filename.c_str();
-							char* char_filename2 = (char*)filename2.c_str();
-							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
-							entity_map[s][i][j].SetAnimation(5, false);
-							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-						}
-						else if (npc_bitmap_map[ID].length() != 0) {
-							string filename = "RES/" + npc_bitmap_map[ID] + ".bmp";
-							string filename2 = "RES/" + npc_bitmap_map[ID] + "2.bmp";
-							char* char_filename = (char*)filename.c_str();
-							char* char_filename2 = (char*)filename2.c_str();
-							entity_map[s][i][j].LoadBitmap({ char_filename, char_filename2 });
-							entity_map[s][i][j].SetAnimation(5, false);
-							entity_map[s][i][j].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
-						}
-						else {
-							GAME_ASSERT(false, "ID NOT EXIST!");
-						}
-					}
-				}
-			}
-		}
+		loadFixedMaterialMap(WALL, { "RES/wall.bmp" }, 0, 0);
+		loadFixedMaterialMap(ROAD, { "RES/road.bmp" }, 0, 0);
+		loadFixedMaterialMap(LAVA, { "RES/lava.bmp", "RES/lava2.bmp" }, 200, false);
+		loadFixedMaterialMap(WALL_SHINE, { "RES/wall_shine.bmp", "RES/wall_shine2.bmp" }, 200, false);
+		loadFixedMaterialMap(WALL_SPECIAL, { "RES/wall_special.bmp" }, 200, false);
+		loadFixedMaterialMap(WALL_B, { "RES/wall_b.bmp" }, 200, false);
+		loadFixedMaterialMap(LAVA_ROAD, { "RES/lava_road.bmp", "RES/lava_road2.bmp" }, 200, false);
 
 		/* Attack animation Load */
 
 		enemyAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
 		enemyAttackAnimation[0].SetTopLeft(671 - 227, 377);
-		enemyAttackAnimation[0].SetAnimation(2, true);
+		enemyAttackAnimation[0].SetAnimation(100, true);
 
 		characterAttackAnimation[0].LoadBitmap({ "RES/attack_animation_1.bmp", "RES/attack_animation_2.bmp", "RES/attack_animation_3.bmp", "RES/empty_animation.bmp" }, RGB(0, 0, 0));
 		characterAttackAnimation[0].SetTopLeft(1427 - 227, 387);
-		characterAttackAnimation[0].SetAnimation(2, true);
+		characterAttackAnimation[0].SetAnimation(100, true);
 
 		/* Bitmap Menu Load */
 
-		dialogMenu.LoadBitmap("RES/DialogMenu.bmp", RGB(0, 0, 0));
-		dialogMenu.SetTopLeft(815 - 227, 107);
-
-		optionMenu.LoadBitmap("RES/OptionMenu1.bmp", RGB(0, 0, 0));
-		optionMenu.SetTopLeft(815 - 227, 414);
-
-		optionArrow.LoadBitmap("RES/optionArrow.bmp", RGB(0, 0, 0));
-		optionArrow.SetTopLeft(875 - 227, 464);
+		dialogMenu.LoadBitmap();
+		dialogMenu.setNPCMap(npc_map);
 
 		/* Character Attack Menu Load */
 
@@ -354,24 +325,45 @@ namespace game_framework {
 		getDialogMenu.LoadBitmap({ "RES/getDialog.bmp" });
 		getDialogMenu.SetTopLeft(656 - 227, 400);
 
+		helpMenu.LoadBitmapA("RES/help.bmp");
+		helpMenu.SetTopLeft(start_x, start_y);
+
+		/* Flying Menu Bitmap */
+
+		flyingMenu.LoadBitmap();
+
+		/* Spy Menu Bitmap */
+
+		spyMenu.LoadBitmap();
+
 	}
 
 	void CGameStateRun::OnBeginState()
-	{	
+	{
 		character = Character();
-		
+
 		current_stage = 26;
 		temp_monster_x = NULL;
 		temp_monster_y = NULL;
 		dialogMenuing = false;
 		inShopping = false;
 		attackMenuing = false;
+		dialogMenuing = false;
+		flyingMenuing = false;
+		spyMenuing = false;
 		showAttackValue = true;
 		enterStatus = false;
 		turn = true;
 		teleport_allow = false;
-		
+
+		stage_entity = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
+		stage_material = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 		hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
+
+		for (int i = 1; i <= 46; i++) {
+			stage_entity[i] = stage.getStageEntity(i);
+			stage_material[i] = stage.getStageMaterial(i);
+		}
 
 #ifdef UU_DEBUG 
 		character.setAttack(998244353);
@@ -379,26 +371,14 @@ namespace game_framework {
 		character.setHealth(998244353);
 		character.setSpeed(998244353);
 		character.setCoin(998244353);
+		character.setExp(998244353);
 		character.changeKeyNumber(KEY, 23766);
 		character.changeKeyNumber(SILVER_KEY, 23766);
 		character.changeKeyNumber(GOLD_KEY, 23766);
 		teleport_allow = true;
 #endif 
 
-		for (int i = 26; i <= 46; i++) {
-			for (int j = 0; j < 11; j++) {
-				for (int k = 0; k < 11; k++) {
-					if (entity_map[i][j][k].GetMovingBitmapFrame() > 0) {
-						entity_map[i][j][k].SelectShowBitmap(0);
-					}
-					if (material_map[i][j][k].GetMovingBitmapFrame() > 0) {
-						material_map[i][j][k].SelectShowBitmap(0);
-					}
-				}
-			}
-		}
-
-		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
+		vector<vector<int>> entity_code = stage_entity[current_stage];
 
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
@@ -407,6 +387,8 @@ namespace game_framework {
 				}
 			}
 		}
+
+		flyingMenu.setFlyingSelect(current_stage);
 
 	}
 
@@ -419,9 +401,13 @@ namespace game_framework {
 	}
 
 	bool CGameStateRun::OpenDoor(int x, int y, int doorCode) {
+
+		vector<vector<int>> entity_ID = stage_entity[current_stage];
+
 		if (doorCode == DOOR) {
 			if (character.getKeyNumber() > 0) {
-				entity_map[current_stage][x][y].ToggleAnimation(1);
+				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
+				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(KEY, -1);
 				return true;
@@ -429,7 +415,8 @@ namespace game_framework {
 		}
 		if (doorCode == SILVER_DOOR) {
 			if (character.getSilverKeyNumber() > 0) {
-				entity_map[current_stage][x][y].ToggleAnimation(1);
+				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
+				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(SILVER_KEY, -1);
 				return true;
@@ -437,14 +424,16 @@ namespace game_framework {
 		}
 		if (doorCode == GOLD_DOOR) {
 			if (character.getGoldKeyNumber() > 0) {
-				entity_map[current_stage][x][y].ToggleAnimation(1);
+				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
+				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
 				hidden_code[current_stage][x][y] = 1;
 				character.changeKeyNumber(GOLD_KEY, -1);
 				return true;
 			}
 		}
 		if (doorCode == IRON_FENCE) {
-			entity_map[current_stage][x][y].ToggleAnimation(1);
+			fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
+			fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
 			hidden_code[current_stage][x][y] = 1;
 			return true;
 		}
@@ -471,10 +460,10 @@ namespace game_framework {
 	}
 
 	void CGameStateRun::OnMove()							// 移動遊戲元素
-	{	
+	{
 
 		if (character.getHealth() == 0) {
-			GotoGameState(GAME_STATE_OVER);
+			//GotoGameState(GAME_STATE_OVER);
 		}
 
 		floor_message = "主塔　";
@@ -483,59 +472,92 @@ namespace game_framework {
 			floor_message += "入口";
 		}
 		else {
-			floor_message += to_string(current_stage-26) + "F";
+			floor_message += to_string(current_stage - 26) + "F";
 		}
 
 		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
-		if (attackMenuing && --tempDelayCycle <= 0) {
+		if (attackMenuing && (clock() - last_time) >= tempDelayCycle) {
+
+			last_time = clock();
+
 			if (character.getHealth() && monster.getHealth()) {
+
+				int probabilityCauseDamage = rand() % 100;
+				int probabilityCauseCriticalHit = rand() % 100;
+
+				int mo_health = monster.getHealth();
+				int mo_ID = monster.getID();
+				int mo_attack = monster.getAttack();
+				int mo_defence = monster.getDefence();
+				int mo_speed = monster.getSpeed();
+				int mo_special = monster.getSpecialEvent();
+				int mo_attack_count = monster.getAttackCount();
+
+				int ch_health = character.getHealth();
+				int ch_attack = character.getAttack();
+				int ch_defence = mo_special == IGNORE_DEFENCE ? 0 : character.getDefence();
+				int ch_speed = character.getSpeed();
+
+				if (mo_special == ONE_SHOT_ATTACK) {
+					if ((mo_ID == KNIGHT && probabilityCauseCriticalHit <= 30) || (mo_ID == IRON_KNIGHT_B && probabilityCauseCriticalHit <= 40) || (mo_ID == IRON_KNIGHT_A && probabilityCauseCriticalHit <= 50)) {
+						mo_attack = ch_health + ch_defence + (rand() % 12345 + 12345) * (rand() % 12345 + 12345);
+					}
+				}
+
 				if (turn) {
-					int probabilityCauseDamage = rand() % 100;
+					attack_menu_animation_select = 1;
 					int causeDamageValue;
-					if (probabilityCauseDamage < monster.getSpeed()) {
+					if (probabilityCauseDamage < mo_speed) {
 						causeDamageValue = 0;
 						causeDamageValueString = "Miss!";
 					}
 					else {
-						causeDamageValue = max(1, character.getAttack() - monster.getDefence());
+						causeDamageValue = max(1, ch_attack - mo_defence) * (probabilityCauseCriticalHit <= 2 ? 2 : 1);;
 						causeDamageValueString = to_string(causeDamageValue);
 					}
 					monster.causeDamage(causeDamageValue);
-					enemyAttackAnimation[0].SetAnimation(1, true);
+					enemyAttackAnimation[0].ToggleAnimation(100);
+					monsterAttackCount = mo_attack_count;
+					tempDelayCycle = MENU_DELAY / (monster.getHealth() == 0 ? 1 : mo_attack_count);
+					turn = !turn;
 				}
 				else {
-					int probabilityCauseDamage = rand() % 100;
+					attack_menu_animation_select = 0;
 					int causeDamageValue;
-					if (probabilityCauseDamage < character.getSpeed()) {
+					if (probabilityCauseDamage < ch_speed) {
 						causeDamageValue = 0;
 						causeDamageValueString = "Miss!";
 					}
 					else {
-						causeDamageValue = max(0, monster.getAttack() - character.getDefence());
+						causeDamageValue = max(0, mo_attack - ch_defence) * (probabilityCauseCriticalHit <= 2 ? 2 : 1);
 						causeDamageValueString = to_string(causeDamageValue);
 					}
 					character.causeDamage(causeDamageValue);
-					characterAttackAnimation[0].SetAnimation(1, true);
+					characterAttackAnimation[0].ToggleAnimation(100);
+					if (--monsterAttackCount == 0) {
+						turn = !turn;
+						tempDelayCycle = MENU_DELAY;
+						monsterAttackCount = mo_attack_count;
+					}
 				}
 				showAttackValue = true;
-				turn = !turn;
 			}
 
-			if (enterStatus == true) {
+			if (enterStatus) {
 				showAttackValue = false;
 			}
 
-			if (showAttackValue && monster.getHealth() == 0) {
+			if (!enterStatus && monster.getHealth() == 0) {
 				character.setExp(character.getExp() + monster.getExp());
 				character.setCoin(character.getCoin() + monster.getGold());
 				enterStatus = true;
 				turn = false;
 			}
 
-			tempDelayCycle = MENU_DELAY_CYCLE;
-
 		}
+
+		gameSystem.setParameter(character, mouse_x, mouse_y, floor_message);
 
 	}
 
@@ -547,10 +569,14 @@ namespace game_framework {
 		const char KEY_RIGHT = 0x27; // keyboard右箭頭
 		const char KEY_DOWN = 0x28; // keyboard下箭頭
 		const char KEY_ENTER = 0x0D;
+		const char KEY_D = 0x44;
 		const char KEY_Q = 0x51;
+		const char KEY_L = 0x4C;
+		const char KEY_F = 0x46;
+		const char KEY_R = 0x52;
 
-		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
-		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
+		vector<vector<int>> material_code = stage_material[current_stage];
+		vector<vector<int>> entity_code = stage_entity[current_stage];
 
 		int x = character.getX();
 		int y = character.getY();
@@ -576,66 +602,102 @@ namespace game_framework {
 				temp_monster_y = 0;
 				enterStatus = false;
 				turn = true;
-				return;
 			}
-		}
-
-		if (inShopping) {
-			if (nChar == KEY_DOWN) {
-				tempSelect += 1;
-				tempSelect %= (int)npc.getOption().size();
-			}
-			else if (nChar == KEY_UP) {
-				tempSelect -= 1;
-				tempSelect += (int)npc.getOption().size();
-				tempSelect %= (int)npc.getOption().size();
-			}
-			else if (nChar == KEY_ENTER) {
-				TRACE("%d\n", tempSelect);
-				if (character.getCoin() >= NPC::increaseCost1) {
-					if (tempSelect == 0) {
-						character.setHealth(character.getHealth() + 500);
-						character.setCoin(character.getCoin() - current_shop_price);
-					}
-					else if (tempSelect == 1) {
-						character.setAttack(character.getAttack() + 3);
-						character.setCoin(character.getCoin() - current_shop_price);
-					}
-					else if (tempSelect == 2) {
-						character.setDefence(character.getDefence() + 3);
-						character.setCoin(character.getCoin() - current_shop_price);
-					}
-					NPC::increaseCost1 += 1;
-				}
-				if (tempSelect == 3) {
-					inShopping = false;
-					enterStatus = false;
-					dialogMenuing = false;
-				}
-				return;
-			}
-			optionArrow.SetTopLeft(875  , 464 + menuOptionGap * tempSelect);
 			return;
 		}
+
+		if (nChar == KEY_R) {
+			GotoGameState(GAME_STATE_INIT);
+		}
+
+		if (nChar == KEY_L && !attackMenuing && !dialogMenuing) {
+			helpMenuing = !helpMenuing;
+			return;
+		}
+
+		if (nChar == KEY_F && !(attackMenuing || dialogMenuing || helpMenuing || spyMenuing) && !(current_stage == 36 || current_stage == 46)) {
+			flyingMenuing = !flyingMenuing;
+			return;
+		}
+
+		if (nChar == KEY_D && !attackMenuing && !dialogMenuing && !helpMenuing && !flyingMenuing) {
+			spyMenuing = !spyMenuing;
+
+			vector<vector<int>> entity_map = stage_entity[current_stage];
+			map<int, bool> visited;
+			vector<Monster> monster_vec;
+
+			for (int i = 0; i < 11; i++) {
+				for (int j = 0; j < 11; j++) {
+					if (monster_bitmap_map[entity_map[i][j]].length() == 0 || visited[entity_map[i][j]]) continue;
+					visited[entity_map[i][j]] = true;
+					monster_vec.push_back(monster_value[entity_map[i][j]]);
+				}
+			}
+
+			spyMenu.setMonsterData({ monster_vec }, character);
+			spyMenu.setPage(0);
+			return;
+		}
+
+		if (spyMenuing) {
+			spyMenu.onKeyUp(nChar, nRepCnt, nFlags);
+		}
+
+		if (dialogMenuing || inShopping) {
+			dialogMenu.onKeyUp(nChar, nRepCnt, nFlags, character, inShopping, enterStatus, dialogMenuing);
+			return;
+		}
+
 		if (enterStatus && nChar == KEY_ENTER) {
 			if (attackMenuing) {
+				event.triggerAfterAttack(current_stage, temp_monster_x, temp_monster_y, dialogMenu, enterStatus, dialogMenuing);
 				hidden_code[current_stage][temp_monster_x][temp_monster_y] = 1;
 				temp_monster_x = 0;
 				temp_monster_y = 0;
 				enterStatus = false;
 				turn = true;
+				enterStatus = false;
+				attackMenuing = false;
 			}
 			if (getDialogMenuing) {
 				getDialogMenuing = false;
+				enterStatus = false;
 			}
-			enterStatus = false;
-			attackMenuing = false;
-			dialogMenuing = false;
+		}
+
+		if (flyingMenuing) {
+			int flying_select = flyingMenu.getFlyingSelect();
+			int flying_top_range = flyingMenu.getFlyingRange(FlyingMenu::TOP);
+			int flying_down_range = flyingMenu.getFlyingRange(FlyingMenu::DOWN);
+			if (nChar == KEY_DOWN) {
+				if (flying_select - 26 - 1 < flying_down_range) return;
+				flyingMenu.setFlyingSelect(flying_select - 1);
+			}
+			else if (nChar == KEY_UP) {
+				if (flying_select - 26 + 1 > flying_top_range) return;
+				flyingMenu.setFlyingSelect(flying_select + 1);
+			}
+			if (nChar == KEY_ENTER) {
+				vector<vector<int>> entity_stage_code = stage_entity[flying_select];
+				pair<int, int> floor;
+				if (current_stage < flying_select) {
+					floor = flyingMenu.fetch_near_floor(FlyingMenu::DOWN, entity_stage_code, { character.getX(), character.getY() });
+				}
+				else if (current_stage >= flying_select) {
+					floor = flyingMenu.fetch_near_floor(FlyingMenu::TOP, entity_stage_code, { character.getX(), character.getY() });
+				}
+				character.setXY(floor.first, floor.second);
+				current_stage = flying_select;
+				flyingMenuing = false;
+				return;
+			}
+		}
+
+		if (enterStatus || helpMenuing || flyingMenuing || spyMenuing) {
 			return;
 		}
-		if (enterStatus) {
-			return;
-		}
+
 		if (!attackMenuing) {
 			if (nChar == KEY_UP) {
 				x = max(0, character.getX() - 1);
@@ -656,7 +718,10 @@ namespace game_framework {
 				y = character.getY();
 			}
 		}
-		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL) {
+
+		event.triggerDialogEvent(current_stage, x, y, dialogMenu, enterStatus, dialogMenuing);
+
+		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL || material_code[x][y] == WALL_B) {
 			return;
 		}
 		if (hidden_code[current_stage][x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
@@ -664,91 +729,37 @@ namespace game_framework {
 		}
 		if (entity_code[x][y] == UP_STAIR) {
 			current_stage++;
+			flyingMenu.setFlyingRange(FlyingMenu::TOP, max(flyingMenu.getFlyingRange(FlyingMenu::TOP), current_stage - 26));
 		}
 		if (entity_code[x][y] == DOWN_STAIR) {
 			current_stage--;
+			flyingMenu.setFlyingRange(FlyingMenu::DOWN, max(flyingMenu.getFlyingRange(FlyingMenu::DOWN), current_stage - 26));
 		}
 		if (hidden_code[current_stage][x][y] == 0 && monster_bitmap_map[entity_code[x][y]].length() != 0) {
+
 			attackMenuing = true;
 			int ID = entity_code[x][y];
+
 			monster = monster_value[ID];
+
+			if (monster.getAttack() == -1) {
+				monster.setAttack(character.getAttack());
+			}
+			if (monster.getDefence() == -1) {
+				monster.setDefence(character.getDefence());
+			}
+
+			monsterAttackCount = monster.getAttackCount();
+			tempDelayCycle = 200;
+			last_time = clock();
 			temp_monster_x = x;
 			temp_monster_y = y;
 			turn = 1;
+			causeDamageValueString = "";
 			return;
 		}
 		if (hidden_code[current_stage][x][y] == 0 && functional_entity_bitmap_map[entity_code[x][y]].length() != 0) {
-			if (entity_code[x][y] == RUBY) {
-				character.setAttack(character.getAttack() + 2);
-				temp_item_info = "紅寶石，攻擊力 + 2";
-			}
-			if (entity_code[x][y] == SAPPHIRE) {
-				character.setDefence(character.getDefence() + 2);
-				temp_item_info = "藍寶石，防禦力 + 2";
-			}
-			if (entity_code[x][y] == EMERALD) {
-				character.setSpeed(character.getSpeed() + 2);
-				temp_item_info = "綠寶石，敏捷 + 2";
-			}
-			if (entity_code[x][y] == RED_POTION) {
-				character.setHealth(character.getHealth() + 150);
-				temp_item_info = "紅藥水，血量 + 150";
-			}
-			if (entity_code[x][y] == BLUE_POTION) {
-				character.setHealth(character.getHealth() + 400);
-				temp_item_info = "藍藥水，血量 + 400";
-			}
-			if (entity_code[x][y] == KEY) {
-				character.changeKeyNumber(KEY, 1);
-				temp_item_info = "黃鑰匙";
-			}
-			if (entity_code[x][y] == SILVER_KEY) {
-				character.changeKeyNumber(SILVER_KEY, 1);
-				temp_item_info = "藍鑰匙";
-			}
-			if (entity_code[x][y] == GOLD_KEY) {
-				character.changeKeyNumber(GOLD_KEY, 1);
-				temp_item_info = "紅鑰匙";
-			}
-			if (entity_code[x][y] == FIRE_DRINK) {
-				temp_item_info = "火酒，回復衰弱狀態";
-			}
-			if (entity_code[x][y] == ANTI_POTION) {
-				temp_item_info = "抗毒劑，回復毒狀態";
-			}
-			if (entity_code[x][y] == JUMP_WING) {
-				character.setLevel(character.getLevel() + 1);
-				temp_item_info = "躍進之翼，等級提升一";
-			}
-			if (entity_code[x][y] == SHIELD_D) {
-				character.setDefence(character.getDefence() + 7);
-				temp_item_info = "皮革之盾，防禦力 + 7";
-			}
-			if (entity_code[x][y] == GEM_DIGGER) {
-				temp_item_info = "寶石鋤頭";
-			}
-			if (entity_code[x][y] == COIN_200) {
-				character.setCoin(character.getCoin() + 200);
-				temp_item_info = "金幣 200 塊";
-			}
-			if (entity_code[x][y] == SWORD_C) {
-				character.setAttack(character.getAttack() + 16);
-				temp_item_info = "長劍，攻擊力 + 16";
-			}
-			if (entity_code[x][y] == SHIELD_C) {
-				character.setAttack(character.getDefence() + 22);
-				temp_item_info = "光之盾，防禦力 + 22";
-			}
-			if (entity_code[x][y] == MAGIC_KEY) {
-				character.changeKeyNumber(KEY, 1);
-				character.changeKeyNumber(SILVER_KEY, 1);
-				character.changeKeyNumber(GOLD_KEY, 1);
-				temp_item_info = "魔法之匙，所有鎖匙數 + 1";
-			}
-			if (entity_code[x][y] == SWORD_D) {
-				character.setAttack(character.getAttack() + 16);
-				temp_item_info = "鐵劍，攻擊力 + 8";
-			}
+			event.triggerGetItem(entity_code[x][y], character, temp_item_info);
 			enterStatus = true;
 			getDialogMenuing = true;
 			hidden_code[current_stage][x][y] = 1;
@@ -758,16 +769,35 @@ namespace game_framework {
 			if (entity_code[x][y] == SHOPKEEPER) {
 				dialogMenuing = true;
 				enterStatus = true;
-				npc = NPC(SHOPKEEPER, "商人");
-				npc.loadData(current_stage, x, y);
+				dialogMenu.setNPC(NPC(SHOPKEEPER, "奸商"), current_stage, x, y, inShopping);
 			}
-			else if (entity_code[x][y] == SHOP2) {
+			else if (entity_code[x][y] == ELDER) {
 				dialogMenuing = true;
 				enterStatus = true;
-				inShopping = true;
-				npc = NPC(SHOP2, "貪婪之神");
-				npc.loadData(current_stage, x, y);
-				menuOptionGap = OPTION_GAP - 10 * npc.getOption().size();
+				dialogMenu.setNPC(NPC(ELDER, "老人"), current_stage, x, y, inShopping);
+			}
+			else if (entity_code[x][y] == SHOP_1_2) {
+				dialogMenuing = true;
+				enterStatus = true;
+				dialogMenu.setNPC(NPC(SHOP_1_2, "貪婪之神"), current_stage, x, y, inShopping);
+			}
+			else if (entity_code[x][y] == SHOP_2_2) {
+				dialogMenuing = true;
+				enterStatus = true;
+				dialogMenu.setNPC(NPC(SHOP_2_2, "戰鬥之神"), current_stage, x, y, inShopping);
+			}
+			else if (entity_code[x][y] == PRINCESS) {
+				dialogMenuing = true;
+				enterStatus = true;
+				dialogMenu.setNPC(NPC(PRINCESS, "公主"), current_stage, x, y, inShopping);
+			}
+			else if (entity_code[x][y] == THIEF) {
+				dialogMenuing = true;
+				enterStatus = true;
+				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(THIEF, "竊賊"), character, dialogMenu, enterStatus, dialogMenuing);
+				if (trigger == false) {
+					dialogMenu.setNPC(NPC(THIEF, "竊賊"), current_stage, x, y, inShopping);
+				}
 			}
 			return;
 		}
@@ -783,47 +813,46 @@ namespace game_framework {
 
 	void CGameStateRun::OnShow() {
 
-		vector<vector<int>> material_code = stage.getStageMaterial(current_stage);
-		vector<vector<int>> entity_code = stage.getStageEntity(current_stage);
+		gameSystem.onShow();
+
+		vector<vector<int>> material_code = stage_material[current_stage];
+		vector<vector<int>> entity_code = stage_entity[current_stage];
 
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
-				material_map[current_stage][i][j].ShowBitmap();
+				fixed_material_map[i][j][material_code[i][j]].ShowBitmap();
 			}
 		}
+
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
 				if (entity_code[i][j] == 0) continue;
 				if (entity_code[i][j] == 1) continue;
-				if (entity_map[current_stage][i][j].IsAnimationDone()) {
+				if (fixed_entity_map[i][j][entity_code[i][j]].IsAnimationDone()) {
 					if (hidden_code[current_stage][i][j] == 1) {
-						entity_map[current_stage][i][j].UnshowBitmap();
+						fixed_entity_map[i][j][entity_code[i][j]].UnshowBitmap();
 					} else {
-						entity_map[current_stage][i][j].ShowBitmap();
+						fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
 					}
 				}
 				else {
-					entity_map[current_stage][i][j].ShowBitmap();
+					fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
 				}
 			}
 		}
 		
 		characterBitmap.ShowBitmap();
-		menuBitmap.ShowBitmap();
 
 		if (attackMenuing) {
 			attackMenu.ShowBitmap();
 			characterAttackMenuBitMap.ShowBitmap();
 			monster_map[monster.getID()].ShowBitmap();
-			if (!turn) {
+			if (attack_menu_animation_select == 1) {
 				enemyAttackAnimation[0].ShowBitmap();
 			}
-			else {
+			else if (attack_menu_animation_select == 0) {
 				characterAttackAnimation[0].ShowBitmap();
 			}
-		}
-		else {
-			menuBitmap.UnshowBitmap();
 		}
 
 		if (attackMenuing && enterStatus) {
@@ -834,26 +863,38 @@ namespace game_framework {
 		}
 
 		if (dialogMenuing) {
-
-			dialogMenu.ShowBitmap();
-
-			if (inShopping) {
-				optionMenu.ShowBitmap();
-				optionArrow.ShowBitmap();
-			}
-
-			npc_map[npc.getID()].ShowBitmap();
-		}
-		else {
-			dialogMenu.UnshowBitmap();
+			dialogMenu.onShow();
 		}
 
 		if (getDialogMenuing) {
 			getDialogMenu.ShowBitmap();
 		}
 
+		if (helpMenuing) {
+			helpMenu.ShowBitmap();
+		}
+
+		if (flyingMenuing) {
+			flyingMenu.onShow();
+		}
+
+		if (spyMenuing) {
+			spyMenu.onShow();
+		}
+
 		ShowText();
 
+	}
+
+	vector<int> getShineVector() {
+		vector<int> vec;
+		for (int i = 80; i <= 250; i += 10) {
+			vec.push_back(i);
+		}
+		for (int i = 250; i >= 80; i -= 10) {
+			vec.push_back(i);
+		}
+		return vec;
 	}
 
 	void CGameStateRun::ShowText() {
@@ -890,13 +931,13 @@ namespace game_framework {
 
 				ChangeFontLog(pDC, fp, 80, "Noto Sans TC");
 
-				if (!turn) {
-					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(781 - 227 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 487 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+				if (attack_menu_animation_select == 1) {
+					pDC->SetTextColor(RGB(255, 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY), 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY)));
+					pDC->TextOut((int)(504 + (clock() - last_time) * (50.0 / MENU_DELAY)), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
 				}
-				else {
-					pDC->SetTextColor(RGB(255, 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE), 0 + tempDelayCycle * (255 / MENU_DELAY_CYCLE)));
-					pDC->TextOut(1507 - 227 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), 507 - tempDelayCycle * (25 / MENU_DELAY_CYCLE), causeDamageValueString.c_str());
+				else if (attack_menu_animation_select == 0) {
+					pDC->SetTextColor(RGB(255, 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY), 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY)));
+					pDC->TextOut((int)(1230 + (clock() - last_time) * (50.0 / MENU_DELAY)) - 20 * causeDamageValueString.length(), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
 				}
 
 				if (!enterStatus) {
@@ -915,15 +956,9 @@ namespace game_framework {
 			pDC->TextOut(786 - 227, 415, temp_item_info.c_str());
 		}
 
-		if (attackMenuing && enterStatus || dialogMenuing || getDialogMenuing ) {
+		if (attackMenuing && enterStatus || getDialogMenuing || flyingMenuing ) {
 			/* Make Shine Enter */
-			vector<int> vec;
-			for (int i = 80; i <= 250; i += 10) {
-				vec.push_back(i);
-			}
-			for (int i = 250; i >= 80; i -= 10) {
-				vec.push_back(i);
-			}
+			vector<int> vec = getShineVector();
 			int count = vec.size();
 			pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
@@ -931,8 +966,6 @@ namespace game_framework {
 				pDC->TextOut(1430 - 227, 630, string("- Enter -").c_str());
 			}else if (getDialogMenuing) {
 				pDC->TextOut(1430 - 227, 415, string("- Enter -").c_str());
-			}else if(dialogMenuing) {
-				pDC->TextOut(1293 - 227, 360, string("- Enter -").c_str());
 			}
 			/* Place gold and exp */
 			if (attackMenuing) {
@@ -948,55 +981,21 @@ namespace game_framework {
 		/* Dialog Menu Text Setup */
 
 		if (dialogMenuing) {
+			dialogMenu.onShowText(pDC, fp, inShopping);
+		}
 
-			pDC->SetTextColor(RGB(255, 255, 255));
+		if (flyingMenuing) {
+			flyingMenu.onShowText(pDC, fp);
+		}
 
-			vector<string> dialog = npc.getDialog();
-			vector<string> option = npc.getOption();
-
-			ChangeFontLog(pDC, fp, 60, "STZhongsong");
-
-			pDC->TextOut(1100 - 227, 130, npc.getName().c_str());
-
-			ChangeFontLog(pDC, fp, 30, "STZhongsong");
-
-			for (int i = 0; i < (int)dialog.size(); i++) {
-				pDC->TextOut(1010 - 227, 210 + i * 40, dialog[i].c_str());
-			}
-
-			if (inShopping) {
-				ChangeFontLog(pDC, fp, 36, "Noto Sans TC");
-				for (int i = 0; i < (int)option.size(); i++) {
-					pDC->TextOut(1000 - 227, 480 + i * menuOptionGap, option[i].c_str());
-				}
-			}
+		if (spyMenuing) {
+			spyMenu.onShowText(pDC, fp);
 		}
 
 		/* Show Dashboard */
 
-		ChangeFontLog(pDC, fp, 48, "Noto Sans TC");
-
-		pDC->SetTextColor(RGB(255, 255, 255));
-
-		pDC->TextOut(256 + 240 - 227 - 20, 140, character.getStatus().c_str());
-
-		pDC->TextOut(256 + 250 - 227, 204, to_string(character.getLevel()).c_str());
-		pDC->TextOut(256 + 250 - 227, 256, to_string(character.getHealth()).c_str());
-		pDC->TextOut(256 + 250 - 227, 308, to_string(character.getAttack()).c_str());
-		pDC->TextOut(256 + 250 - 227, 360, to_string(character.getDefence()).c_str());
-		pDC->TextOut(256 + 250 - 227, 412, to_string(character.getSpeed()).c_str());
-		pDC->TextOut(256 + 250 - 227, 460, to_string(character.getExp()).c_str());
-		pDC->TextOut(256 + 790 - 227, 14, floor_message.c_str());
-
-		ChangeFontLog(pDC, fp, 60, "Noto Sans TC", 800);
-
-		pDC->TextOut(256 + 290 - 227, 615, to_string(character.getKeyNumber()).c_str());
-		pDC->TextOut(256 + 290 - 227, 688, to_string(character.getSilverKeyNumber()).c_str());
-		pDC->TextOut(256 + 290 - 227, 762, to_string(character.getGoldKeyNumber()).c_str());
-		pDC->TextOut(256 + 290 - 227, 844, to_string(character.getCoin()).c_str());
-
-		pDC->SetTextColor(RGB(0, 0, 0));
-		pDC->TextOut(0, 0, (to_string(mouse_x) + " " + to_string(mouse_y)).c_str());
+		gameSystem.onShowText(pDC, fp);
+		
 
 		CDDraw::ReleaseBackCDC();
 	}
@@ -1006,8 +1005,7 @@ namespace game_framework {
 		mouse_y = point.y;
 	}
 
-	void CGameStateRun::OnLButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
-	{
+	void CGameStateRun::OnLButtonDown(UINT nFlags, CPoint point) {  // 處理滑鼠的動作
 
 	}
 
@@ -1018,7 +1016,7 @@ namespace game_framework {
 
 	void CGameStateRun::OnRButtonDown(UINT nFlags, CPoint point)  // 處理滑鼠的動作
 	{
-
+		
 	}
 
 	void CGameStateRun::OnRButtonUp(UINT nFlags, CPoint point)	// 處理滑鼠的動作

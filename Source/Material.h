@@ -5,6 +5,8 @@
 #define ROAD 1
 #define LAVA 2
 #define WALL_SHINE 73
+#define WALL_B 94
+#define LAVA_ROAD 95
 
 /* ======================= Entity ======================= */
 
@@ -26,9 +28,9 @@
 #define ZOMBIE 16
 #define SKELETON_C 17
 #define SHOPKEEPER 18
-#define SHOP1 19
-#define SHOP2 20
-#define SHOP3 21
+#define SHOP_1_1 19
+#define SHOP_1_2 20
+#define SHOP_1_3 21
 #define RUBY 22
 #define SAPPHIRE 23
 #define RED_POTION 24
@@ -86,8 +88,37 @@
 #define WALL_SPECIAL 77
 #define PRINCESS 78
 #define SWORD_A 79
-#define SWORD_C 80
-#define SWORD_D 81
+#define SWORD_D 80
+#define SWORD_E 81
 #define SHIELD_D 82
+#define OCTOPUS_1 83
+#define OCTOPUS_2 84
+#define OCTOPUS_3 85
+#define OCTOPUS_4 86
+#define OCTOPUS_5 87
+#define OCTOPUS_6 88
+#define OCTOPUS_7 89
+#define OCTOPUS_8 90
+#define OCTOPUS_9 91
+#define FAKE_PRINCESS 92
+#define HOE 93
+#define SWORD_C 96
+#define CROSS 97
+#define AMULET_OF_ICE 98	
+#define HOLY_CROSS_SHIELD 99
+#define MERCURY_MAN 100
+
+/* ======================= Skill ======================= */
+
+#define N 0
+#define RESPAWN_53 1
+#define RESPAWN_52 2
+#define ONE_SHOT_ATTACK 3
+#define IGNORE_DEFENCE 4
+#define CAUSE_WEEK 5
+#define POSION_ATTACK 6
+#define HARD_HARD_HARD 7
+#define MULTIPLE_ATTACK 8
+#define DODGE_ATTACK 9
 
 /* ======================= End ======================= */
