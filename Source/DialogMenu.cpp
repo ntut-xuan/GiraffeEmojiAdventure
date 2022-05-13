@@ -82,6 +82,15 @@ namespace game_framework {
 		dialogMenuing = true;
 	}
 
+	void DialogMenu::setNPCTemporaryDialog(vector<vector<string>> _dialog, vector<char> _position, bool &enterStatus, bool &dialogMenuing, NPC _npc) {
+		dialog = _dialog;
+		position = { _position };
+		npc = _npc;
+		current_dialog = 0;
+		enterStatus = true;
+		dialogMenuing = true;
+	}
+
 	void DialogMenu::setNPCMap(vector<CMovingBitmap> vec) {
 		npc_map = vec;
 	}

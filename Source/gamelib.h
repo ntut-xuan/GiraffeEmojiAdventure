@@ -67,7 +67,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #define SIZE_X				 1400		// 設定遊戲畫面的解析度為640x480
-#define SIZE_Y				 1050		// 註：若不使用標準的解析度，則不能切換到全螢幕
+#define SIZE_Y				 1080		// 註：若不使用標準的解析度，則不能切換到全螢幕
 #define OPEN_AS_FULLSCREEN	 false		// 是否以全螢幕方式開啟遊戲
 #define SHOW_LOAD_PROGRESS   true		// 是否顯示loading(OnInit)的進度
 #define DEFAULT_BG_COLOR	 RGB(255,255,255)	// 遊戲畫面預設的背景顏色(黑色)

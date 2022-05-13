@@ -144,13 +144,33 @@ namespace game_framework {
 			dialogMenu.setNPCTemporaryDialog({ "真正的公主就在塔的最底部", "有本事就來救他吧！" }, enterStatus, dialogMenuing, NPC(PRINCESS, "公主"));
 		}
 	}
-	bool Event::triggerSpecialNPCDialog(int current_stage, int x, int y, NPC npc, Character character, DialogMenu &dialogMenu, bool &enterStatus, bool &dialogMenuing) {
+	bool Event::triggerSpecialNPCDialog(int current_stage, int x, int y, NPC npc, Character &character, DialogMenu &dialogMenu, bool &enterStatus, bool &dialogMenuing) {
 		if (current_stage == 28 && x == 1 && y == 5 && character.getItemCount(HOE) > 0) {
 			dialogMenu.setNPCTemporaryDialog({ "咦！這不就是我的鋤頭嗎！", "謝謝你替我找回來！", "讓我替你打開", "通往地下的通道吧！" }, enterStatus, dialogMenuing, NPC(THIEF, "盜賊"));
 			CGameStateRun::hidden_code[current_stage][1][5] = 1;
 			CGameStateRun::stage_entity[26][1][2] = THIEF;
 			CGameStateRun::stage_entity[26][1][1] = DOWN_STAIR;
 			CGameStateRun::stage_material[26][1][1] = ROAD;
+			return true;
+		}
+		if (current_stage == 24 && x == 5 && y == 5 && character.getItemCount(SPECIAL_KEY_17F) == 0) {
+			dialogMenu.setNPCTemporaryDialog({
+				{"稀客呢～是來救公主的吧？", "但這層往後的怪物會變得更強", "以你現時的實力", "是絕對贏不了的"}, 
+				{"是嗎？", "那怎麼辦？"}, 
+				{"嗯～～我還是建議你到 17F 取寶物", "這個你拿去吧", "拿到寶物後你的力量就會大增", "到時再來找我～"},
+				{"神秘之匙，可打開 17F 的祕密通道？" }}, 
+				{ 'T', 'B', 'T', 'C' }, enterStatus, dialogMenuing, NPC(FAIRY, "妖精")
+			);
+			character.setItemCount(SPECIAL_KEY_17F, 1);
+			return true;
+		}
+		return false;
+	}
+
+	bool Event::triggerTeleport(int &current_stage, int x, int y, Character &character) {
+		if (current_stage == 43 && x == 0 && y == 2 && character.getItemCount(SPECIAL_KEY_17F) > 0) {
+			current_stage = 47;
+			character.setXY(10, 5);
 			return true;
 		}
 		return false;

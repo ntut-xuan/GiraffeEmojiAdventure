@@ -121,4 +121,9 @@
 #define MULTIPLE_ATTACK 8
 #define DODGE_ATTACK 9
 
+/* =================== Special Item =================== */
+
+#define SPECIAL_KEY_17F 171717
+
+
 /* ======================= End ======================= */

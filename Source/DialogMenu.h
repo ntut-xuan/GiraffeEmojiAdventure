@@ -16,6 +16,7 @@ namespace game_framework {
 		int menuOptionGap = 120;
 		int current_dialog = 0;
 		void setNPCTemporaryDialog(vector<string> dialog, bool &enterStatus, bool &dialogMenuing, NPC _npc);
+		void setNPCTemporaryDialog(vector<vector<string>>, vector<char> _position, bool &enterStatus, bool &dialogMenuing, NPC _npc);
 		void setTemporaryDialog(POSITION position, vector<string> dialog, bool &enterStatus, bool &dialogMenuing);
 	private:
 

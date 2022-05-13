@@ -165,7 +165,7 @@ namespace game_framework {
 	vector<vector<vector<int>>> CGameStateRun::stage_material = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 	vector<vector<vector<int>>> CGameStateRun::hidden_code = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 
-	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(50)
+	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(60)
 	{
 
 	}
@@ -355,12 +355,13 @@ namespace game_framework {
 		enterStatus = false;
 		turn = true;
 		teleport_allow = false;
+		temp_current_stage = 0;
 
 		stage_entity = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 		stage_material = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 		hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 
-		for (int i = 1; i <= 46; i++) {
+		for (int i = 1; i <= 52; i++) {
 			stage_entity[i] = stage.getStageEntity(i);
 			stage_material[i] = stage.getStageMaterial(i);
 		}
@@ -720,6 +721,11 @@ namespace game_framework {
 		}
 
 		event.triggerDialogEvent(current_stage, x, y, dialogMenu, enterStatus, dialogMenuing);
+		
+		bool triggerTeleport = event.triggerTeleport(current_stage, x, y, character);
+		if (triggerTeleport) {
+			return;
+		}
 
 		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL || material_code[x][y] == WALL_B) {
 			return;
@@ -733,7 +739,7 @@ namespace game_framework {
 		}
 		if (entity_code[x][y] == DOWN_STAIR) {
 			current_stage--;
-			flyingMenu.setFlyingRange(FlyingMenu::DOWN, max(flyingMenu.getFlyingRange(FlyingMenu::DOWN), current_stage - 26));
+			flyingMenu.setFlyingRange(FlyingMenu::DOWN, min(flyingMenu.getFlyingRange(FlyingMenu::DOWN), current_stage - 26));
 		}
 		if (hidden_code[current_stage][x][y] == 0 && monster_bitmap_map[entity_code[x][y]].length() != 0) {
 
@@ -799,6 +805,14 @@ namespace game_framework {
 					dialogMenu.setNPC(NPC(THIEF, "ÅÑ¸é"), current_stage, x, y, inShopping);
 				}
 			}
+			else if (entity_code[x][y] == FAIRY) {
+				dialogMenuing = true;
+				enterStatus = true;
+				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(FAIRY, "§¯ºë"), character, dialogMenu, enterStatus, dialogMenuing);
+				if (trigger == false) {
+					dialogMenu.setNPC(NPC(FAIRY, "§¯ºë"), current_stage, x, y, inShopping);
+				}
+			}
 			return;
 		}
 		if (eventEntity(entity_code[x][y])) {
@@ -824,6 +838,8 @@ namespace game_framework {
 			}
 		}
 
+		bool reset_frame = temp_current_stage != current_stage;
+
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
 				if (entity_code[i][j] == 0) continue;
@@ -833,12 +849,22 @@ namespace game_framework {
 						fixed_entity_map[i][j][entity_code[i][j]].UnshowBitmap();
 					} else {
 						fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
+						if (reset_frame) {
+							fixed_entity_map[i][j][entity_code[i][j]].SelectShowBitmap(0);
+						}
 					}
 				}
 				else {
 					fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
+					if (reset_frame) {
+						fixed_entity_map[i][j][entity_code[i][j]].SelectShowBitmap(0);
+					}
 				}
 			}
+		}
+
+		if (reset_frame) {
+			temp_current_stage = current_stage;
 		}
 		
 		characterBitmap.ShowBitmap();
@@ -996,6 +1022,10 @@ namespace game_framework {
 
 		gameSystem.onShowText(pDC, fp);
 		
+
+		ChangeFontLog(pDC, fp, 60, "Noto Sans TC");
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(0, 930, (to_string(current_stage) + " " + to_string(character.getX()) + " " + to_string(character.getY())).c_str());
 
 		CDDraw::ReleaseBackCDC();
 	}
