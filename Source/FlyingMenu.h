@@ -15,7 +15,7 @@ namespace game_framework {
 		void setFlyingRange(TOPDOWN setting, int value);
 		void setFlyingSelect(int flyingSelect);
 		void onShowText(CDC *pDC, CFont* &fp);
-		pair<int, int> fetch_near_floor(TOPDOWN up_or_down, vector<vector<int>> entity_code, pair<int, int> character_location);
+		pair<int, int> fetch_near_floor(int current_stage, TOPDOWN up_or_down, vector<vector<int>> entity_code, pair<int, int> character_location);
 	private:
 		CMovingBitmap flyingMenu;
 		CMovingBitmap arrow_up_enable;

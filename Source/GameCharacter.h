@@ -50,11 +50,11 @@ namespace game_framework {
 		int getItemCount(int item);
 		void changeKeyNumber(int keyCode, int amount);
 	protected:
-		int x, y; // 座標
+		int x, y;
 		int faced_x, faced_y;
 		int faced_direction;
 		int current_stage;
-		int level, health, attack, defence, speed, coin, exp, status; // 人物屬性
+		int level, health, attack, defence, speed, coin, exp, status;
 		int goldKeyNumber, silverKeyNumber, keyNumber;
 		int character_index = 0;
 		std::string statusString;

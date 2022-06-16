@@ -14,7 +14,7 @@
 
 namespace game_framework {
 
-	pair<int, int> FlyingMenu::fetch_near_floor(TOPDOWN up_or_down, vector<vector<int>> entity_code, pair<int, int> character_location) {
+	pair<int, int> FlyingMenu::fetch_near_floor(int target_stage, TOPDOWN up_or_down, vector<vector<int>> entity_code, pair<int, int> character_location) {
 		double distance_up = 20020625;
 		double distance_down = 20020625;
 		pair<int, int> up_stair_location = { -1, -1 };
@@ -36,6 +36,15 @@ namespace game_framework {
 					}
 				}
 			}
+		}
+		if (target_stage == 36) {
+			return { 7, 1 };
+		}
+		if (target_stage == 41) {
+			return { 10,  5 };
+		}
+		if (target_stage == 46) {
+			return { 9,  5 };
 		}
 		if (up_or_down == TOP) {
 			return up_stair_location.first == -1 ? down_stair_location : up_stair_location;
@@ -98,15 +107,16 @@ namespace game_framework {
 
 	void FlyingMenu::onShowText(CDC *pDC, CFont* &fp) {
 		ChangeFontLog(pDC, fp, 130, "STZhongsong");
+
 		pDC->SetTextColor(RGB(255, 255, 255));
-		pDC->TextOut(850, 435, to_string(flying_select - 26).c_str());
+		CTextDraw::print(pDC, 850, 435, to_string(flying_select - 26).c_str());
 
 		vector<int> vec = getShineVector();
 		int count = (int)vec.size();
 		pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 		ChangeFontLog(pDC, fp, 50, "STZhongsong");
 
-		pDC->TextOut(1050, 835, "- Enter -");
-		pDC->TextOut(1050, 735, "- Quit(F) -");
+		CTextDraw::print(pDC, 1050, 835, "- Enter -");
+		CTextDraw::print(pDC, 1050, 735, "- Quit(F) -");
 	}
 }

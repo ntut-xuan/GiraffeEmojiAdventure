@@ -14,7 +14,6 @@
 #include <set>
 
 #define element_width 77
-#define UU_DEBUG 0
 
 namespace game_framework {
 	/////////////////////////////////////////////////////////////////////////////
@@ -101,8 +100,11 @@ namespace game_framework {
 	vector<vector<vector<int>>> CGameStateRun::stage_entity = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 	vector<vector<vector<int>>> CGameStateRun::stage_material = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 	vector<vector<vector<int>>> CGameStateRun::hidden_code = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
+	Character CGameStateRun::character = Character();
 	bool CGameStateRun::refresh_animation = false;
 	char CGameStateRun::ending = '\0';
+	int CGameStateRun::current_stage = 26;
+	bool CGameStateRun::teleport_allow = false;
 
 	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(60)
 	{
@@ -333,24 +335,6 @@ namespace game_framework {
 			stage_entity[i] = stage.getStageEntity(i);
 			stage_material[i] = stage.getStageMaterial(i);
 		}
-
-#ifdef UU_DEBUG 
-		character.setAttack(998244353);
-		character.setDefence(998244353);
-		character.setHealth(998244353);
-		character.setSpeed(998244353);
-		character.setCoin(998244353);
-		character.setExp(998244353);
-		character.changeKeyNumber(KEY, 23766);
-		character.changeKeyNumber(SILVER_KEY, 23766);
-		character.changeKeyNumber(GOLD_KEY, 23766);
-		character.setItemCount(AMULET_OF_ICE, 1);
-		character.setItemCount(GEM_DIGGER, 100);
-		character.setItemCount(ANY_GATE, 10);
-		character.setItemCount(POGS, 10);
-		//character.setStatus(CAUSE_WEEK | POSION_ATTACK);
-		teleport_allow = true;
-#endif 
 
 		vector<vector<int>> entity_code = stage_entity[current_stage];
 
@@ -655,12 +639,12 @@ namespace game_framework {
 			return;
 		}
 
-		if (GetKeyState(VK_CONTROL) >= 0 && nChar == KEY_F && !(attackMenuing || dialogMenuing || helpMenuing || spyMenuing) && !(current_stage == 36 || current_stage == 46)) {
+		if (GetKeyState(VK_CONTROL) >= 0 && nChar == KEY_F && !(attackMenuing || dialogMenuing || helpMenuing || spyMenuing) && !(current_stage == 36 || current_stage > 45 || current_stage == 1) && character.getItemCount(FLY_ENABLE)) {
 			flyingMenuing = !flyingMenuing;
 			return;
 		}
 
-		if (nChar == KEY_D && !attackMenuing && !dialogMenuing && !helpMenuing && !flyingMenuing) {
+		if (nChar == KEY_D && !attackMenuing && !dialogMenuing && !helpMenuing && !flyingMenuing && character.getItemCount(HEART_MIRROR_ENABLE)) {
 			spyMenuing = !spyMenuing;
 
 			vector<vector<int>> entity_map = stage_entity[current_stage];
@@ -747,10 +731,10 @@ namespace game_framework {
 				vector<vector<int>> entity_stage_code = stage_entity[flying_select];
 				pair<int, int> floor;
 				if (current_stage < flying_select) {
-					floor = flyingMenu.fetch_near_floor(FlyingMenu::DOWN, entity_stage_code, { character.getX(), character.getY() });
+					floor = flyingMenu.fetch_near_floor(flying_select, FlyingMenu::DOWN, entity_stage_code, { character.getX(), character.getY() });
 				}
 				else if (current_stage >= flying_select) {
-					floor = flyingMenu.fetch_near_floor(FlyingMenu::TOP, entity_stage_code, { character.getX(), character.getY() });
+					floor = flyingMenu.fetch_near_floor(flying_select, FlyingMenu::TOP, entity_stage_code, { character.getX(), character.getY() });
 				}
 				character.setXY(floor.first, floor.second);
 				current_stage = flying_select;
@@ -1074,21 +1058,21 @@ namespace game_framework {
 
 			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
 
-			pDC->TextOut(1167 - 227, 405, to_string(character.getHealth()).c_str());
-			pDC->TextOut(1167 - 227, 465, to_string(character.getAttack()).c_str());
-			pDC->TextOut(1167 - 227, 528, to_string(character.getDefence()).c_str());
-			pDC->TextOut(1167 - 227, 586, to_string(character.getSpeed()).c_str());
+			CTextDraw::print(pDC, 1167 - 227, 405, to_string(character.getHealth()).c_str());
+			CTextDraw::print(pDC, 1167 - 227, 465, to_string(character.getAttack()).c_str());
+			CTextDraw::print(pDC, 1167 - 227, 528, to_string(character.getDefence()).c_str());
+			CTextDraw::print(pDC, 1167 - 227, 586, to_string(character.getSpeed()).c_str());
 
 			ChangeFontLog(pDC, fp, 60, "Noto Sans TC");
 
-			pDC->TextOut(701 - 227, 330, monster.getName().c_str());
+			CTextDraw::print(pDC, 701 - 227, 330, monster.getName().c_str());
 
 			ChangeFontLog(pDC, fp, 40, "Noto Sans TC");
 
-			pDC->TextOut(977 - 227, 405, to_string(monster.getHealth()).c_str());
-			pDC->TextOut(977 - 227, 465, to_string(monster.getAttack()).c_str());
-			pDC->TextOut(977 - 227, 528, to_string(monster.getDefence()).c_str());
-			pDC->TextOut(977 - 227, 586, to_string(monster.getSpeed()).c_str());
+			CTextDraw::print(pDC, 977 - 227, 405, to_string(monster.getHealth()).c_str());
+			CTextDraw::print(pDC, 977 - 227, 465, to_string(monster.getAttack()).c_str());
+			CTextDraw::print(pDC, 977 - 227, 528, to_string(monster.getDefence()).c_str());
+			CTextDraw::print(pDC, 977 - 227, 586, to_string(monster.getSpeed()).c_str());
 
 			if (showAttackValue == true) {
 
@@ -1096,17 +1080,17 @@ namespace game_framework {
 
 				if (attack_menu_animation_select == 1) {
 					pDC->SetTextColor(RGB(255, 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY), 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY)));
-					pDC->TextOut((int)(504 + (clock() - last_time) * (50.0 / MENU_DELAY)), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
+					CTextDraw::print(pDC, (int)(504 + (clock() - last_time) * (50.0 / MENU_DELAY)), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
 				}
 				else if (attack_menu_animation_select == 0) {
 					pDC->SetTextColor(RGB(255, 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY), 255 - ((clock() - last_time) % (MENU_DELAY + 100)) * (255.0 / MENU_DELAY)));
-					pDC->TextOut((int)(1230 + (clock() - last_time) * (50.0 / MENU_DELAY)) - 20 * causeDamageValueString.length(), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
+					CTextDraw::print(pDC, (int)(1230 + (clock() - last_time) * (50.0 / MENU_DELAY)) - 20 * causeDamageValueString.length(), (int)(437 + (clock() - last_time) * (50.0 / MENU_DELAY)), causeDamageValueString.c_str());
 				}
 
 				if (!enterStatus) {
 					pDC->SetTextColor(RGB(255, 255, 0));
 					ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-					pDC->TextOut(1430 - 227, 630, string("ºM°h(Q)").c_str());
+					CTextDraw::print(pDC, 1430 - 227, 630, string("ºM°h(Q)").c_str());
 				}
 			}
 
@@ -1116,7 +1100,7 @@ namespace game_framework {
 		if (getDialogMenuing) {
 			pDC->SetTextColor(RGB(255, 255, 255));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-			pDC->TextOut(786 - 227, 415, temp_item_info.c_str());
+			CTextDraw::print(pDC, 786 - 227, 415, temp_item_info.c_str());
 		}
 
 		if (attackMenuing && enterStatus || getDialogMenuing || flyingMenuing ) {
@@ -1126,16 +1110,16 @@ namespace game_framework {
 			pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 			ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
 			if (attackMenuing) {
-				pDC->TextOut(1430 - 227, 630, string("- Enter -").c_str());
+				CTextDraw::print(pDC, 1430 - 227, 630, string("- Enter -").c_str());
 			}else if (getDialogMenuing) {
-				pDC->TextOut(1430 - 227, 415, string("- Enter -").c_str());
+				CTextDraw::print(pDC, 1430 - 227, 415, string("- Enter -").c_str());
 			}
 			/* Place gold and exp */
 			if (attackMenuing) {
 				pDC->SetTextColor(RGB(255, 255, 255));
 				ChangeFontLog(pDC, fp, 80, "Noto Sans TC", 800);
-				pDC->TextOut(1156 - 227, 688, to_string(monster.getExp()).c_str());
-				pDC->TextOut(1470 - 227, 688, to_string(monster.getGold()).c_str());
+				CTextDraw::print(pDC, 1156 - 227, 688, to_string(monster.getExp()).c_str());
+				CTextDraw::print(pDC, 1470 - 227, 688, to_string(monster.getGold()).c_str());
 			}
 		}
 
@@ -1170,7 +1154,7 @@ namespace game_framework {
 
 		ChangeFontLog(pDC, fp, 60, "Noto Sans TC");
 		pDC->SetTextColor(RGB(0, 0, 0));
-		pDC->TextOut(0, 930, (to_string(current_stage) + " " + to_string(character.getX()) + " " + to_string(character.getY())).c_str());
+		CTextDraw::print(pDC, 0, 930, (to_string(current_stage) + " " + to_string(character.getX()) + " " + to_string(character.getY())).c_str());
 
 		CDDraw::ReleaseBackCDC();
 	}
@@ -1291,19 +1275,19 @@ namespace game_framework {
 
 		ChangeFontLog(pDC, fp, 60, "STZhongsong");
 
-		pDC->TextOut(1100 - 227 - 150, 540 - 250, "ªøÀV³À");
+		CTextDraw::print(pDC, 1100 - 227 - 150, 540 - 250, "ªøÀV³À");
 
 		ChangeFontLog(pDC, fp, 24, "STZhongsong");
 
 		for (int i = 0; i < (int)dialog[current_dialog].size(); i++) {
-			pDC->TextOut(1010 - 227 - 150, 630 + i * 40 - 250, dialog[current_dialog][i].c_str());
+			CTextDraw::print(pDC, 1010 - 227 - 150, 630 + i * 40 - 250, dialog[current_dialog][i].c_str());
 		}
 
 		vector<int> vec = getShineVector();
 		int count = vec.size();
 		pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 
-		pDC->TextOut(1293 - 227 - 150, 760 - 250, string("- Enter -").c_str());
+		CTextDraw::print(pDC, 1293 - 227 - 150, 760 - 250, string("- Enter -").c_str());
 
 		CDDraw::ReleaseBackCDC();
 	}

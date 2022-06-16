@@ -163,6 +163,8 @@
 #define POGS 314159
 #define SPECIAL_KEY_B18F 322493
 #define SPECIAL_KEY_10F 472256
+#define FLY_ENABLE 444666
+#define HEART_MIRROR_ENABLE 666444
 
 /* ======================= Audio ======================= */
 
@@ -173,5 +175,15 @@
 #define AUDIO_ATTACK 4
 #define AUDIO_CATCH_ITEM 5
 #define AUDIO_WINNING_SOUND 6
+
+/* ==================== Status Bar ===================== */
+
+#define ID_BAD_END 1
+#define ID_NORMAL_END 2
+#define ID_TRUE_END 3
+#define ID_WEEK_GIRAFFE 4
+#define ID_STRONGE_GIRAFFE 5
+#define ID_WEEK_GIRAFFE_CANT_KILL 6
+#define ID_TELEPORT 7
 
 /* ======================= End ======================= */

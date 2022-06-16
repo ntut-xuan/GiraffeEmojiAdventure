@@ -54,6 +54,13 @@ public:
 
 	//{{AFX_MSG(CGameApp)
 	afx_msg void OnAppAbout();
+	afx_msg void OnBadEnd();
+	afx_msg void OnNormalEnd();
+	afx_msg void OnTrueEnd();
+	afx_msg void OnWeekGiraffe();
+	afx_msg void OnStrongGiraffe();
+	afx_msg void OnWeekGiraffeCantKill();
+	afx_msg void OnTeleport();
 		// NOTE - the ClassWizard will add and remove member functions here.
 		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_MSG

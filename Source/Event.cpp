@@ -13,6 +13,10 @@ namespace game_framework {
 
 	vector<vector<vector<int>>> Event::visited = vector<vector<vector<int>>>(60, vector<vector<int>>(11, vector<int>(11)));
 
+	Event::Event() {
+		visited = vector<vector<vector<int>>>(60, vector<vector<int>>(11, vector<int>(11)));
+	}
+
 	void Event::triggerDialogEvent(int current_stage, int x, int y, DialogMenu &dialogMenu, bool &enterStatus, bool &dialogMenuing) {
 		if (current_stage == 26 && x == 8 && y == 5 && !visited[current_stage][x][y]) {
 			dialogMenu.setTemporaryDialog(DialogMenu::DOWN, { "就是這裡了", "攻進去..." }, enterStatus, dialogMenuing);
@@ -112,6 +116,12 @@ namespace game_framework {
 		}
 		if (current_stage == 9 && x == 10 && y == 0) {
 			character.setItemCount(SPECIAL_KEY_B18F, 1);
+		}
+		if (current_stage == 31 && x == 10 && y == 5) {
+			character.setItemCount(HEART_MIRROR_ENABLE, 1);
+		}
+		if (current_stage == 34 && x == 7 && y == 9) {
+			character.setItemCount(FLY_ENABLE, 1);
 		}
 	}
 	void Event::triggerGetItem(int ID, Character &character, string &temp_item_info) {
@@ -363,6 +373,13 @@ namespace game_framework {
 			visited[current_stage][x][y] = true;
 			return true;
 		}
+		if (current_stage == 12 && x == 10 && y == 2 && character.getItemCount(POGS)) {
+			dialogMenu.setNPCTemporaryDialog({
+					{"啊啊，是神劍之証！", "只要你在怪物前使用，", "那麼它就會變成最弱的綠色史萊姆"},
+					{"但次數有限", "考慮清楚才使用啊！"} },
+				{ 'T', 'T' }, enterStatus, dialogMenuing, NPC(SHOPKEEPER, "奸商"));
+			return true;
+		}
 		return false;	
 	}
 
@@ -544,5 +561,119 @@ namespace game_framework {
 		}
 
 		return true;
+	}
+
+	bool Event::triggerShopping(int current_stage, int x, int y, Character &character, int tempSelect, bool &inShopping, bool &enterStatus, bool &dialogMenuing) {
+		if (current_stage == 29 && x == 7 && y == 3) {
+			if (character.getCoin() >= NPC::increaseCost1) {
+				if (tempSelect == 0) {
+					character.setHealth(character.getHealth() + 500);
+					character.setCoin(character.getCoin() - NPC::increaseCost1);
+					NPC::increaseCost1 += 1;
+				}
+				else if (tempSelect == 1) {
+					character.setAttack(character.getRawAttack() + 3);
+					character.setCoin(character.getCoin() - NPC::increaseCost1);
+					NPC::increaseCost1 += 1;
+				}
+				else if (tempSelect == 2) {
+					character.setDefence(character.getRawDefence() + 3);
+					character.setCoin(character.getCoin() - NPC::increaseCost1);
+					NPC::increaseCost1 += 1;
+				}
+			}
+			return true;
+		}
+		if (current_stage == 30 && x == 3 && y == 6) {
+			if (tempSelect == 0) {
+				character.setHealth(character.getHealth() + 200);
+				character.setCoin(character.getCoin() - 15);
+				CGameStateRun::stage_entity[30][3][6] = 0;
+				inShopping = false;
+				enterStatus = false;
+				dialogMenuing = false;
+			}
+		}
+		if (current_stage == 31 && x == 0 && y == 7) {
+			if (tempSelect == 0) {
+				character.setAttack(character.getRawAttack() + 4);
+				character.setCoin(character.getCoin() - 40);
+				CGameStateRun::stage_entity[31][0][7] = 0;
+				inShopping = false;
+				enterStatus = false;
+				dialogMenuing = false;
+			}
+		}
+		if (current_stage == 33 && x == 9 && y == 2) {
+			
+			if (tempSelect == 0) {
+				if (character.getExp() >= 70) {
+					character.levelup();
+					character.setExp(character.getExp() - 70);
+				}
+			}
+			else if (tempSelect == 1) {
+				if (character.getExp() >= 20) {
+					character.setAttack(character.getRawAttack() + 1);
+					character.setExp(character.getExp() - 20);
+				}
+			}
+			else if (tempSelect == 2) {
+				if (character.getExp() >= 20) {
+					character.setDefence(character.getRawDefence() + 2);
+					character.setExp(character.getExp() - 20);
+				}
+			}
+		}
+		if (current_stage == 21 && x == 7 && y == 9) {
+			if (character.getCoin() >= NPC::increaseCost2) {
+				if (tempSelect == 0) {
+					character.setHealth(character.getHealth() + 800);
+					character.setCoin(character.getCoin() - NPC::increaseCost2);
+					NPC::increaseCost2 += 1;
+				}
+				else if (tempSelect == 1) {
+					character.setAttack(character.getRawAttack() + 6);
+					character.setCoin(character.getCoin() - NPC::increaseCost2);
+					NPC::increaseCost2 += 1;
+				}
+				else if (tempSelect == 2) {
+					character.setDefence(character.getRawDefence() + 6);
+					character.setCoin(character.getCoin() - NPC::increaseCost2);
+					NPC::increaseCost2 += 1;
+				}
+			}
+		}
+		if (current_stage == 19 && x == 3 && y == 2) {
+			if (tempSelect == 0) {
+				if (character.getExp() >= 190) {
+					character.levelup();
+					character.levelup();
+					character.levelup();
+					character.setExp(character.getExp() - 70);
+				}
+			}
+			else if (tempSelect == 1) {
+				if (character.getExp() >= 50) {
+					character.setDefence(character.getRawAttack() + 3);
+					character.setExp(character.getExp() - 20);
+				}
+			}
+			else if (tempSelect == 2) {
+				if (character.getExp() >= 50) {
+					character.setDefence(character.getRawDefence() + 5);
+					character.setExp(character.getExp() - 20);
+				}
+			}
+		}
+		if (current_stage == 12 && x == 10 && y == 6) {
+			if (character.getCoin() >= 150) {
+				if (tempSelect == 0) {
+					character.setItemCount(ANY_GATE, character.getItemCount(ANY_GATE) + 10);
+					character.setCoin(character.getCoin() - 150);
+				}
+			}
+		}
+		return false;
 	}
 }

@@ -42,6 +42,7 @@
 #define ID_BUTTON_FULLSCREEN            32773
 #define ID_BUTTON_PAUSE                 32774
 #define ID_BUTTON_UNITTEST              32775
+#define IDB_QRCODE						32776
 
 // Next default values for new objects
 // 

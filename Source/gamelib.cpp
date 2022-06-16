@@ -348,12 +348,6 @@ namespace game_framework {
 		delayCount = delay;
 	}
 
-	void CMovingBitmap::SetAnimation(int delay, int count) {
-		isAnimation = true;
-		animationCount = count;
-		delayCount = delay / count;
-	}
-
 	void CMovingBitmap::ShowBitmap()
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before ShowBitmap() is called !!!");
@@ -502,7 +496,7 @@ namespace game_framework {
 		f.CreateFontIndirect(&lf);
 		fp = pDC->SelectObject(&f);
 
-		pDC->TextOut(250, 445, message.c_str());
+		CTextDraw::print(pDC, 250, 425, message.c_str());
 
 		CDDraw::ReleaseBackCDC();					// ©ñ±¼ Back Plain ªº CDC
 		//
@@ -872,6 +866,8 @@ namespace game_framework {
 
 	void CDDraw::BltBitmapToBack(unsigned SurfaceID, int x, int y)
 	{
+		x = CDDraw::IsFullScreen() ? x + (RESOLUTION_X - SIZE_X)/2 : x;
+		y = CDDraw::IsFullScreen() ? y + (RESOLUTION_Y - SIZE_Y)/2 : y;
 		GAME_ASSERT(lpDDSBack && (SurfaceID < lpDDS.size()) && lpDDS[SurfaceID], "Internal Error: Incorrect SurfaceID in BltBitmapToBack");
 		CRect TargetRect;
 		TargetRect.left = x;
@@ -957,15 +953,17 @@ namespace game_framework {
 				LoadBitmap(i, (char *)BitmapName[i].c_str()); // from file
 			SetColorKey(i, BitmapColorKey[i]);
 		}
+		
 		return true;
 	}
 
 	bool CDDraw::CreateSurfaceFullScreen()
 	{
+
 		ddrval = lpDD->SetCooperativeLevel(AfxGetMainWnd()->m_hWnd, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN);
 		CheckDDFail("Can not SetCooperativeLevel Exclusive");
 
-		ddrval = lpDD->SetDisplayMode(1920, 1080, 32, 0, 0);
+		ddrval = lpDD->SetDisplayMode(RESOLUTION_X, RESOLUTION_Y, 32, 0, 0);
 
 		if (ddrval != DD_OK) {
 			ddrval = lpDD->SetCooperativeLevel(AfxGetMainWnd()->m_hWnd, DDSCL_NORMAL);
@@ -1020,11 +1018,13 @@ namespace game_framework {
 
 		BltBackColor(RGB(0, 0, 0));
 		BltBackToPrimary();
+
 		return true;
 	}
 
 	bool CDDraw::CreateSurfaceWindowed()
 	{
+
 		ddrval = lpDD->SetCooperativeLevel(AfxGetMainWnd()->m_hWnd, DDSCL_NORMAL);
 		CheckDDFail("Can not SetCooperativeLevel ");
 
@@ -1090,7 +1090,7 @@ namespace game_framework {
 	void CDDraw::Init(int sx, int sy)
 	{
 		// set target screen size
-		size_x = sx, size_y = sy;
+		size_x = RESOLUTION_X, size_y = RESOLUTION_Y;
 		// init lpDD
 		LPDIRECTDRAW lpDD0;
 		ddrval = DirectDrawCreate(NULL, &lpDD0, NULL);
@@ -1392,6 +1392,12 @@ namespace game_framework {
 					GAME_ASSERT(0, ErrorMsg[i]);
 			GAME_ASSERT(0, "Direct Draw Failed due to unknown error code !!!");
 		}
+	}
+
+	void CTextDraw::print(CDC *pDC, int x, int y, string str) {
+		x = CDDraw::IsFullScreen() ? x + (RESOLUTION_X - SIZE_X) / 2 : x;
+		y = CDDraw::IsFullScreen() ? y + (RESOLUTION_Y - SIZE_Y) / 2 : y;
+		pDC->TextOut(x, y, str.c_str());
 	}
 
 }         

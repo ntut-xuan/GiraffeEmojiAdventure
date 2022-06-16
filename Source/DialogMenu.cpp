@@ -34,7 +34,7 @@ namespace game_framework {
 		optionMenu.SetTopLeft(815 - 227, 414);
 
 		optionArrow.LoadBitmap("RES/optionArrow.bmp", RGB(0, 0, 0));
-		optionArrow.SetTopLeft(875 - 227, 464);
+		optionArrow.SetTopLeft(875 - 277, 454);
 
 	}
 
@@ -49,10 +49,13 @@ namespace game_framework {
 		position = npc.getPosition();
 		option = npc.getOption();
 		suboption = npc.getSubOption();
-
+		
+		menuOptionGap = 100;
 		current_stage = _current_stage;
 		x = _x;
 		y = _y;
+
+		TRACE("%d %d %d\n", current_stage, x, y);
 
 		current_dialog = 0;
 	}
@@ -114,64 +117,15 @@ namespace game_framework {
 				tempSelect %= (int) option.size();
 			}
 			else if (nChar == KEY_ENTER) {
-				if (npc.getID() == SHOP_1_2) {
-					if (character.getCoin() >= NPC::increaseCost1) {
-						if (tempSelect == 0) {
-							character.setHealth(character.getHealth() + 500);
-							character.setCoin(character.getCoin() - NPC::increaseCost1);
-						}
-						else if (tempSelect == 1) {
-							character.setAttack(character.getRawAttack() + 3);
-							character.setCoin(character.getCoin() - NPC::increaseCost1);
-						}
-						else if (tempSelect == 2) {
-							character.setDefence(character.getRawDefence() + 3);
-							character.setCoin(character.getCoin() - NPC::increaseCost1);
-						}
-						NPC::increaseCost1 += 1;
-					}
-					if (tempSelect == 3) {
-						inShopping = false;
-						enterStatus = false;
-						dialogMenuing = false;
-					}
+				Event::triggerShopping(current_stage, x, y, character, tempSelect, inShopping, enterStatus, dialogMenuing);
+				if (tempSelect == option.size() - 1) {
+					inShopping = false;
+					enterStatus = false;
+					dialogMenuing = false;
 				}
-				if (npc.getID() == SHOP_2_2) {
-					if (tempSelect == 0 && character.getExp() >= 70) {
-						character.levelup();
-						character.setExp(character.getExp() - 70);
-					}
-					else if (tempSelect == 1 && character.getExp() >= 20) {
-						character.setAttack(character.getRawAttack() + 1);
-						character.setExp(character.getExp() - 20);
-					}
-					else if (tempSelect == 2 && character.getExp() >= 20) {
-						character.setDefence(character.getDefence() + 2);
-						character.setExp(character.getExp() - 20);
-					}
-					if (tempSelect == 3) {
-						inShopping = false;
-						enterStatus = false;
-						dialogMenuing = false;
-					}
-				}
-				if (npc.getID() == THIEF) {
-					if (tempSelect == 0 && character.getCoin() >= 20) {
-						character.changeKeyNumber(KEY, 1);
-						character.setCoin(character.getCoin() - 70);
-					}
-					else if (tempSelect == 1 && character.getExp() >= 80) {
-						character.changeKeyNumber(SILVER_KEY, 1);
-						character.setCoin(character.getCoin() - 20);
-					}
-					if (tempSelect == 2) {
-						inShopping = false;
-						enterStatus = false;
-						dialogMenuing = false;
-					}
-				}
+				dialog = npc.getDialog();
 			}
-			optionArrow.SetTopLeft(875 - 277, 464 + menuOptionGap * tempSelect);
+			optionArrow.SetTopLeft(875 - 277, 454 + menuOptionGap * tempSelect);
 			return false;
 		}
 
@@ -192,24 +146,6 @@ namespace game_framework {
 
 		return false;
 
-	}
-
-	bool DialogMenu::onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, bool &enterStatus, bool &dialogMenuing) {
-		const char KEY_ENTER = 0x0D; // keyboard上箭頭
-		if (dialogMenuing && nChar == KEY_ENTER) {
-			if (dialogMenuing) {
-				if (current_dialog < (int)dialog.size() - 1) {
-					current_dialog += 1;
-				}
-				else {
-					current_dialog = 0;
-					enterStatus = false;
-					dialogMenuing = false;
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	void DialogMenu::onShow() {
@@ -245,41 +181,43 @@ namespace game_framework {
 
 		pDC->SetTextColor(RGB(255, 255, 255));
 
+		int	offset_x = CDDraw::IsFullScreen() ? 0 : (1920 - SIZE_X) / 2;
+
 		ChangeFontLog(pDC, fp, 60, "STZhongsong");
 
 		int nameLength = npc.getName().length() > 3 ? npc.getName().length() : 0;
 
 		if (position[current_dialog] == 'T') {
-			pDC->TextOut(1100 - 227 - nameLength * 5, 130, npc.getName().c_str());
+			CTextDraw::print(pDC, 1100 - 227 - nameLength * 5, 130, npc.getName().c_str());
 		}
 		else if (position[current_dialog] == 'B') {
-			pDC->TextOut(1100 - 227, 540, "長頸鹿");
+			CTextDraw::print(pDC, 1100 - 227, 540, "長頸鹿");
 		}
 
 		ChangeFontLog(pDC, fp, 30, "STZhongsong");
 
 		for (int i = 0; i < (int)dialog[current_dialog].size(); i++) {
 			if (position[current_dialog] == 'T') {
-				pDC->TextOut(1010 - 227, 210 + i * 40, dialog[current_dialog][i].c_str());
+				CTextDraw::print(pDC, 1010 - 227, 210 + i * 40, dialog[current_dialog][i].c_str());
 			}
 			else if (position[current_dialog] == 'B') {
-				pDC->TextOut(1010 - 227, 630 + i * 40, dialog[current_dialog][i].c_str());
+				CTextDraw::print(pDC, 1010 - 227, 630 + i * 40, dialog[current_dialog][i].c_str());
 			}
 			else if (position[current_dialog] == 'C') {
 				ChangeFontLog(pDC, fp, 50, "Noto Sans TC");
-				pDC->TextOut(786 - 227, 415, dialog[current_dialog][0].c_str());
+				CTextDraw::print(pDC, 786 - 227, 415, dialog[current_dialog][0].c_str());
 			}
 		}
 
 		if (inShopping) {
 			ChangeFontLog(pDC, fp, 36, "Noto Sans TC");
 			for (int i = 0; i < (int)option.size(); i++) {
-				pDC->TextOut(1000 - 227, 480 + i * menuOptionGap, option[i].c_str());
+				CTextDraw::print(pDC, 1000 - 227, 480 + i * menuOptionGap, option[i].c_str());
 			}
 			pDC->SetTextColor(RGB(0, 255, 0));
 			ChangeFontLog(pDC, fp, 24, "Noto Sans TC");
 			for (int i = 0; i < (int)suboption.size(); i++) {
-				pDC->TextOut(1200 - 227, 490 + i * menuOptionGap, suboption[i].c_str());
+				CTextDraw::print(pDC, 1200 - 227, 490 + i * menuOptionGap, suboption[i].c_str());
 			}
 		}
 
@@ -288,13 +226,13 @@ namespace game_framework {
 		pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 
 		if (position[current_dialog] == 'T') {
-			pDC->TextOut(1293 - 227, 360, string("- Enter -").c_str());
+			CTextDraw::print(pDC, 1293 - 227, 360, string("- Enter -").c_str());
 		}
 		else if (position[current_dialog] == 'B') {
-			pDC->TextOut(1293 - 227, 760, string("- Enter -").c_str());
+			CTextDraw::print(pDC, 1293 - 227, 760, string("- Enter -").c_str());
 		}
 		else if (position[current_dialog] == 'C') {
-			pDC->TextOut(1430 - 227, 415, string("- Enter -").c_str());
+			CTextDraw::print(pDC, 1430 - 227, 415, string("- Enter -").c_str());
 		}
 
 	}

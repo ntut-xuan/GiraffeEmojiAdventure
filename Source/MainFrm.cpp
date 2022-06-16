@@ -121,9 +121,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pMenu = GetMenu();
 	//
 	
+
 	m_wndToolBar.ShowWindow(SW_HIDE);
-	m_wndStatusBar.ShowWindow(SW_HIDE);
-	SetMenu(NULL);
+	m_wndStatusBar.ShowWindow(SW_SHOW);
+	// SetMenu(NULL);
 
 	SetWindowText(_T("Giraffe Adventure"));
 
@@ -146,7 +147,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	//	cs.style = WS_OVERLAPPED | WS_CAPTION | FWS_ADDTOTITLE
 	//		| WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX;
 
-	cs.cx = 640; cs.cy = 480;
+	cs.cx = SIZE_X; cs.cy = SIZE_Y;
 	cs.style = WS_SYSMENU | WS_MINIMIZEBOX;
     cs.x = (::GetSystemMetrics(SM_CXSCREEN) - cs.cx) / 2; 
 	cs.y = (::GetSystemMetrics(SM_CYSCREEN) - cs.cy) / 2; 
@@ -183,7 +184,9 @@ void CMainFrame::SetFullScreen(bool isFull)
 		//
 		// Store window position
 		//
+
 		GetWindowRect(WindowRect);
+
 		if (!game_framework::CDDraw::SetFullScreen(true))
 			FullScreenError = true;
 		//
@@ -207,11 +210,11 @@ void CMainFrame::SetFullScreen(bool isFull)
 		//
 		// Recover menu, tool bar, and status bar
 		//
-		SetMenu(NULL);
+		//SetMenu(NULL);
 		if (isToolBarVisible)
 			m_wndToolBar.ShowWindow(SW_NORMAL);
-		if (isStatusBarVisible)
-			m_wndStatusBar.ShowWindow(SW_NORMAL);
+		m_wndStatusBar.ShowWindow(SW_SHOW);
+		SetMenu(pMenu);
 		ModifyStyle(0, WS_DLGFRAME);
 		//
 		// Restore window position
@@ -255,7 +258,7 @@ void CMainFrame::OnPaint()
 	CRect WindowRect;
 	GetWindowRect(WindowRect);
 
-	MoveWindow(WindowRect.left, WindowRect.top, ClientRect.Width(), ClientRect.Height() + extra_height);
+	MoveWindow(WindowRect.left, WindowRect.top, SIZE_X, SIZE_Y + extra_height);
 }
 
 void CMainFrame::OnButtonFullscreen() 

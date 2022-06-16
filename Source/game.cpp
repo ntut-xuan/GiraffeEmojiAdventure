@@ -58,6 +58,13 @@ BEGIN_MESSAGE_MAP(CGameApp, CWinApp)
 	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
 	// Standard print setup command
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
+	ON_COMMAND(ID_BAD_END, OnBadEnd)
+	ON_COMMAND(ID_NORMAL_END, OnNormalEnd)
+	ON_COMMAND(ID_TRUE_END, OnTrueEnd)
+	ON_COMMAND(ID_WEEK_GIRAFFE, OnWeekGiraffe)
+	ON_COMMAND(ID_STRONGE_GIRAFFE, OnStrongGiraffe)
+	ON_COMMAND(ID_WEEK_GIRAFFE_CANT_KILL, OnWeekGiraffeCantKill)
+	ON_COMMAND(ID_TELEPORT, OnTeleport)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -207,4 +214,65 @@ void CAboutDlg::OnReadme()
 {
 	// TODO: Add your control notification handler code here
 	system("notepad.exe ReadMe.txt");
+}
+
+void CGameApp::OnBadEnd()
+{
+	game_framework::CGameStateRun::character.setHealth(0);
+}
+
+void CGameApp::OnNormalEnd()
+{
+	game_framework::CGameStateRun::current_stage = 1;
+	game_framework::CGameStateRun::character.setXY(0, 5);
+
+	game_framework::Event::visited[1][5][5] = 1;
+	game_framework::CGameStateRun::stage_entity[1][5][5] = 0;
+	game_framework::CGameStateRun::stage_entity[1][6][5] = 0;
+	game_framework::CGameStateRun::stage_entity[1][8][5] = 0;
+}
+
+void CGameApp::OnTrueEnd()
+{
+	game_framework::CGameStateRun::current_stage = 54;
+	for (int i = 1; i < 10; i++) {
+		game_framework::CGameStateRun::stage_entity[54][i][5] = 0;
+	}
+}
+
+void CGameApp::OnWeekGiraffe()
+{
+	game_framework::CGameStateRun::character.setAttack(1);
+	game_framework::CGameStateRun::character.setDefence(1);
+	game_framework::CGameStateRun::character.setHealth(1);
+	game_framework::CGameStateRun::character.setSpeed(1);
+}
+
+void CGameApp::OnStrongGiraffe()
+{
+	game_framework::CGameStateRun::character.setAttack(998244353);
+	game_framework::CGameStateRun::character.setDefence(998244353);
+	game_framework::CGameStateRun::character.setHealth(998244353);
+	game_framework::CGameStateRun::character.setSpeed(998244353);
+	game_framework::CGameStateRun::character.setCoin(998244353);
+	game_framework::CGameStateRun::character.setExp(998244353);
+	game_framework::CGameStateRun::character.changeKeyNumber(KEY, 23766);
+	game_framework::CGameStateRun::character.changeKeyNumber(SILVER_KEY, 23766);
+	game_framework::CGameStateRun::character.changeKeyNumber(GOLD_KEY, 23766);
+	game_framework::CGameStateRun::character.setItemCount(AMULET_OF_ICE, 1);
+	game_framework::CGameStateRun::character.setItemCount(GEM_DIGGER, 100);
+	game_framework::CGameStateRun::character.setItemCount(ANY_GATE, 10);
+	game_framework::CGameStateRun::character.setItemCount(POGS, 10);
+}
+
+void CGameApp::OnWeekGiraffeCantKill()
+{
+	game_framework::CGameStateRun::character.setAttack(1);
+	game_framework::CGameStateRun::character.setDefence(1);
+	game_framework::CGameStateRun::character.setHealth(998244353);
+	game_framework::CGameStateRun::character.setSpeed(100);
+}
+
+void CGameApp::OnTeleport() {
+	game_framework::CGameStateRun::teleport_allow = true;
 }

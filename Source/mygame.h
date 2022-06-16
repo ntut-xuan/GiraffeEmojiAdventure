@@ -1,43 +1,3 @@
-/*
- * mygame.h: 本檔案儲遊戲本身的class的interface
- * Copyright (C) 2002-2008 Woei-Kae Chen <wkc@csie.ntut.edu.tw>
- *
- * This file is part of game, a free game development framework for windows.
- *
- * game is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * game is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *	 2004-03-02 V4.0
- *      1. Add CGameStateInit, CGameStateRun, and CGameStateOver to
- *         demonstrate the use of states.
- *   2005-09-13
- *      Rewrite the codes for CBall and CEraser.
- *   2005-09-20 V4.2Beta1.
- *   2005-09-29 V4.2Beta2.
- *   2006-02-08 V4.2
- *      1. Rename OnInitialUpdate() -> OnInit().
- *      2. Replace AUDIO_CANYON as AUDIO_NTUT.
- *      3. Add help bitmap to CGameStateRun.
- *   2006-09-09 V4.3
- *      1. Rename Move() and Show() as OnMove and OnShow() to emphasize that they are
- *         event driven.
- *   2008-02-15 V4.4
- *      1. Add namespace game_framework.
- *      2. Replace the demonstration of animation as a new bouncing ball.
- *      3. Use ShowInitProgress(percent) to display loading progress.
-*/
-
 #include "GameCharacter.h"
 #include "Monster.h"
 #include "NPC.h"
@@ -52,20 +12,6 @@
 #include "Event.h"
 
 namespace game_framework {
-	/////////////////////////////////////////////////////////////////////////////
-	// Constants
-	/////////////////////////////////////////////////////////////////////////////
-
-	enum AUDIO_ID {				// 定義各種音效的編號
-		AUDIO_DING,				// 0
-		AUDIO_LAKE,				// 1
-		AUDIO_NTUT				// 2
-	};
-
-	/////////////////////////////////////////////////////////////////////////////
-	// 這個class為遊戲的遊戲開頭畫面物件
-	// 每個Member function的Implementation都要弄懂
-	/////////////////////////////////////////////////////////////////////////////
 
 	class CGameStateInit : public CGameState {
 	public:
@@ -80,11 +26,6 @@ namespace game_framework {
 		CMovingBitmap giraffe_photo;
 		CMovingBitmap logo;								// csie的logo
 	};
-
-	/////////////////////////////////////////////////////////////////////////////
-	// 這個class為遊戲的遊戲執行物件，主要的遊戲程式都在這裡
-	// 每個Member function的Implementation都要弄懂
-	/////////////////////////////////////////////////////////////////////////////
 
 	class CGameStateRun : public CGameState {
 	public:
@@ -102,11 +43,14 @@ namespace game_framework {
 		void OnRButtonDown(UINT nFlags, CPoint point);  // 處理滑鼠的動作
 		void OnRButtonUp(UINT nFlags, CPoint point);	// 處理滑鼠的動作
 
+		static Character character;
 		static vector<vector<vector<int>>> stage_entity;
 		static vector<vector<vector<int>>> stage_material;
 		static vector<vector<vector<int>>> hidden_code;
 		static bool refresh_animation;
 		static char ending;
+		static int current_stage;
+		static bool teleport_allow;
 
 	protected:
 		void OnMove();									// 移動遊戲元素
@@ -123,7 +67,6 @@ namespace game_framework {
 		int mouse_x, mouse_y;
 		int temp_current_stage = 0;
 		int temp_monster_x, temp_monster_y;
-		int current_stage;
 		int current_shop_price = 20;
 		int current_dialog = 0;
 		long long tempDelayCycle = MENU_DELAY;
@@ -142,7 +85,6 @@ namespace game_framework {
 		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // 玩家先手
-		bool teleport_allow = false;
 		bool onMoveDone = false;
 		bool onShowDone = true;
 		int last_time;
@@ -152,7 +94,6 @@ namespace game_framework {
 
 		Stage stage;
 		Event event;
-		Character character;
 		CMovingBitmap characterBitmap;
 
 		/* Attack Menu Object */
@@ -197,11 +138,6 @@ namespace game_framework {
 
 		void ShowText();
 	};
-
-	/////////////////////////////////////////////////////////////////////////////
-	// 這個class為遊戲的結束狀態(Game Over)
-	// 每個Member function的Implementation都要弄懂
-	/////////////////////////////////////////////////////////////////////////////
 
 	class CGameStateOver : public CGameState {
 	public:

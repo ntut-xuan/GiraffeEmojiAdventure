@@ -165,9 +165,6 @@
     <ClCompile Include="Source\DialogMenu.cpp">
       <Filter>MyGame</Filter>
     </ClCompile>
-    <ClCompile Include="Source\AttackAction.cpp">
-      <Filter>MyGame</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Event.cpp">
       <Filter>MyGame</Filter>
     </ClCompile>
@@ -234,9 +231,6 @@
       <Filter>MyGame</Filter>
     </ClInclude>
     <ClInclude Include="Source\DialogMenu.h">
-      <Filter>MyGame</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AttackAction.h">
       <Filter>MyGame</Filter>
     </ClInclude>
     <ClInclude Include="Source\Event.h">
@@ -775,6 +769,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="RES\zombie2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\qrcode_ntut-xuan.github.io.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

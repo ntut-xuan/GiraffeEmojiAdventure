@@ -8,13 +8,12 @@ namespace game_framework {
 		void onShow();
 		void LoadBitmap();
 		bool onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, Character &character, bool &inShopping, bool &enterStatus, bool &dialogMenuing);
-		bool onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, bool &enterStatus, bool &dialogMenuing);
 		void setNPC(NPC npc, int current_stage, int x, int y, bool &inShopping);
 		void setNPCMap(vector<CMovingBitmap> vec);
 		void onShowText(CDC *pDC, CFont* &fp, bool inShopping);
 		int tempSelect = 0;
 		const int OPTION_GAP = 150;
-		int menuOptionGap = 120;
+		int menuOptionGap;
 		int current_dialog = 0;
 		void setNPCTemporaryDialog(vector<string> dialog, bool &enterStatus, bool &dialogMenuing, NPC _npc);
 		void setNPCTemporaryDialog(vector<vector<string>>, vector<char> _position, bool &enterStatus, bool &dialogMenuing, NPC _npc);

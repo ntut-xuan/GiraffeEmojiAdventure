@@ -67,7 +67,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #define SIZE_X				 1400		// 設定遊戲畫面的解析度為640x480
-#define SIZE_Y				 1040		// 註：若不使用標準的解析度，則不能切換到全螢幕
+#define SIZE_Y				 1005		// 註：若不使用標準的解析度，則不能切換到全螢幕
 #define OPEN_AS_FULLSCREEN	 false		// 是否以全螢幕方式開啟遊戲
 #define SHOW_LOAD_PROGRESS   true		// 是否顯示loading(OnInit)的進度
 #define DEFAULT_BG_COLOR	 RGB(0, 0, 0)	// 遊戲畫面預設的背景顏色(黑色)
@@ -78,6 +78,8 @@
 #define ENABLE_TOOLBAR       false      // 是否關閉 toolbar
 #define ENABLE_MENU          false      // 是否關閉 menu
 #define ENABLE_STATUSBAR     false      // 是否關閉 statusbar
+#define RESOLUTION_X     1920           // 全螢幕用，請設定成目前視窗的解析度 (width)。
+#define RESOLUTION_Y     1080           // 全螢幕用，請設定成目前視窗的解析度 (height)。
 
 /////////////////////////////////////////////////////////////////////////////
 // 定義CGame及CGameState所使用的三個狀態常數
@@ -203,7 +205,6 @@ namespace game_framework {
 		int   Height();						// 取得圖形的高度
 		int   Left();						// 取得圖形的左上角的 x 座標
 		void  SetAnimation(int delay, bool _once);
-		void  SetAnimation(int delay, int count);
 		void  LoadBitmap(int, COLORREF = CLR_INVALID);		// 載入圖，指定圖的編號(resource)及透明色
 		void  LoadBitmap(char*, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
 		void  LoadBitmap(vector<char*>, COLORREF = CLR_INVALID);	// 載入圖，指定圖的檔名及透明色
@@ -366,6 +367,11 @@ namespace game_framework {
 		CGameState		*gameState;			// pointer指向目前的遊戲狀態
 		CGameState		*gameStateTable[3];	// 遊戲狀態物件的pointer
 		static CGame	instance;			// 遊戲唯一的instance
+	};
+
+	class CTextDraw {
+	public:
+		void static print(CDC *pDC, int x, int y, string str);
 	};
 
 }

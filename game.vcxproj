@@ -264,7 +264,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\AnyGateMenu.cpp" />
-    <ClCompile Include="Source\AttackAction.cpp" />
     <ClCompile Include="Source\audio.cpp">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
@@ -328,7 +327,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnyGateMenu.h" />
-    <ClInclude Include="Source\AttackAction.h" />
     <ClInclude Include="Source\audio.h">
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>
@@ -475,6 +473,7 @@
     <Image Include="RES\priest_c2.bmp" />
     <Image Include="RES\princess.bmp" />
     <Image Include="RES\princess2.bmp" />
+    <Image Include="res\qrcode_ntut-xuan.github.io.bmp" />
     <Image Include="RES\red_door.bmp" />
     <Image Include="RES\red_door2.bmp" />
     <Image Include="RES\red_door3.bmp" />

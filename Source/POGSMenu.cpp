@@ -31,15 +31,15 @@ namespace game_framework {
 
 		ChangeFontLog(pDC, fp, 60, "STZhongsong");
 
-		pDC->TextOut(860, 620, "神劍之証");
+		CTextDraw::print(pDC, 860, 620, "神劍之証");
 
 		int POGS_count = character.getItemCount(POGS);
 
-		pDC->TextOut(1105, 620, ((string)("X " + to_string(POGS_count))).c_str());
+		CTextDraw::print(pDC, 1105, 620, ((string)("X " + to_string(POGS_count))).c_str());
 
 		ChangeFontLog(pDC, fp, 36, "STZhongsong");
 
-		pDC->TextOut(967, 725, "→ 確定");
+		CTextDraw::print(pDC, 967, 725, "→ 確定");
 
 
 		ChangeFontLog(pDC, fp, 48, "STZhongsong");
@@ -48,8 +48,8 @@ namespace game_framework {
 		int count = vec.size();
 		pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
 
-		pDC->TextOut(1095, 717, "-Enter-");
-		pDC->TextOut(965, 815, "-Quit-(W)");
+		CTextDraw::print(pDC, 1095, 717, "-Enter-");
+		CTextDraw::print(pDC, 965, 815, "-Quit-(W)");
 
 	}
 
