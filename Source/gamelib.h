@@ -67,10 +67,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #define SIZE_X				 1400		// 設定遊戲畫面的解析度為640x480
-#define SIZE_Y				 1080		// 註：若不使用標準的解析度，則不能切換到全螢幕
+#define SIZE_Y				 1040		// 註：若不使用標準的解析度，則不能切換到全螢幕
 #define OPEN_AS_FULLSCREEN	 false		// 是否以全螢幕方式開啟遊戲
 #define SHOW_LOAD_PROGRESS   true		// 是否顯示loading(OnInit)的進度
-#define DEFAULT_BG_COLOR	 RGB(255,255,255)	// 遊戲畫面預設的背景顏色(黑色)
+#define DEFAULT_BG_COLOR	 RGB(0, 0, 0)	// 遊戲畫面預設的背景顏色(黑色)
 #define GAME_CYCLE_TIME		 15		    // 每33ms跑一次Move及Show(每秒30次)
 #define SHOW_GAME_CYCLE_TIME false		// 是否在debug mode顯示cycle time
 #define ENABLE_GAME_PAUSE	 false		// 是否允許以 Ctrl-Q 暫停遊戲
@@ -213,8 +213,8 @@ namespace game_framework {
 		void  ShowBitmap();					// 將圖貼到螢幕
 		void  ShowBitmap(double factor);	// 將圖貼到螢幕 factor < 1時縮小，>1時放大。注意：需要VGA卡硬體的支援，否則會很慢
 		void  SelectShowBitmap(int select);
+		int   GetSelectShowBitmap();
 		void  ToggleAnimation(int delay);
-		void  ToggleAnimation();
 		int   Top();						// 取得圖形的左上角的 y 座標
 		int   Width();						// 取得圖形的寬度
 		bool  IsAnimationDone();

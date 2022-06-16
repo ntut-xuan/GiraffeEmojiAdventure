@@ -107,6 +107,41 @@
 #define AMULET_OF_ICE 98	
 #define HOLY_CROSS_SHIELD 99
 #define MERCURY_MAN 100
+#define SILVER_SLIME 101
+#define SWORD_KING 102
+#define POISON_ZOMBIE 103
+#define POISON_BAT 104
+#define SKELETON_S 105
+#define BAR_VERI 106
+#define YONG_VERI 107
+#define XIAN_VERI 108
+#define SELF_MONSTER 109
+#define SELF_NPC 110
+#define GOLD_SLIME 111
+#define DARK_MAGICIAN 112
+#define SHIELD_A 113
+#define HOLY_WATER 114
+#define DRAGON_1 115
+#define DRAGON_2 116
+#define DRAGON_3 117
+#define DRAGON_4 118
+#define DRAGON_5 119
+#define DRAGON_6 120
+#define DRAGON_7 121
+#define DRAGON_8 122
+#define DRAGON_9 123
+#define PROVE_OF_GOD_SWORD 124
+#define VAMPIRE_NPC 125
+#define MONSTER 126
+#define POISON_DRAGON_1 127
+#define POISON_DRAGON_2 128
+#define POISON_DRAGON_3 129
+#define POISON_DRAGON_4 130
+#define POISON_DRAGON_5 131
+#define POISON_DRAGON_6 132
+#define POISON_DRAGON_7 133
+#define POISON_DRAGON_8 134
+#define POISON_DRAGON_9 135
 
 /* ======================= Skill ======================= */
 
@@ -115,15 +150,28 @@
 #define RESPAWN_52 2
 #define ONE_SHOT_ATTACK 3
 #define IGNORE_DEFENCE 4
-#define CAUSE_WEEK 5
-#define POSION_ATTACK 6
 #define HARD_HARD_HARD 7
 #define MULTIPLE_ATTACK 8
 #define DODGE_ATTACK 9
+#define CAUSE_WEEK 16
+#define POSION_ATTACK 32
 
 /* =================== Special Item =================== */
 
 #define SPECIAL_KEY_17F 171717
+#define ANY_GATE 48763
+#define POGS 314159
+#define SPECIAL_KEY_B18F 322493
+#define SPECIAL_KEY_10F 472256
 
+/* ======================= Audio ======================= */
+
+#define AUDIO_BACKGROUND 0
+#define AUDIO_BACKGROUND2 2
+#define AUDIO_WALK 1
+#define AUDIO_OPENDOOR 3
+#define AUDIO_ATTACK 4
+#define AUDIO_CATCH_ITEM 5
+#define AUDIO_WINNING_SOUND 6
 
 /* ======================= End ======================= */

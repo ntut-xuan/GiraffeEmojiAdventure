@@ -98,9 +98,8 @@ namespace game_framework {
 			pDC->TextOut(1170, 185 + i * 250, "敏捷");
 
 			pDC->TextOut(620, 265 + i * 250, "攻擊次數");
-			pDC->TextOut(820, 265 + i * 250, "預估傷害");
-			pDC->TextOut(1020, 265 + i * 250, "Exp");
-			pDC->TextOut(1170, 265 + i * 250, "Gold");
+			pDC->TextOut(820, 265 + i * 250, "Exp");
+			pDC->TextOut(1020, 265 + i * 250, "Gold");
 
 			ChangeFontLog(pDC, fp, 36, "STZhongsong");
 			pDC->TextOut(615, 125 + i * 250, spyMenuMonsterData[spyMenuPage * 3 + i].getName().c_str());
@@ -125,10 +124,10 @@ namespace game_framework {
 			pDC->TextOut(620, 295 + i * 250, to_string(spyMenuMonsterData[spyMenuPage * 3 + i].getAttackCount()).c_str());
 
 			pDC->SetTextColor(RGB(0, 255, 255));
-			pDC->TextOut(1020, 295 + i * 250, to_string(spyMenuMonsterData[spyMenuPage * 3 + i].getExp()).c_str());
+			pDC->TextOut(820, 295 + i * 250, to_string(spyMenuMonsterData[spyMenuPage * 3 + i].getExp()).c_str());
 
 			pDC->SetTextColor(RGB(255, 215, 0));
-			pDC->TextOut(1170, 295 + i * 250, to_string(spyMenuMonsterData[spyMenuPage * 3 + i].getGold()).c_str());
+			pDC->TextOut(1020, 295 + i * 250, to_string(spyMenuMonsterData[spyMenuPage * 3 + i].getGold()).c_str());
 		}
 
 		ChangeFontLog(pDC, fp, 30, "Noto Sans TC", 800);

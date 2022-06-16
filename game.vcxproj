@@ -263,6 +263,7 @@
     <None Include="res\Toolbar.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\AnyGateMenu.cpp" />
     <ClCompile Include="Source\AttackAction.cpp" />
     <ClCompile Include="Source\audio.cpp">
       <DeploymentContent>true</DeploymentContent>
@@ -299,6 +300,7 @@
     </ClCompile>
     <ClCompile Include="Source\Monster.cpp" />
     <ClCompile Include="Source\NPC.cpp" />
+    <ClCompile Include="Source\POGSMenu.cpp" />
     <ClCompile Include="Source\SpyMenu.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
     <ClCompile Include="Source\StdAfx.cpp">
@@ -325,6 +327,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\AnyGateMenu.h" />
     <ClInclude Include="Source\AttackAction.h" />
     <ClInclude Include="Source\audio.h">
       <DeploymentContent>true</DeploymentContent>
@@ -350,6 +353,7 @@
     <ClInclude Include="Source\Material.h" />
     <ClInclude Include="Source\Monster.h" />
     <ClInclude Include="Source\NPC.h" />
+    <ClInclude Include="Source\POGSMenu.h" />
     <ClInclude Include="Source\Resource.h">
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>

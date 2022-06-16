@@ -125,6 +125,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.ShowWindow(SW_HIDE);
 	SetMenu(NULL);
 
+	SetWindowText(_T("Giraffe Adventure"));
+
 	// 如果是Full Screen的話，隱藏ToolBar, StatusBar, Menu
 	//
 	if (isFullScreen) {
@@ -145,7 +147,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	//		| WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX;
 
 	cs.cx = 640; cs.cy = 480;
-	cs.style = WS_BORDER | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	cs.style = WS_SYSMENU | WS_MINIMIZEBOX;
     cs.x = (::GetSystemMetrics(SM_CXSCREEN) - cs.cx) / 2; 
 	cs.y = (::GetSystemMetrics(SM_CYSCREEN) - cs.cy) / 2; 
 	//  Set priority level
@@ -194,6 +196,7 @@ void CMainFrame::SetFullScreen(bool isFull)
 		//
 		m_wndToolBar.ShowWindow(SW_HIDE);
 		m_wndStatusBar.ShowWindow(SW_HIDE);
+
 		ModifyStyle(WS_DLGFRAME, 0);
 		SetMenu(NULL);
 	}
@@ -234,6 +237,7 @@ void CMainFrame::OnPaint()
 	// Do not call CFrameWnd::OnPaint() for painting messages
 	if (isFullScreen)
 		return;
+
 	int extra_height=0;
 	CRect ClientRect;
 	game_framework::CDDraw::GetClientRect(ClientRect);
@@ -250,6 +254,7 @@ void CMainFrame::OnPaint()
 	extra_height += GetSystemMetrics(SM_CYMENU);
 	CRect WindowRect;
 	GetWindowRect(WindowRect);
+
 	MoveWindow(WindowRect.left, WindowRect.top, ClientRect.Width(), ClientRect.Height() + extra_height);
 }
 

@@ -399,6 +399,10 @@ namespace game_framework {
 		selector = _select;
 	}
 
+	int CMovingBitmap::GetSelectShowBitmap() {
+		return selector;
+	}
+
 	int CMovingBitmap::Top()
 	{
 		GAME_ASSERT(isBitmapLoaded, "A bitmap must be loaded before Top() is called !!!");
@@ -478,7 +482,7 @@ namespace game_framework {
 		pDC->SelectObject(&b1);
 		pDC->Rectangle(progress_x1, progress_y1, progress_x2_end, progress_y2);
 
-		CBrush b2(RGB(30, 30, 30));					// 畫黃色 progrss進度
+		CBrush b2(RGB(255, 255, 255));					// 畫黃色 progrss進度
 		pDC->SelectObject(&b2);
 		pDC->Rectangle(progress_x1, progress_y1, progress_x2, progress_y2);
 
@@ -1390,4 +1394,4 @@ namespace game_framework {
 		}
 	}
 
-}
+}         

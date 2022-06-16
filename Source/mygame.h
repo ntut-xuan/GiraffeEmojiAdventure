@@ -47,6 +47,8 @@
 #include "FlyingMenu.h"
 #include "GameSystem.h"
 #include "DialogMenu.h"
+#include "AnyGateMenu.h"
+#include "POGSMenu.h"
 #include "Event.h"
 
 namespace game_framework {
@@ -103,13 +105,15 @@ namespace game_framework {
 		static vector<vector<vector<int>>> stage_entity;
 		static vector<vector<vector<int>>> stage_material;
 		static vector<vector<vector<int>>> hidden_code;
+		static bool refresh_animation;
+		static char ending;
 
 	protected:
 		void OnMove();									// 移動遊戲元素
 		void OnShow();									// 顯示這個狀態的遊戲畫面
 		bool isDoor(int doorCode);
 		bool isKey(int keyCode);
-		bool OpenDoor(int x, int y, int doorCode);
+		bool OpenDoor(int preCurrentStage, int x, int y, int doorCode);
 		bool GetKey(int x, int y, int keyCode);
 		void loadFixedEntityMap(int ID, vector<string> vec, int animation_time, bool animation_option);
 		void loadFixedMaterialMap(int ID, vector<string> vec, int animation_time, bool animation_option);
@@ -133,6 +137,8 @@ namespace game_framework {
 		bool helpMenuing = false;
 		bool flyingMenuing = false;
 		bool spyMenuing = false;
+		bool anyGateMenuing = false;
+		bool pogsMenuing = false;
 		bool showAttackValue = true;
 		bool enterStatus = false;
 		bool turn = true; // 玩家先手
@@ -180,11 +186,14 @@ namespace game_framework {
 		vector<CMovingBitmap> monster_map = vector<CMovingBitmap>(200);
 		vector<CMovingBitmap> npc_map = vector<CMovingBitmap>(200);
 		vector<vector<vector<CMovingBitmap>>> fixed_entity_map = vector<vector<vector<CMovingBitmap>>>(11, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(200)));
+		vector<vector<vector<CMovingBitmap>>> fixed_animation_map = vector<vector<vector<CMovingBitmap>>>(11, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(5)));
 		vector<vector<vector<CMovingBitmap>>> fixed_material_map = vector<vector<vector<CMovingBitmap>>>(11, vector<vector<CMovingBitmap>>(11, vector<CMovingBitmap>(200)));
 		GameSystem gameSystem;
 		SpyMenu spyMenu;
 		FlyingMenu flyingMenu;
 		DialogMenu dialogMenu;
+		AnyGateMenu anyGateMenu;
+		POGSMenu pogsMenu;
 
 		void ShowText();
 	};
@@ -198,12 +207,19 @@ namespace game_framework {
 	public:
 		CGameStateOver(CGame *g);
 		void OnBeginState();							// 設定每次重玩所需的變數
+		void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		void OnInit();
+		static char ending;
 	protected:
 		void OnMove();									// 移動遊戲元素
 		void OnShow();									// 顯示這個狀態的遊戲畫面
+		void ShowText(); 
 	private:
-		int counter;	// 倒數之計數器
+		int current_dialog = 0;
+		vector<vector<string>> dialog;
+		CMovingBitmap dialogMenu_B, dialogMenuCharacter_B;
+		bool enterStatus = true;
+		bool dialogMenuing = true;
 	};
 
 }

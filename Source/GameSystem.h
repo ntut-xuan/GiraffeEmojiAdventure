@@ -7,7 +7,6 @@ namespace game_framework {
 	class GameSystem : public GameMenu {
 	public:
 		GameSystem() = default;
-
 		void onShow();
 		void setParameter(Character _character, int _mouse_x, int _mouse_y, string _floor_message);
 		void LoadBitmap(vector<char*> vec);

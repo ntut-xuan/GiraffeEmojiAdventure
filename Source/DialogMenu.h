@@ -8,6 +8,7 @@ namespace game_framework {
 		void onShow();
 		void LoadBitmap();
 		bool onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, Character &character, bool &inShopping, bool &enterStatus, bool &dialogMenuing);
+		bool onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, bool &enterStatus, bool &dialogMenuing);
 		void setNPC(NPC npc, int current_stage, int x, int y, bool &inShopping);
 		void setNPCMap(vector<CMovingBitmap> vec);
 		void onShowText(CDC *pDC, CFont* &fp, bool inShopping);

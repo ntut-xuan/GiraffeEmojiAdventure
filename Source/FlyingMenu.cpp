@@ -17,8 +17,8 @@ namespace game_framework {
 	pair<int, int> FlyingMenu::fetch_near_floor(TOPDOWN up_or_down, vector<vector<int>> entity_code, pair<int, int> character_location) {
 		double distance_up = 20020625;
 		double distance_down = 20020625;
-		pair<int, int> up_stair_location;
-		pair<int, int> down_stair_location;
+		pair<int, int> up_stair_location = { -1, -1 };
+		pair<int, int> down_stair_location = { -1, -1 };
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
 				if (entity_code[i][j] == UP_STAIR) {
@@ -38,10 +38,10 @@ namespace game_framework {
 			}
 		}
 		if (up_or_down == TOP) {
-			return up_stair_location;
+			return up_stair_location.first == -1 ? down_stair_location : up_stair_location;
 		}
 		else {
-			return down_stair_location;
+			return down_stair_location.first == -1 ? up_stair_location : down_stair_location;
 		}
 	}
 
@@ -73,6 +73,7 @@ namespace game_framework {
 
 	void FlyingMenu::setFlyingRange(TOPDOWN setting, int value) {
 		setting == TOP ? flying_top_range = value : flying_buttom_range = value;
+		TRACE("%d %d\n", flying_top_range, flying_buttom_range);
 	}
 
 	void FlyingMenu::setFlyingSelect(int _flyingSelect) {
@@ -81,13 +82,13 @@ namespace game_framework {
 
 	void FlyingMenu::onShow() {
 		flyingMenu.ShowBitmap();
-		if (flying_select - 26 == flying_top_range) {
+		if (flying_select == flying_top_range) {
 			//arrow_up_disable.ShowBitmap();
 		}
 		else {
 			arrow_up_enable.ShowBitmap();
 		}
-		if (flying_select - 26 == flying_buttom_range) {
+		if (flying_select == flying_buttom_range) {
 			//arrow_down_disable.ShowBitmap();
 		}
 		else {

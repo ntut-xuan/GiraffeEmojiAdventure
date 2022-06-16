@@ -20,8 +20,10 @@ namespace game_framework {
 			vector<int> vec;
 			for (int i = 80; i <= 250; i += 10) {
 				vec.push_back(i);
+				vec.push_back(i);
 			}
 			for (int i = 250; i >= 80; i -= 10) {
+				vec.push_back(i);
 				vec.push_back(i);
 			}
 			return vec;

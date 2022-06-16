@@ -89,6 +89,7 @@ namespace game_framework {
 		current_dialog = 0;
 		enterStatus = true;
 		dialogMenuing = true;
+		option = vector<string>(0);
 	}
 
 	void DialogMenu::setNPCMap(vector<CMovingBitmap> vec) {
@@ -120,11 +121,11 @@ namespace game_framework {
 							character.setCoin(character.getCoin() - NPC::increaseCost1);
 						}
 						else if (tempSelect == 1) {
-							character.setAttack(character.getAttack() + 3);
+							character.setAttack(character.getRawAttack() + 3);
 							character.setCoin(character.getCoin() - NPC::increaseCost1);
 						}
 						else if (tempSelect == 2) {
-							character.setDefence(character.getDefence() + 3);
+							character.setDefence(character.getRawDefence() + 3);
 							character.setCoin(character.getCoin() - NPC::increaseCost1);
 						}
 						NPC::increaseCost1 += 1;
@@ -137,11 +138,11 @@ namespace game_framework {
 				}
 				if (npc.getID() == SHOP_2_2) {
 					if (tempSelect == 0 && character.getExp() >= 70) {
-						character.setLevel(character.getLevel() + 1);
+						character.levelup();
 						character.setExp(character.getExp() - 70);
 					}
 					else if (tempSelect == 1 && character.getExp() >= 20) {
-						character.setAttack(character.getAttack() + 1);
+						character.setAttack(character.getRawAttack() + 1);
 						character.setExp(character.getExp() - 20);
 					}
 					else if (tempSelect == 2 && character.getExp() >= 20) {
@@ -175,7 +176,6 @@ namespace game_framework {
 		}
 
 		if (dialogMenuing && nChar == KEY_ENTER) {
-			TRACE("enter\n");
 			if (dialogMenuing && !inShopping) {
 				if (current_dialog < (int) dialog.size() - 1) {
 					current_dialog += 1;
@@ -184,7 +184,7 @@ namespace game_framework {
 					current_dialog = 0;
 					enterStatus = false;
 					dialogMenuing = false;
-					Event::triggerAfterDialog(current_stage, x, y);
+					Event::triggerAfterDialog(current_stage, x, y, character);
 					return true;
 				}
 			}
@@ -192,6 +192,24 @@ namespace game_framework {
 
 		return false;
 
+	}
+
+	bool DialogMenu::onKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags, bool &enterStatus, bool &dialogMenuing) {
+		const char KEY_ENTER = 0x0D; // keyboard¤W½bÀY
+		if (dialogMenuing && nChar == KEY_ENTER) {
+			if (dialogMenuing) {
+				if (current_dialog < (int)dialog.size() - 1) {
+					current_dialog += 1;
+				}
+				else {
+					current_dialog = 0;
+					enterStatus = false;
+					dialogMenuing = false;
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	void DialogMenu::onShow() {
@@ -229,8 +247,10 @@ namespace game_framework {
 
 		ChangeFontLog(pDC, fp, 60, "STZhongsong");
 
+		int nameLength = npc.getName().length() > 3 ? npc.getName().length() : 0;
+
 		if (position[current_dialog] == 'T') {
-			pDC->TextOut(1100 - 227, 130, npc.getName().c_str());
+			pDC->TextOut(1100 - 227 - nameLength * 5, 130, npc.getName().c_str());
 		}
 		else if (position[current_dialog] == 'B') {
 			pDC->TextOut(1100 - 227, 540, "ªøÀV³À");

@@ -21,7 +21,7 @@ namespace game_framework {
 	// 這個class為遊戲的遊戲開頭畫面物件
 	/////////////////////////////////////////////////////////////////////////////
 
-	const int CGameStateRun::start_x = 472;
+	const int CGameStateRun::start_x = 469;
 	const int CGameStateRun::start_y = 77;
 
 	void ChangeFontLog(CDC* pDC, CFont* &fp, int size, string fontName, int weight = 500) {
@@ -59,7 +59,7 @@ namespace game_framework {
 		//
 		logo.LoadBitmap(IDB_BACKGROUND);
 
-		giraffe_photo.LoadBitmap("./RES/layout.bmp", RGB(255, 255, 255));
+		giraffe_photo.LoadBitmap("./RES/layout.bmp");
 		giraffe_photo.SetTopLeft(0, 0);
 
 		Sleep(300);				// 放慢，以便看清楚進度，實際遊戲請刪除此Sleep
@@ -78,83 +78,20 @@ namespace game_framework {
 		const char KEY_ESC = 27;
 		const char KEY_SPACE = ' ';
 		if (nChar == KEY_SPACE)
-			GotoGameState(GAME_STATE_RUN);						// 切換至GAME_STATE_RUN
-		else if (nChar == KEY_ESC)								// Demo 關閉遊戲的方法
-			PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);	// 關閉遊戲
+			GotoGameState(GAME_STATE_RUN);
+		else if (nChar == KEY_ESC)
+			PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
 	}
 
 	void CGameStateInit::OnLButtonDown(UINT nFlags, CPoint point)
 	{
-		//GotoGameState(GAME_STATE_RUN);		// 切換至GAME_STATE_RUN
+
 	}
 
 	void CGameStateInit::OnShow() {
 
 		giraffe_photo.ShowBitmap();
 
-		/*CDC *pDC = CDDraw::GetBackCDC();
-		CFont f, *fp;
-
-		time_t rawtime;
-		time(&rawtime);
-
-		f.CreatePointFont(560, "Noto Sans TC");
-		fp = pDC->SelectObject(&f);
-		pDC->SetBkColor(RGB(255, 255, 255));
-		pDC->SetTextColor(RGB(0, 0, 0));
-		//pDC->TextOut(400, 50, "魔塔（但封面還沒做好.jpg）");
-
-		f.Detach();
-		f.CreatePointFont(160, "Noto Sans TC");
-		fp = pDC->SelectObject(&f);
-
-		//pDC->TextOut(650, 740, " - 按 Space 開始遊戲 - ");
-		//pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
-		//pDC->TextOut(20, 850, "按 Ctrl + Q 暫停遊戲");
-		//pDC->TextOut(1000, 850, ctime(&rawtime));
-
-		pDC->SelectObject(fp);						// 放掉 font f (千萬不要漏了放掉)
-		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC*/
-	}
-
-	/////////////////////////////////////////////////////////////////////////////
-	// 這個class為遊戲的結束狀態(Game Over)
-	/////////////////////////////////////////////////////////////////////////////
-
-	CGameStateOver::CGameStateOver(CGame *g)
-		: CGameState(g)
-	{
-	}
-
-	void CGameStateOver::OnMove()
-	{
-		counter--;
-		if (counter < 0)
-			GotoGameState(GAME_STATE_INIT);
-	}
-
-	void CGameStateOver::OnBeginState()
-	{
-		counter = 30 * 5; // 5 seconds
-	}
-
-	void CGameStateOver::OnInit()
-	{
-	}
-
-	void CGameStateOver::OnShow()
-	{
-		CDC *pDC = CDDraw::GetBackCDC();			// 取得 Back Plain 的 CDC 
-		CFont f, *fp;
-		f.CreatePointFont(160, "Times New Roman");	// 產生 font f; 160表示16 point的字
-		fp = pDC->SelectObject(&f);					// 選用 font f
-		pDC->SetBkColor(RGB(0, 0, 0));
-		pDC->SetTextColor(RGB(255, 255, 0));
-		char str[80];								// Demo 數字對字串的轉換
-		sprintf(str, "Game Over ! (%d)", counter / 30);
-		pDC->TextOut(240, 210, str);
-		pDC->SelectObject(fp);						// 放掉 font f (千萬不要漏了放掉)
-		CDDraw::ReleaseBackCDC();					// 放掉 Back Plain 的 CDC
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -164,6 +101,8 @@ namespace game_framework {
 	vector<vector<vector<int>>> CGameStateRun::stage_entity = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 	vector<vector<vector<int>>> CGameStateRun::stage_material = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
 	vector<vector<vector<int>>> CGameStateRun::hidden_code = vector<vector<vector<int>>>(50, vector<vector<int>>(11, vector<int>(11)));
+	bool CGameStateRun::refresh_animation = false;
+	char CGameStateRun::ending = '\0';
 
 	CGameStateRun::CGameStateRun(CGame *g) : CGameState(g), STAGES(60)
 	{
@@ -185,6 +124,7 @@ namespace game_framework {
 				}
 			}
 		}
+		//TRACE("%d, size=%d\n", ID, fixed_entity_map[0][0][ID].GetMovingBitmapFrame());
 	}
 
 	void CGameStateRun::loadFixedMaterialMap(int ID, vector<string> vec, int animation_time, bool animation_option) {
@@ -260,6 +200,19 @@ namespace game_framework {
 			}
 		}
 
+		ShowInitProgress(70, "Loading Block Animation");
+
+		for (int i = 0; i < 11; i++) {
+			for (int j = 0; j < 11; j++) {
+				fixed_animation_map[i][j][0].LoadBitmap({ "RES/blank_animation.bmp", "RES/lfa.bmp", "RES/lfa2.bmp", "RES/lfa3.bmp", "RES/lfa4.bmp", "RES/lfa5.bmp", "RES/blank_animation.bmp" }, RGB(255, 255, 255));
+				fixed_animation_map[i][j][0].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
+				fixed_animation_map[i][j][0].SetAnimation(0, true);
+				fixed_animation_map[i][j][1].LoadBitmap({ "RES/blank_animation.bmp", "RES/lfai.bmp", "RES/lfai2.bmp", "RES/lfai3.bmp", "RES/lfai4.bmp", "RES/lfai5.bmp", "RES/blank_animation.bmp" }, RGB(255, 255, 255));
+				fixed_animation_map[i][j][1].SetTopLeft(start_x + element_width * j, start_y + element_width * i);
+				fixed_animation_map[i][j][1].SetAnimation(0, true);
+			}
+		}
+
 		ShowInitProgress(100, "Done!");
 
 		map<string, int> special_event_number;
@@ -310,10 +263,10 @@ namespace game_framework {
 
 		/* Character Attack Menu Load */
 
-		characterAttackMenuBitMap.LoadBitmap({ "RES/character.bmp" }, RGB(255, 255, 255));
+		characterAttackMenuBitMap.LoadBitmap({ "RES/character.bmp" }, RGB(0, 0, 0));
 		characterAttackMenuBitMap.SetTopLeft(1467 - 227, 427);
 
-		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp" }, RGB(255, 255, 255));
+		characterBitmap.LoadBitmap({ "RES/character.bmp", "RES/character2.bmp", "RES/character_21.bmp", "RES/character_22.bmp", "RES/character_31.bmp", "RES/character_32.bmp", "RES/character_41.bmp", "RES/character_42.bmp" }, RGB(0, 0, 0));
 		characterBitmap.SetTopLeft(start_x + character.getY() * element_width, start_y + character.getX() * element_width);
 
 		attackMenu.LoadBitmap({ "RES/attack_menu.bmp" }, RGB(0, 0, 0));
@@ -328,6 +281,9 @@ namespace game_framework {
 		helpMenu.LoadBitmapA("RES/help.bmp");
 		helpMenu.SetTopLeft(start_x, start_y);
 
+		anyGateMenu.LoadBitmap({ "RES/anygate.bmp" });
+		pogsMenu.LoadBitmap({ "RES/pogs.bmp" });
+
 		/* Flying Menu Bitmap */
 
 		flyingMenu.LoadBitmap();
@@ -335,6 +291,14 @@ namespace game_framework {
 		/* Spy Menu Bitmap */
 
 		spyMenu.LoadBitmap();
+
+		CAudio::Instance()->Load(AUDIO_BACKGROUND, "Audio/background.mp3");
+		CAudio::Instance()->Load(AUDIO_BACKGROUND2, "Audio/background2.mp3");
+		CAudio::Instance()->Load(AUDIO_WALK, "Audio/walk.mp3");
+		CAudio::Instance()->Load(AUDIO_OPENDOOR, "Audio/opendoor.mp3");
+		CAudio::Instance()->Load(AUDIO_ATTACK, "Audio/attack.mp3");
+		CAudio::Instance()->Load(AUDIO_CATCH_ITEM, "Audio/catch_item.mp3");
+		CAudio::Instance()->Load(AUDIO_WINNING_SOUND, "Audio/winning_sound.mp3");
 
 	}
 
@@ -356,12 +320,16 @@ namespace game_framework {
 		turn = true;
 		teleport_allow = false;
 		temp_current_stage = 0;
+		flyingMenu.setFlyingRange(FlyingMenu::TOP, 26);
+		flyingMenu.setFlyingRange(FlyingMenu::DOWN, 26);
+		character.setCharacterIndex(0);
 
 		stage_entity = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 		stage_material = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
 		hidden_code = vector<vector<vector<int>>>(STAGES, vector<vector<int>>(11, vector<int>(11)));
+		refresh_animation = false;
 
-		for (int i = 1; i <= 52; i++) {
+		for (int i = 1; i <= 56; i++) {
 			stage_entity[i] = stage.getStageEntity(i);
 			stage_material[i] = stage.getStageMaterial(i);
 		}
@@ -376,6 +344,11 @@ namespace game_framework {
 		character.changeKeyNumber(KEY, 23766);
 		character.changeKeyNumber(SILVER_KEY, 23766);
 		character.changeKeyNumber(GOLD_KEY, 23766);
+		character.setItemCount(AMULET_OF_ICE, 1);
+		character.setItemCount(GEM_DIGGER, 100);
+		character.setItemCount(ANY_GATE, 10);
+		character.setItemCount(POGS, 10);
+		//character.setStatus(CAUSE_WEEK | POSION_ATTACK);
 		teleport_allow = true;
 #endif 
 
@@ -391,51 +364,68 @@ namespace game_framework {
 
 		flyingMenu.setFlyingSelect(current_stage);
 
+		CAudio::Instance()->Play(AUDIO_BACKGROUND, true);
+
 	}
 
 	bool CGameStateRun::isDoor(int doorCode) {
-		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR || doorCode == IRON_FENCE;
+		return doorCode == DOOR || doorCode == SILVER_DOOR || doorCode == GOLD_DOOR || doorCode == IRON_FENCE || doorCode == GEM_DOOR;
 	}
 
 	bool CGameStateRun::isKey(int keyCode) {
 		return keyCode == KEY || keyCode == SILVER_KEY || keyCode == GOLD_KEY;
 	}
 
-	bool CGameStateRun::OpenDoor(int x, int y, int doorCode) {
+	bool CGameStateRun::OpenDoor(int preCurrentStage, int x, int y, int doorCode) {
 
 		vector<vector<int>> entity_ID = stage_entity[current_stage];
 
+		bool doorSuccessOpen = true;
+
 		if (doorCode == DOOR) {
 			if (character.getKeyNumber() > 0) {
-				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
-				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
-				hidden_code[current_stage][x][y] = 1;
+				doorSuccessOpen = true;
 				character.changeKeyNumber(KEY, -1);
-				return true;
 			}
 		}
 		if (doorCode == SILVER_DOOR) {
 			if (character.getSilverKeyNumber() > 0) {
-				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
-				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
-				hidden_code[current_stage][x][y] = 1;
+				doorSuccessOpen = true;
 				character.changeKeyNumber(SILVER_KEY, -1);
-				return true;
 			}
 		}
 		if (doorCode == GOLD_DOOR) {
 			if (character.getGoldKeyNumber() > 0) {
-				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
-				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
-				hidden_code[current_stage][x][y] = 1;
+				doorSuccessOpen = true;
 				character.changeKeyNumber(GOLD_KEY, -1);
-				return true;
+			}
+		}
+		if (doorCode == GEM_DOOR) {
+			if (character.getItemCount(GEM_DIGGER) > 0) {
+				doorSuccessOpen = true;
+				character.setItemCount(GEM_DIGGER, character.getItemCount(GEM_DIGGER) - 1);
 			}
 		}
 		if (doorCode == IRON_FENCE) {
 			fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
 			fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
-			hidden_code[current_stage][x][y] = 1;
+			hidden_code[preCurrentStage][x][y] = 1;
+			CAudio::Instance()->Play(AUDIO_OPENDOOR, false);
+			return true;
+		}
+
+		if (doorSuccessOpen) {
+
+			bool trigger = event.triggerTeleportIsExist(current_stage, x, y);
+
+			if (!trigger) {
+				fixed_entity_map[x][y][doorCode].SetAnimation(1, true);
+				fixed_entity_map[x][y][doorCode].ToggleAnimation(1);
+			}
+			
+			hidden_code[preCurrentStage][x][y] = 1;
+			CAudio::Instance()->Play(AUDIO_OPENDOOR, false);
+
 			return true;
 		}
 		return false;
@@ -462,6 +452,36 @@ namespace game_framework {
 
 	void CGameStateRun::OnMove()							// 移動遊戲元素
 	{
+		
+		if (CGameStateRun::ending != '\0') {
+			GotoGameState(GAME_STATE_OVER);
+		}
+
+		if (character.getHealth() <= 0) {
+			if (character.getItemCount(CROSS) > 0) {
+				character.setHealth(2000);
+				character.setItemCount(CROSS, character.getItemCount(CROSS) - 1);
+			}
+			else {
+				CGameStateOver::ending = 'B';
+				GotoGameState(GAME_STATE_OVER);
+			}
+		}
+
+		if (temp_current_stage != current_stage) {
+			if (current_stage == 26) {
+				CAudio::Instance()->Play(AUDIO_BACKGROUND, true);
+				CAudio::Instance()->Stop(AUDIO_BACKGROUND2);
+			}
+			else if (temp_current_stage == 26 && current_stage != 26) {
+				CAudio::Instance()->Play(AUDIO_BACKGROUND2, true);
+				CAudio::Instance()->Stop(AUDIO_BACKGROUND);
+			}
+		}
+
+		if (characterBitmap.GetSelectShowBitmap() / 2 != character.getCharacterIndex()) {
+			characterBitmap.SelectShowBitmap(character.getCharacterIndex() * 2);
+		}
 
 		if (character.getHealth() == 0) {
 			//GotoGameState(GAME_STATE_OVER);
@@ -486,6 +506,7 @@ namespace game_framework {
 
 				int probabilityCauseDamage = rand() % 100;
 				int probabilityCauseCriticalHit = rand() % 100;
+				int probabilityCauseSkill = rand() % 100;
 
 				int mo_health = monster.getHealth();
 				int mo_ID = monster.getID();
@@ -521,6 +542,7 @@ namespace game_framework {
 					enemyAttackAnimation[0].ToggleAnimation(100);
 					monsterAttackCount = mo_attack_count;
 					tempDelayCycle = MENU_DELAY / (monster.getHealth() == 0 ? 1 : mo_attack_count);
+					CAudio::Instance()->Play(AUDIO_ATTACK, false);
 					turn = !turn;
 				}
 				else {
@@ -533,9 +555,18 @@ namespace game_framework {
 					else {
 						causeDamageValue = max(0, mo_attack - ch_defence) * (probabilityCauseCriticalHit <= 2 ? 2 : 1);
 						causeDamageValueString = to_string(causeDamageValue);
+						if (probabilityCauseSkill <= 50) {
+							if (monster.getSpecialEvent() == CAUSE_WEEK) {
+								character.setStatus(CAUSE_WEEK);
+							}
+							if (monster.getSpecialEvent() == POSION_ATTACK) {
+								character.setStatus(POSION_ATTACK);
+							}
+						}
 					}
 					character.causeDamage(causeDamageValue);
 					characterAttackAnimation[0].ToggleAnimation(100);
+					CAudio::Instance()->Play(AUDIO_ATTACK, false);
 					if (--monsterAttackCount == 0) {
 						turn = !turn;
 						tempDelayCycle = MENU_DELAY;
@@ -552,6 +583,7 @@ namespace game_framework {
 			if (!enterStatus && monster.getHealth() == 0) {
 				character.setExp(character.getExp() + monster.getExp());
 				character.setCoin(character.getCoin() + monster.getGold());
+				CAudio::Instance()->Play(AUDIO_WINNING_SOUND, false);
 				enterStatus = true;
 				turn = false;
 			}
@@ -559,6 +591,8 @@ namespace game_framework {
 		}
 
 		gameSystem.setParameter(character, mouse_x, mouse_y, floor_message);
+		anyGateMenu.setParameter(character);
+		pogsMenu.setParameter(character);
 
 	}
 
@@ -575,12 +609,17 @@ namespace game_framework {
 		const char KEY_L = 0x4C;
 		const char KEY_F = 0x46;
 		const char KEY_R = 0x52;
+		const char KEY_T = 0x54;
+		const char KEY_W = 0x57;
 
 		vector<vector<int>> material_code = stage_material[current_stage];
 		vector<vector<int>> entity_code = stage_entity[current_stage];
 
 		int x = character.getX();
 		int y = character.getY();
+		int faced_x = character.getFacedX();
+		int faced_y = character.getFacedY();
+		int preCurrentStage = current_stage;
 
 		if (teleport_allow) {
 			if (GetKeyState(VK_CONTROL) < 0) {
@@ -588,7 +627,7 @@ namespace game_framework {
 					current_stage += 1;
 					return;
 				}
-				else {
+				else if (nChar == KEY_DOWN) {
 					current_stage -= 1;
 					return;
 				}
@@ -616,7 +655,7 @@ namespace game_framework {
 			return;
 		}
 
-		if (nChar == KEY_F && !(attackMenuing || dialogMenuing || helpMenuing || spyMenuing) && !(current_stage == 36 || current_stage == 46)) {
+		if (GetKeyState(VK_CONTROL) >= 0 && nChar == KEY_F && !(attackMenuing || dialogMenuing || helpMenuing || spyMenuing) && !(current_stage == 36 || current_stage == 46)) {
 			flyingMenuing = !flyingMenuing;
 			return;
 		}
@@ -641,12 +680,37 @@ namespace game_framework {
 			return;
 		}
 
+		if (nChar == KEY_T && !attackMenuing && !dialogMenuing && !helpMenuing && !flyingMenuing && !spyMenuing) {
+			if (Event::triggerAnydoorRule(character)) {
+				anyGateMenuing = !anyGateMenuing;
+				return;
+			}
+		}
+
+		if (nChar == KEY_W && !attackMenuing && !dialogMenuing && !helpMenuing && !flyingMenuing && !spyMenuing && !anyGateMenuing) {
+			if (Event::triggerPOGSRule(character, monster_bitmap_map)) {
+				pogsMenuing = !pogsMenuing;
+				return;
+			}
+		}
+
 		if (spyMenuing) {
 			spyMenu.onKeyUp(nChar, nRepCnt, nFlags);
+			return;
 		}
 
 		if (dialogMenuing || inShopping) {
 			dialogMenu.onKeyUp(nChar, nRepCnt, nFlags, character, inShopping, enterStatus, dialogMenuing);
+			return;
+		}
+
+		if (anyGateMenuing) {
+			anyGateMenu.onKeyUp(nChar, nRepCnt, nFlags, character, enterStatus, anyGateMenuing);
+			return;
+		}
+
+		if (pogsMenuing) {
+			pogsMenu.onKeyUp(nChar, nRepCnt, nFlags, character, enterStatus, pogsMenuing, monster_bitmap_map);
 			return;
 		}
 
@@ -672,11 +736,11 @@ namespace game_framework {
 			int flying_top_range = flyingMenu.getFlyingRange(FlyingMenu::TOP);
 			int flying_down_range = flyingMenu.getFlyingRange(FlyingMenu::DOWN);
 			if (nChar == KEY_DOWN) {
-				if (flying_select - 26 - 1 < flying_down_range) return;
+				if (flying_select - 1 < flying_down_range) return;
 				flyingMenu.setFlyingSelect(flying_select - 1);
 			}
 			else if (nChar == KEY_UP) {
-				if (flying_select - 26 + 1 > flying_top_range) return;
+				if (flying_select + 1 > flying_top_range) return;
 				flyingMenu.setFlyingSelect(flying_select + 1);
 			}
 			if (nChar == KEY_ENTER) {
@@ -703,43 +767,63 @@ namespace game_framework {
 			if (nChar == KEY_UP) {
 				x = max(0, character.getX() - 1);
 				y = character.getY();
+				character.setFacedDirection(0);
+				CAudio::Instance()->Play(AUDIO_WALK, false);
 			}
 			else if (nChar == KEY_LEFT) {
-				characterBitmap.SelectShowBitmap(0);
+				characterBitmap.SelectShowBitmap(character.getCharacterIndex() * 2);
 				x = character.getX();
 				y = max(0, character.getY() - 1);
+				character.setFacedDirection(3);
+				CAudio::Instance()->Play(AUDIO_WALK, false);
 			}
 			else if (nChar == KEY_RIGHT) {
-				characterBitmap.SelectShowBitmap(1);
+				characterBitmap.SelectShowBitmap(character.getCharacterIndex() * 2 + 1);
 				x = character.getX();
 				y = min(10, character.getY() + 1);
+				character.setFacedDirection(1);
+				CAudio::Instance()->Play(AUDIO_WALK, false);
 			}
 			else if (nChar == KEY_DOWN) {
 				x = min(10, character.getX() + 1);
 				y = character.getY();
+				character.setFacedDirection(2);
+				CAudio::Instance()->Play(AUDIO_WALK, false);
 			}
 		}
 
-		event.triggerDialogEvent(current_stage, x, y, dialogMenu, enterStatus, dialogMenuing);
-		
-		bool triggerTeleport = event.triggerTeleport(current_stage, x, y, character);
-		if (triggerTeleport) {
+		character.setFacedXY(faced_x, faced_y);
+
+		if (character.getX() == x && character.getY() == y) {
 			return;
 		}
 
-		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL || material_code[x][y] == WALL_B) {
+		if (material_code[x][y] == 0 || material_code[x][y] == WALL_SHINE || material_code[x][y] == WALL_SPECIAL || material_code[x][y] == LAVA || material_code[x][y] == WALL_B || block_bitmap_map[entity_code[x][y]].length() != 0) {
 			return;
 		}
-		if (hidden_code[current_stage][x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(x, y, entity_code[x][y]) == false) {
+		if (hidden_code[current_stage][x][y] == 0 && isDoor(entity_code[x][y]) && OpenDoor(preCurrentStage, x, y, entity_code[x][y]) == false) {
 			return;
 		}
+
 		if (entity_code[x][y] == UP_STAIR) {
 			current_stage++;
-			flyingMenu.setFlyingRange(FlyingMenu::TOP, max(flyingMenu.getFlyingRange(FlyingMenu::TOP), current_stage - 26));
+			flyingMenu.setFlyingRange(FlyingMenu::TOP, max(flyingMenu.getFlyingRange(FlyingMenu::TOP), current_stage));
+			flyingMenu.setFlyingSelect(current_stage);
 		}
 		if (entity_code[x][y] == DOWN_STAIR) {
 			current_stage--;
-			flyingMenu.setFlyingRange(FlyingMenu::DOWN, min(flyingMenu.getFlyingRange(FlyingMenu::DOWN), current_stage - 26));
+			flyingMenu.setFlyingRange(FlyingMenu::DOWN, min(flyingMenu.getFlyingRange(FlyingMenu::DOWN), current_stage));
+			flyingMenu.setFlyingSelect(current_stage);
+		}
+		if (material_code[x][y] == LAVA_ROAD) {
+			if (character.getItemCount(AMULET_OF_ICE) > 0) {
+				fixed_animation_map[x][y][1].ToggleAnimation(50);
+				CGameStateRun::stage_material[current_stage][x][y] = ROAD;
+			}
+			else {
+				fixed_animation_map[x][y][0].ToggleAnimation(50);
+				character.setHealth(character.getHealth() - 50);
+			}
 		}
 		if (hidden_code[current_stage][x][y] == 0 && monster_bitmap_map[entity_code[x][y]].length() != 0) {
 
@@ -764,8 +848,10 @@ namespace game_framework {
 			causeDamageValueString = "";
 			return;
 		}
+
 		if (hidden_code[current_stage][x][y] == 0 && functional_entity_bitmap_map[entity_code[x][y]].length() != 0) {
 			event.triggerGetItem(entity_code[x][y], character, temp_item_info);
+			CAudio::Instance()->Play(AUDIO_CATCH_ITEM, false);
 			enterStatus = true;
 			getDialogMenuing = true;
 			hidden_code[current_stage][x][y] = 1;
@@ -775,12 +861,19 @@ namespace game_framework {
 			if (entity_code[x][y] == SHOPKEEPER) {
 				dialogMenuing = true;
 				enterStatus = true;
-				dialogMenu.setNPC(NPC(SHOPKEEPER, "奸商"), current_stage, x, y, inShopping);
+				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(SHOPKEEPER, "奸商"), character, dialogMenu, enterStatus, dialogMenuing);
+				if (trigger == false) {
+					dialogMenu.setNPC(NPC(SHOPKEEPER, "奸商"), current_stage, x, y, inShopping);
+				}
 			}
 			else if (entity_code[x][y] == ELDER) {
 				dialogMenuing = true;
 				enterStatus = true;
-				dialogMenu.setNPC(NPC(ELDER, "老人"), current_stage, x, y, inShopping);
+				inShopping = false;
+				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(ELDER, "老人"), character, dialogMenu, enterStatus, dialogMenuing);
+				if (trigger == false) {
+					dialogMenu.setNPC(NPC(ELDER, "老人"), current_stage, x, y, inShopping);
+				}
 			}
 			else if (entity_code[x][y] == SHOP_1_2) {
 				dialogMenuing = true;
@@ -794,12 +887,17 @@ namespace game_framework {
 			}
 			else if (entity_code[x][y] == PRINCESS) {
 				dialogMenuing = true;
-				enterStatus = true;
-				dialogMenu.setNPC(NPC(PRINCESS, "公主"), current_stage, x, y, inShopping);
+				enterStatus = true; 
+				inShopping = false;
+				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(PRINCESS, "公主"), character, dialogMenu, enterStatus, dialogMenuing);
+				if (trigger == false) {
+					dialogMenu.setNPC(NPC(PRINCESS, "公主"), current_stage, x, y, inShopping);
+				}
 			}
 			else if (entity_code[x][y] == THIEF) {
 				dialogMenuing = true;
 				enterStatus = true;
+				inShopping = false;
 				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(THIEF, "竊賊"), character, dialogMenu, enterStatus, dialogMenuing);
 				if (trigger == false) {
 					dialogMenu.setNPC(NPC(THIEF, "竊賊"), current_stage, x, y, inShopping);
@@ -808,6 +906,7 @@ namespace game_framework {
 			else if (entity_code[x][y] == FAIRY) {
 				dialogMenuing = true;
 				enterStatus = true;
+				inShopping = false;
 				bool trigger = event.triggerSpecialNPCDialog(current_stage, x, y, NPC(FAIRY, "妖精"), character, dialogMenu, enterStatus, dialogMenuing);
 				if (trigger == false) {
 					dialogMenu.setNPC(NPC(FAIRY, "妖精"), current_stage, x, y, inShopping);
@@ -815,10 +914,29 @@ namespace game_framework {
 			}
 			return;
 		}
+
 		if (eventEntity(entity_code[x][y])) {
 			hidden_code[current_stage][x][y] = 1;
 		}
+
+
+		event.triggerDialogEvent(current_stage, x, y, dialogMenu, enterStatus, dialogMenuing);
+
+		bool triggerTeleport = event.triggerTeleport(current_stage, x, y, character);
+		bool triggerTeleportAfterShowBitmap = event.triggerTeleportAfterShowBitmap(current_stage, x, y, character);
+
+		TRACE("%d %d\n", triggerTeleport, triggerTeleportAfterShowBitmap);
+
+		if (triggerTeleport || triggerTeleportAfterShowBitmap) {
+			return;
+		}
+
+		if ((character.getStatus() & POSION_ATTACK) > 0) {
+			character.setHealth(character.getHealth() - 10);
+		}
+
 		character.setXY(x, y);
+		character.setCurrentStage(current_stage);
 	}
 
 	void CGameStateRun::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -838,7 +956,7 @@ namespace game_framework {
 			}
 		}
 
-		bool reset_frame = temp_current_stage != current_stage;
+		bool reset_frame = ((temp_current_stage != current_stage) || refresh_animation);
 
 		for (int i = 0; i < 11; i++) {
 			for (int j = 0; j < 11; j++) {
@@ -847,16 +965,17 @@ namespace game_framework {
 				if (fixed_entity_map[i][j][entity_code[i][j]].IsAnimationDone()) {
 					if (hidden_code[current_stage][i][j] == 1) {
 						fixed_entity_map[i][j][entity_code[i][j]].UnshowBitmap();
-					} else {
+					}
+					else {
 						fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
-						if (reset_frame) {
+						if (reset_frame && !monster_bitmap_map[entity_code[i][j]].length()) {
 							fixed_entity_map[i][j][entity_code[i][j]].SelectShowBitmap(0);
 						}
 					}
 				}
 				else {
 					fixed_entity_map[i][j][entity_code[i][j]].ShowBitmap();
-					if (reset_frame) {
+					if (reset_frame && !monster_bitmap_map[entity_code[i][j]].length()) {
 						fixed_entity_map[i][j][entity_code[i][j]].SelectShowBitmap(0);
 					}
 				}
@@ -865,9 +984,19 @@ namespace game_framework {
 
 		if (reset_frame) {
 			temp_current_stage = current_stage;
+			refresh_animation = false;
+			reset_frame = false; 
 		}
-		
+
 		characterBitmap.ShowBitmap();
+
+		for (int i = 0; i < 11; i++) {
+			for (int j = 0; j < 11; j++) {
+				for (int k = 0; k < 2; k++) {
+					fixed_animation_map[i][j][k].ShowBitmap();
+				}
+			}
+		}
 
 		if (attackMenuing) {
 			attackMenu.ShowBitmap();
@@ -906,6 +1035,14 @@ namespace game_framework {
 
 		if (spyMenuing) {
 			spyMenu.onShow();
+		}
+
+		if (anyGateMenuing) {
+			anyGateMenu.onShow();
+		}
+
+		if (pogsMenuing) {
+			pogsMenu.onShow();
 		}
 
 		ShowText();
@@ -1018,6 +1155,14 @@ namespace game_framework {
 			spyMenu.onShowText(pDC, fp);
 		}
 
+		if (anyGateMenuing) {
+			anyGateMenu.onShowText(pDC, fp);
+		}
+
+		if (pogsMenuing) {
+			pogsMenu.onShowText(pDC, fp);
+		}
+
 		/* Show Dashboard */
 
 		gameSystem.onShowText(pDC, fp);
@@ -1053,4 +1198,114 @@ namespace game_framework {
 	{
 
 	}
+
+	char CGameStateOver::ending = '\0';
+
+	CGameStateOver::CGameStateOver(CGame *g)
+		: CGameState(g)
+	{
+	}
+
+	void CGameStateOver::OnMove()
+	{
+
+	}
+
+	void CGameStateOver::OnBeginState()
+	{
+		if (CGameStateOver::ending == 'B') {
+			dialog = {
+				{"你在與怪物的戰鬥中被擊敗了", "怪物踐踏著你的屍體", "國家陷入毀滅" },
+				{"Bad End..."}
+			};
+		}
+
+		if (CGameStateOver::ending == 'N') {
+			dialog = {
+				{ "這位勇士終於成功將公主救了出來", "魔塔也被毀滅了", "剩下的只是一堆石頭而已" },
+				{"不過，卻比他預期中，", "花多了兩天才完成任務，照當初的約定", "他沒有領取任何獎金就離開這個國家了"},
+				{"不久，這個國家傳出滅亡的消息", "兇手不知是誰，奇怪的是，", "找遍了整個國家都找不到公主的屍體"},
+				{"究竟是逃走了", "還是被毀屍了？", "沒有人知道"},
+				{"唯一知道的是，", "在魔塔遺址又有怪物出沒", "似乎是有漏網之魚"},
+				{"無論如何，", "任務已完成，", "其他事都不用去想了"},
+				{"Normal End..."}
+			};
+		}
+
+		if (CGameStateOver::ending == 'T') {
+			dialog = {
+				{"這位勇士終於成功將公主救了出來", "魔塔也被毀滅了", "剩下的只是一堆石頭而已" },
+				{"雖然，卻比他預期中，", "花多了兩天才完成任務"},
+				{"不過國王在公主的說服下，", "獎金仍然是給了他"},
+				{"接過獎金，", "這位勇士就離開這個國家了"},
+				{"自此之後", "再沒有人見過他的蹤影"},
+				{"究竟他是誰？", "究竟為何而來？", "至今依然是個謎"},
+				{"總之，任務完成了，", "這個國家也回復一片和平的景象"},
+				{"True End..."}
+			};
+		}
+		current_dialog = 0;
+	}
+
+	void CGameStateOver::OnInit()
+	{
+
+		dialogMenu_B.LoadBitmap("RES/DialogMenu.bmp", RGB(0, 0, 0));
+		dialogMenu_B.SetTopLeft(588 - 150, 507 - 250);
+
+		dialogMenuCharacter_B.LoadBitmap("RES/character_bg.bmp", RGB(255, 255, 255));
+		dialogMenuCharacter_B.SetTopLeft(643 - 150, 564 - 250);
+
+		
+	}
+
+	void CGameStateOver::OnShow(){
+
+		dialogMenu_B.ShowBitmap();
+		dialogMenuCharacter_B.ShowBitmap();
+		ShowText();
+
+	}
+
+	void CGameStateOver::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
+		const char KEY_ENTER = 0x0D;
+
+		if (nChar == KEY_ENTER) {
+			current_dialog += 1;
+			if (current_dialog == dialog.size()) {
+				GotoGameState(GAME_STATE_INIT);
+				current_dialog -= 1;
+				CGameStateRun::ending = '\0';
+				CGameStateOver::ending = '\0';
+			}
+		}
+	}
+
+	void CGameStateOver::ShowText() {
+
+		CDC *pDC = CDDraw::GetBackCDC();
+		CFont *fp;
+
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(255, 255, 255));
+
+		ChangeFontLog(pDC, fp, 60, "STZhongsong");
+
+		pDC->TextOut(1100 - 227 - 150, 540 - 250, "長頸鹿");
+
+		ChangeFontLog(pDC, fp, 24, "STZhongsong");
+
+		for (int i = 0; i < (int)dialog[current_dialog].size(); i++) {
+			pDC->TextOut(1010 - 227 - 150, 630 + i * 40 - 250, dialog[current_dialog][i].c_str());
+		}
+
+		vector<int> vec = getShineVector();
+		int count = vec.size();
+		pDC->SetTextColor(RGB(vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count], vec[CSpecialEffect::GetCurrentTimeCount() % count]));
+
+		pDC->TextOut(1293 - 227 - 150, 760 - 250, string("- Enter -").c_str());
+
+		CDDraw::ReleaseBackCDC();
+	}
+
 }

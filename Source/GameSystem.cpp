@@ -37,8 +37,16 @@ namespace game_framework {
 
 		pDC->SetTextColor(RGB(255, 255, 255));
 
-		pDC->TextOut(256 + 240 - 227 - 20, 140, character.getStatus().c_str());
+		if (character.getStatusString().length() > 5) {
+			ChangeFontLog(pDC, fp, 36, "Noto Sans TC");
+			pDC->TextOut(220, 142, character.getStatusString().c_str());
+		}
+		else {
+			pDC->TextOut(249, 140, character.getStatusString().c_str());
+		}
 
+
+		ChangeFontLog(pDC, fp, 48, "Noto Sans TC");
 		pDC->TextOut(256 + 250 - 227, 204, to_string(character.getLevel()).c_str());
 		pDC->TextOut(256 + 250 - 227, 256, to_string(character.getHealth()).c_str());
 		pDC->TextOut(256 + 250 - 227, 308, to_string(character.getAttack()).c_str());

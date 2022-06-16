@@ -171,6 +171,12 @@
     <ClCompile Include="Source\Event.cpp">
       <Filter>MyGame</Filter>
     </ClCompile>
+    <ClCompile Include="Source\AnyGateMenu.cpp">
+      <Filter>MyGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\POGSMenu.cpp">
+      <Filter>MyGame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\audio.h">
@@ -234,6 +240,12 @@
       <Filter>MyGame</Filter>
     </ClInclude>
     <ClInclude Include="Source\Event.h">
+      <Filter>MyGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnyGateMenu.h">
+      <Filter>MyGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\POGSMenu.h">
       <Filter>MyGame</Filter>
     </ClInclude>
   </ItemGroup>
